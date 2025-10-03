@@ -1,65 +1,118 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import EvilIcons from '@expo/vector-icons/EvilIcons';
+import React from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialIcons, FontAwesome5, Ionicons, Entypo } from "@expo/vector-icons";
 
-export default function HomeScreen(){
-    return (
-        <View style={styles.container}>
-            <Text>Bienvenido a la homescreen</Text>
+const { width } = Dimensions.get("window");
 
-            <TouchableOpacity
-                style={[styles.button, {backgroundColor: '#F93827'}]}
-                onPress={() => Alert.alert('Hiciste click!!!')}
-            >
-                <FontAwesome name="star" size={64} color="#FFA49C" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={[styles.button, {backgroundColor: '#FEBA17'}]}
-                onPress={() => Alert.alert('Hiciste click!!!')}
-            >
-                <EvilIcons name="pencil" size={64} color="#FFE094" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={[styles.button, {backgroundColor: '#FEBA17'}]}
-                onPress={() => Alert.alert('Hiciste click!!!')}
-            >
-                <EvilIcons name="pencil" size={64} color="#FFE094" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={[styles.button, {backgroundColor: '#FEBA17'}]}
-                onPress={() => Alert.alert('Hiciste click!!!')}
-            >
-                <EvilIcons name="pencil" size={64} color="#FFE094" />
-            </TouchableOpacity>
-
-            <StatusBar style="auto"/>
+export default function HomeScreen({ navigation }) {
+  return (
+    <View style={styles.container}>
+      <LinearGradient colors={["#8A6DE9", "#A88BFF"]} style={styles.header}>
+        <Ionicons name="person-circle-outline" size={60} color="#FFF" />
+        <View style={styles.headerText}>
+          <Text style={styles.greeting}>
+            Hola, <Text style={{ fontWeight: "bold" }}>Diego Venegas</Text>
+          </Text>
+          <Text style={styles.subText}>#001</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("PerfilPaciente")}>
+            <Text style={styles.profileLink}>Ver perfil ➜</Text>
+          </TouchableOpacity>
         </View>
-    )
+      </LinearGradient>
+
+      <View style={styles.grid}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: "#F93827" }]} onPress={() => navigation.navigate("Actividades")}>
+          <FontAwesome5 name="puzzle-piece" size={42} color="#FFF" />
+          <Text style={styles.cardText}>Actividades</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.card, { backgroundColor: "#FEBA17" }]} onPress={() => navigation.navigate("Bitacora")}>
+          <FontAwesome5 name="book" size={38} color="#FFF" />
+          <Text style={styles.cardText}>Bitácora</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.card, { backgroundColor: "#00C897" }]} onPress={() => navigation.navigate("Tarjetas")}>
+          <FontAwesome5 name="sticky-note" size={42} color="#FFF" />
+          <Text style={styles.cardText}>Tarjetas</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.card, { backgroundColor: "#1A2A80" }]} onPress={() => navigation.navigate("Recuerdos")}>
+          <Entypo name="images" size={40} color="#FFF" />
+          <Text style={styles.cardText}>Recuerdos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.card, { backgroundColor: "#888" }]} onPress={() => navigation.navigate("Ajustes")}>
+          <Ionicons name="settings-outline" size={42} color="#FFF" />
+          <Text style={styles.cardText}>Ajustes</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.card, { backgroundColor: "#FF9BDE" }]} onPress={() => navigation.navigate("Welcome")}>
+          <MaterialIcons name="logout" size={42} color="#FFF" />
+          <Text style={styles.cardText}>Salida</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
+    flex: 1,
+    backgroundColor: "#EDEDED",
   },
-title: {
-    fontSize: 24,
-    marginBottom: 20,
-    fontWeight: "bold",
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 40, 
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    elevation: 5,
   },
-  button: {
-    width: 132,
-    height: 128,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
+  headerText: {
+    marginLeft: 15,
+    marginTop: 20,
+  },
+  greeting: {
+    fontSize: 18,
+    color: "#FFF",
+  },
+  subText: {
+    fontSize: 12,
+    color: "#EEE",
+    marginBottom: 5,
+  },
+  profileLink: {
+    fontSize: 14,
+    color: "#FFF",
+    textDecorationLine: "underline",
+  },
+  grid: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    alignContent: "space-evenly", 
+    padding: 20,
+},
+  card: {
+    width: width / 2.5,
+    aspectRatio: 1,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  cardText: {
+    marginTop: 10,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#FFF",
   },
 });

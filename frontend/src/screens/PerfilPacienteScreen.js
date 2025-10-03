@@ -6,11 +6,11 @@ import { LinearGradient } from "expo-linear-gradient";
 const { width } = Dimensions.get("window");
 const TOP_PAD = Platform.OS === "android" ? (StatusBar.currentHeight || 0) : 0;
 
-export default function AjustesScreen({ navigation }) {
+export default function PerfilPacienteScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={["#888888", "#B0B0B0"]}
+        colors={["#8A6DE9", "#A88BFF"]}
         style={[styles.header, { paddingTop: TOP_PAD + 12 }]}
       >
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -19,7 +19,7 @@ export default function AjustesScreen({ navigation }) {
 
         <View style={{ flex: 1 }}>
           <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            Ajustes
+            Perfil
           </Text>
         </View>
         <View style={{ width: 28 }} />
