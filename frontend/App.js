@@ -3,9 +3,11 @@ import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import ActividadesScreen from "./src/screens/ActividadesScreen";
+import MemoriceScreen from "./src/games/Memorice/MemoriceScreen";
 import BitacoraScreen from "./src/screens/BitacoraScreen";
 import TarjetasScreen from "./src/screens/TarjetasScreen";
 import AddTarjetasScreen from "./src/screens/AddTarjetasScreen";
@@ -33,6 +35,7 @@ export default function App() {
         <Stack.Screen name="RegisterCuidador" component={RegisterCuidadorScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Actividades" component={ActividadesScreen} />
+        <Stack.Screen name="Memorice" component={MemoriceScreen} />
         <Stack.Screen name="Bitacora" component={BitacoraScreen} />
         <Stack.Screen name="Tarjetas" component={TarjetasScreen} />
         <Stack.Screen name="AddTarjetas" component={AddTarjetasScreen} />

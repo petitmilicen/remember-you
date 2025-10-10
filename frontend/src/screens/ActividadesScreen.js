@@ -22,11 +22,14 @@ export default function ActividadesScreen({ navigation }) {
             Actividades
           </Text>
         </View>
+        <View style={{ width: 28 }} />
       </LinearGradient>
-    <View style={{ width: 28 }} />
-
+      
       <ScrollView contentContainerStyle={styles.scroll}>
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigation.navigate("Memorice")}
+        >
           <ImageBackground
             source={require("../assets/images/sudoku.png")}
             style={styles.cardImage}
@@ -36,8 +39,8 @@ export default function ActividadesScreen({ navigation }) {
               colors={["rgba(249,56,39,0.85)", "rgba(249,56,39,0.2)"]}
               style={styles.overlay}
             >
-              <Text style={styles.cardTitle}>Sudoku</Text>
-              <Text style={styles.cardCTA}>Jugar Sudoku →</Text>
+              <Text style={styles.cardTitle}>Memorice</Text>
+              <Text style={styles.cardCTA}>Jugar Memorice →</Text>
             </LinearGradient>
           </ImageBackground>
         </TouchableOpacity>
@@ -142,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#FFF",
   },
-
+  
   soonCard: {
     backgroundColor: "#CCC",
     justifyContent: "center",

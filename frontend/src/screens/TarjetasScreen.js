@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, StatusBar, Platform, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  StatusBar,
+  Platform,
+  Dimensions,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -7,16 +17,19 @@ import { LinearGradient } from "expo-linear-gradient";
 const { width } = Dimensions.get("window");
 const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
+// 🎨 Colores tipo Post-it
 const POSTIT_COLORS = ["#FFF9C4", "#C8E6C9", "#FFCDD2", "#BBDEFB"];
 
 export default function TarjetasScreen({ navigation }) {
   const [cards, setCards] = useState([]);
 
+  // 🔄 Cargar tarjetas al entrar
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", loadCards);
     return unsubscribe;
   }, [navigation]);
 
+  // 📦 Cargar desde AsyncStorage
   const loadCards = async () => {
     try {
       const stored = await AsyncStorage.getItem("memoryCards");
@@ -26,29 +39,42 @@ export default function TarjetasScreen({ navigation }) {
     }
   };
 
+  // 💾 Guardar en AsyncStorage
+  const saveCards = async (newCards) => {
+    try {
+      await AsyncStorage.setItem("memoryCards", JSON.stringify(newCards));
+    } catch (error) {
+      console.error("Error guardando tarjetas:", error);
+    }
+  };
+
+  // 🗑️ Eliminar tarjeta con confirmación
   const handleDeleteCard = (id) => {
-    Alert.alert("Eliminar Tarjeta", "¿Seguro que quieres eliminar esta tarjeta?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: () => deleteCard(id),
-      },
-    ]);
+    Alert.alert(
+      "Eliminar Tarjeta",
+      "¿Seguro que quieres eliminar esta tarjeta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => deleteCard(id),
+        },
+      ]
+    );
   };
 
   const deleteCard = async (id) => {
     try {
-      const stored = await AsyncStorage.getItem("memoryCards");
-      let current = stored ? JSON.parse(stored) : [];
-      const updated = current.filter((c) => c.id !== id);
+      const updated = cards.filter((c) => c.id !== id);
       setCards(updated);
-      await AsyncStorage.setItem("memoryCards", JSON.stringify(updated));
+      await saveCards(updated);
     } catch (error) {
       console.error("Error eliminando tarjeta:", error);
     }
   };
 
+  // 💌 Render de cada tarjeta estilo post-it
   const renderCard = ({ item }) => {
     const color = POSTIT_COLORS[item.id.charCodeAt(0) % POSTIT_COLORS.length];
 
@@ -74,6 +100,7 @@ export default function TarjetasScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* 🔹 Header */}
       <LinearGradient
         colors={["#00C897", "#00E0AC"]}
         style={[styles.header, { paddingTop: TOP_PAD + 12 }]}
@@ -90,23 +117,23 @@ export default function TarjetasScreen({ navigation }) {
         <View style={{ width: 28 }} />
       </LinearGradient>
 
+      {/* 🟨 Lista de tarjetas */}
       <FlatList
         data={cards}
         renderItem={renderCard}
         keyExtractor={(item) => item.id}
         numColumns={2}
         contentContainerStyle={
-          cards.length === 0 && {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }
+          cards.length === 0
+            ? { flex: 1, justifyContent: "center", alignItems: "center" }
+            : { paddingBottom: 100 } // margen inferior para el botón
         }
         ListEmptyComponent={
           <Text style={styles.emptyText}>No hay tarjetas todavía</Text>
         }
       />
 
+      {/* ➕ Botón para añadir tarjeta */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddTarjetas")}
@@ -181,6 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: "center",
     margin: 20,
+    marginBottom: 50,
   },
   addButtonText: {
     color: "#FFF",
