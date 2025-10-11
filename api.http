@@ -1,0 +1,25 @@
+### Registro usuarios con campos: username, password, user_type, phone_number
+POST http://127.0.0.1:8000/auth/users/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "xd1",
+    "password": "xd123456",
+    "user_type": "sd"
+}
+
+### Obtiene JWT a partir de logearse (username, password)
+POST http://127.0.0.1:8000/auth/jwt/create/ HTTP/1.1
+Content-Type: application/json
+{
+    "username": "Diego",
+    "password": "1234"
+}
+
+### Logea usuario con JWT
+GET http://127.0.0.1:8000/auth/users/me/ HTTP/1.1
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYwMTQyMzc3LCJpYXQiOjE3NjAxNDIwNzgsImp0aSI6IjBhMDYzNWIwZTcxOTQ0YmQ5ZTU0OTQwNTJmZDJjMGJjIiwidXNlcl9pZCI6IjEifQ.nyLUv7KEWRv6mUGgqyFlpKDFTam3nj-2a-fesFi34HY
+
+### Cerrar sesion
+POST http://127.0.0.1:8000/auth/token/logout/ HTTP/1.1
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU5ODgwMDEyLCJpYXQiOjE3NTk4Nzk3MTIsImp0aSI6ImU1YzliZDgxNzExNzRmZjZiNWQxMThhYzkzOTc3ZjRiIiwidXNlcl9pZCI6IjEifQ.lJviTMTcqMU1o16SUXuv7ZqQUfb0N9F61WrYC8zxnA0
