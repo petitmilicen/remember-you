@@ -31,7 +31,7 @@ export default function ActividadesScreen({ navigation }) {
           onPress={() => navigation.navigate("Memorice")}
         >
           <ImageBackground
-            source={require("../assets/images/sudoku.png")}
+            source={require("../assets/images/memori.jpg")}
             style={styles.cardImage}
             imageStyle={{ borderRadius: 20 }}
           >
@@ -45,9 +45,12 @@ export default function ActividadesScreen({ navigation }) {
           </ImageBackground>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => navigation.navigate("CaminoCorrecto")}
+          >
           <ImageBackground
-            source={require("../assets/images/rompecabezas.png")}
+            source={require("../assets/images/caminocorrecto.png")}
             style={styles.cardImage}
             imageStyle={{ borderRadius: 20 }}
           >
@@ -55,15 +58,17 @@ export default function ActividadesScreen({ navigation }) {
               colors={["rgba(249,56,39,0.85)", "rgba(249,56,39,0.2)"]}
               style={styles.overlay}
             >
-              <Text style={styles.cardTitle}>Rompecabezas</Text>
-              <Text style={styles.cardCTA}>Armar ahora →</Text>
+              <Text style={styles.cardTitle}>Camino correcto</Text>
+              <Text style={styles.cardCTA}>LLega a la meta →</Text>
             </LinearGradient>
           </ImageBackground>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => navigation.navigate("Sudoku")}>
           <ImageBackground
-            source={require("../assets/images/sopa.png")}
+            source={require("../assets/images/sudoku.png")}
             style={styles.cardImage}
             imageStyle={{ borderRadius: 20 }}
           >
@@ -77,11 +82,23 @@ export default function ActividadesScreen({ navigation }) {
           </ImageBackground>
         </TouchableOpacity>
 
-        <View style={[styles.card, styles.soonCard]}>
-          <Text style={[styles.cardTitle, { color: "#555" }]}>
-            Más actividades próximamente...
-          </Text>
-        </View>
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => navigation.navigate("Puzzle")}>
+          <ImageBackground
+            source={require("../assets/images/sopa.png")}
+            style={styles.cardImage}
+            imageStyle={{ borderRadius: 20 }}
+          >
+            <LinearGradient
+              colors={["rgba(249,56,39,0.85)", "rgba(249,56,39,0.2)"]}
+              style={styles.overlay}
+            >
+              <Text style={styles.cardTitle}>Rompecabezas</Text>
+              <Text style={styles.cardCTA}>Armar ahora →</Text>
+            </LinearGradient>
+          </ImageBackground>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

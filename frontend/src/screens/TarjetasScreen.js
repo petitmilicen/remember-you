@@ -17,13 +17,10 @@ import { LinearGradient } from "expo-linear-gradient";
 const { width } = Dimensions.get("window");
 const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
-// 🎨 Colores tipo Post-it
-const POSTIT_COLORS = ["#FFF9C4", "#C8E6C9", "#FFCDD2", "#BBDEFB"];
-
 export default function TarjetasScreen({ navigation }) {
   const [cards, setCards] = useState([]);
 
-  // 🔄 Cargar tarjetas al entrar
+  // 🔄 Cargar tarjetas cada vez que la pantalla se enfoca
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", loadCards);
     return unsubscribe;
@@ -33,7 +30,12 @@ export default function TarjetasScreen({ navigation }) {
   const loadCards = async () => {
     try {
       const stored = await AsyncStorage.getItem("memoryCards");
-      if (stored) setCards(JSON.parse(stored));
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Ordenar por más recientes
+        parsed.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+        setCards(parsed);
+      }
     } catch (error) {
       console.error("Error cargando tarjetas:", error);
     }
@@ -76,18 +78,28 @@ export default function TarjetasScreen({ navigation }) {
 
   // 💌 Render de cada tarjeta estilo post-it
   const renderCard = ({ item }) => {
-    const color = POSTIT_COLORS[item.id.charCodeAt(0) % POSTIT_COLORS.length];
+    const isCuidador = item.creadoPor === "cuidador";
+    const color = isCuidador ? "#FFF3CD" : "#D0F0C0"; // amarillo o verde
+    const bordeColor = isCuidador ? "#FFB74D" : "#81C784";
 
     return (
       <TouchableOpacity
-        style={[styles.postIt, { backgroundColor: color }]}
+        style={[styles.postIt, { backgroundColor: color, borderLeftColor: bordeColor }]}
         onLongPress={() => handleDeleteCard(item.id)}
         activeOpacity={0.9}
       >
         <View style={styles.cardContent}>
-          <Text style={styles.postItText}>{item.text}</Text>
-          <Text style={styles.postItDate}>{item.date}</Text>
+          <View style={styles.cardHeader}>
+            <Text style={styles.postItTipo}>
+              {isCuidador ? "👨‍⚕️ Cuidador" : "🧠 Paciente"}
+            </Text>
+            <Text style={styles.postItDate}>{item.date}</Text>
+          </View>
+
+          <Text style={styles.postItMensaje}>{item.mensaje}</Text>
+          <Text style={styles.postItTipoSecundario}>{item.tipo}</Text>
         </View>
+
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => handleDeleteCard(item.id)}
@@ -126,7 +138,7 @@ export default function TarjetasScreen({ navigation }) {
         contentContainerStyle={
           cards.length === 0
             ? { flex: 1, justifyContent: "center", alignItems: "center" }
-            : { paddingBottom: 100 } // margen inferior para el botón
+            : { paddingBottom: 100 }
         }
         ListEmptyComponent={
           <Text style={styles.emptyText}>No hay tarjetas todavía</Text>
@@ -165,33 +177,44 @@ const styles = StyleSheet.create({
 
   postIt: {
     flex: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     margin: 10,
     padding: 15,
-    minHeight: 120,
+    minHeight: 130,
     justifyContent: "space-between",
-    elevation: 3,
+    borderLeftWidth: 5,
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 5,
-    shadowOffset: { width: 2, height: 3 },
+    shadowRadius: 4,
+    elevation: 2,
     transform: [{ rotate: "-1deg" }],
   },
-  cardContent: {
-    flex: 1,
+  cardContent: { flex: 1 },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
   },
-  postItText: {
-    fontSize: 16,
-    color: "#333",
-    fontStyle: "italic",
+  postItTipo: {
+    fontWeight: "bold",
+    color: "#4E342E",
   },
   postItDate: {
     fontSize: 12,
     color: "#666",
-    marginTop: 8,
+  },
+  postItMensaje: {
+    fontSize: 15,
+    color: "#333",
+    fontStyle: "italic",
+    marginVertical: 4,
+  },
+  postItTipoSecundario: {
+    fontSize: 12,
+    color: "#555",
     textAlign: "right",
   },
-
   deleteButton: {
     position: "absolute",
     top: 8,

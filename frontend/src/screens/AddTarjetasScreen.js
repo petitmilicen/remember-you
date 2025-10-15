@@ -1,154 +1,142 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, StatusBar, Platform, Dimensions, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StatusBar,
+  Platform,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { FontAwesome5 } from "@expo/vector-icons";
 
-const { width } = Dimensions.get("window");
-const GUTTER = 20;
 const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
-export default function AddTarjetasScreen({ navigation }) {
-  const [memoryText, setMemoryText] = useState("");
+export default function AddTarjetas({ navigation }) {
+  const [tipo, setTipo] = useState("");
+  const [mensaje, setMensaje] = useState("");
 
-  const handleSave = () => {
-    if (!memoryText.trim()) {
-      Alert.alert("Error", "Por favor escribe una tarjeta");
+  const guardarTarjeta = async () => {
+    if (!tipo.trim() || !mensaje.trim()) {
+      Alert.alert("Campos incompletos", "Por favor completa todos los campos.");
       return;
     }
 
-    Alert.alert("Guardar Tarjeta", "¿Deseas guardar esta tarjeta?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Guardar", onPress: saveCard },
-    ]);
-  };
+    const nueva = {
+      id: Date.now().toString(),
+      tipo: tipo.trim(),
+      mensaje: mensaje.trim(),
+      date: new Date().toLocaleDateString(),
+      creadoPor: "paciente", // 👈 origen del paciente
+    };
 
-  const saveCard = async () => {
     try {
-      const storedCards = await AsyncStorage.getItem("memoryCards");
-      let cards = storedCards ? JSON.parse(storedCards) : [];
+      const stored = await AsyncStorage.getItem("memoryCards");
+      const prev = stored ? JSON.parse(stored) : [];
+      const updated = [nueva, ...prev];
+      await AsyncStorage.setItem("memoryCards", JSON.stringify(updated));
 
-      const newCard = {
-        id: Date.now().toString(),
-        text: memoryText.trim(),
-        date: new Date().toLocaleDateString("es-ES", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }),
-        createdBy: "user",
-      };
-
-      cards.unshift(newCard);
-      await AsyncStorage.setItem("memoryCards", JSON.stringify(cards));
-
-      Alert.alert("Éxito", "Tarjeta guardada correctamente", [
-        { text: "Aceptar", onPress: () => navigation.goBack() },
-      ]);
+      Alert.alert("✅ Tarjeta guardada", "La tarjeta se ha añadido correctamente.");
+      navigation.goBack(); // volver a la lista
     } catch (error) {
-      console.error("Error saving card:", error);
-      Alert.alert("Error", "No se pudo guardar la tarjeta");
+      console.error("Error guardando tarjeta:", error);
     }
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <LinearGradient
-        colors={["#00C897", "#00E0AC"]}
-        style={[styles.header, { paddingTop: TOP_PAD + 12 }]}
-      >
+    <LinearGradient
+      colors={["#00C897", "#00E0AC"]}
+      style={[styles.container, { paddingTop: TOP_PAD + 12 }]}
+    >
+      {/* 🔹 Header */}
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
         </TouchableOpacity>
-
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            Añadir Tarjeta
-          </Text>
-        </View>
+        <Text style={styles.headerTitle}>Nueva Tarjeta</Text>
         <View style={{ width: 28 }} />
-      </LinearGradient>
+      </View>
 
-      {/* Formulario */}
-      <ScrollView contentContainerStyle={styles.form}>
-        <Text style={styles.label}>Escribe tu tarjeta:</Text>
+      {/* 📝 Formulario */}
+      <View style={styles.form}>
+        <Text style={styles.label}>Tipo de tarjeta</Text>
         <TextInput
-          style={styles.textInput}
-          multiline
-          numberOfLines={6}
-          placeholder="Escribe aquí tu tarjeta..."
-          value={memoryText}
-          onChangeText={setMemoryText}
-          textAlignVertical="top"
+          style={styles.input}
+          placeholder="Ejemplo: Recordatorio, Mensaje..."
+          placeholderTextColor="#999"
+          value={tipo}
+          onChangeText={setTipo}
         />
 
-        <TouchableOpacity
-          style={[
-            styles.saveButton,
-            !memoryText.trim() && styles.saveButtonDisabled,
-          ]}
-          onPress={handleSave}
-          disabled={!memoryText.trim()}
-        >
-          <Text style={styles.saveButtonText}>Guardar Tarjeta</Text>
+        <Text style={styles.label}>Mensaje</Text>
+        <TextInput
+          style={[styles.input, { height: 100, textAlignVertical: "top" }]}
+          placeholder="Escribe el mensaje para ti o tu cuidador"
+          placeholderTextColor="#999"
+          multiline
+          value={mensaje}
+          onChangeText={setMensaje}
+        />
+
+        {/* Botón Guardar */}
+        <TouchableOpacity style={styles.saveButton} onPress={guardarTarjeta}>
+          <Text style={styles.saveButtonText}>💾 Guardar Tarjeta</Text>
         </TouchableOpacity>
-      </ScrollView>
-    </View>
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#EDEDED" },
-
+  container: {
+    flex: 1,
+  },
   header: {
-    width,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: GUTTER,
-    paddingBottom: 16,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
   },
   headerTitle: {
     color: "#FFF",
     fontSize: 20,
     fontWeight: "bold",
   },
-
   form: {
+    backgroundColor: "#FFF",
+    flex: 1,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     padding: 20,
+    elevation: 5,
   },
   label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontWeight: "bold",
     color: "#333",
+    marginTop: 10,
   },
-  textInput: {
-    backgroundColor: "#FFF",
+  input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
-    minHeight: 120,
+    borderColor: "#CCC",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 6,
+    color: "#333",
   },
   saveButton: {
     backgroundColor: "#00C897",
-    padding: 16,
+    padding: 14,
     borderRadius: 12,
+    marginTop: 30,
     alignItems: "center",
-    elevation: 3,
-  },
-  saveButtonDisabled: {
-    backgroundColor: "#bdc3c7",
   },
   saveButtonText: {
     color: "#FFF",
-    fontSize: 16,
     fontWeight: "bold",
+    fontSize: 16,
   },
 });
