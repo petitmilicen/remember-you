@@ -137,7 +137,6 @@ export default function ZonaSeguraScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: TOP_PAD + 12 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#212121" />
@@ -146,7 +145,6 @@ export default function ZonaSeguraScreen({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Leyenda */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: "#64B5F6" }]} />
@@ -162,7 +160,6 @@ export default function ZonaSeguraScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Mapa principal */}
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -200,7 +197,6 @@ export default function ZonaSeguraScreen({ navigation }) {
         )}
       </MapView>
 
-      {/* Estado flotante */}
       {centro && (
         <View style={styles.statusOverlay}>
           <View
@@ -225,14 +221,12 @@ export default function ZonaSeguraScreen({ navigation }) {
         </View>
       )}
 
-      {/* Recentrar */}
       {centro && (
         <TouchableOpacity style={styles.recenterBtn} onPress={recentrar}>
           <Ionicons name="locate" size={20} color="#FFF" />
         </TouchableOpacity>
       )}
 
-      {/* Panel inferior */}
       <View style={styles.bottomPanel}>
         {centro ? (
           <>
@@ -240,7 +234,7 @@ export default function ZonaSeguraScreen({ navigation }) {
             <Slider
               style={styles.slider}
               minimumValue={10}
-              maximumValue={500}
+              maximumValue={100}
               step={10}
               value={radio}
               onValueChange={setRadio}

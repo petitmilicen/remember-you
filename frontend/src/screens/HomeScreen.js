@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Image } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+  Image,
+  StatusBar,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialIcons, FontAwesome5, Ionicons, Entypo } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  FontAwesome5,
+  Ionicons,
+  Entypo,
+} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
 
 export default function HomeScreen({ navigation }) {
   const [fotoPerfil, setFotoPerfil] = useState(null);
   const [nombrePaciente, setNombrePaciente] = useState("Paciente");
+
+  const insets = useSafeAreaInsets();
+  const { settings } = useSettings();
+  const theme = settings.theme;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -29,9 +48,34 @@ export default function HomeScreen({ navigation }) {
     }, [])
   );
 
+  const getFontSizeStyle = (baseSize = 16) => {
+    switch (settings.fontSize) {
+      case "small":
+        return { fontSize: baseSize - 2 };
+      case "large":
+        return { fontSize: baseSize + 2 };
+      default:
+        return { fontSize: baseSize };
+    }
+  };
+
+  const headerGradient =
+    theme === "dark" ? ["#5C3CA6", "#7E5AE1"] : ["#8A6DE9", "#A88BFF"];
+
   return (
-    <View style={styles.container}>
-      <LinearGradient colors={["#8A6DE9", "#A88BFF"]} style={styles.header}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme === "dark" ? "#0D0D0D" : "#EDEDED" },
+      ]}
+    >
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
+      {/* HEADER */}
+      <LinearGradient
+        colors={headerGradient}
+        style={[styles.header, { paddingTop: insets.top + 10 }]}
+      >
         <TouchableOpacity onPress={() => navigation.navigate("PerfilPaciente")}>
           {fotoPerfil ? (
             <Image source={{ uri: fotoPerfil }} style={styles.profileImage} />
@@ -41,24 +85,28 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
 
         <View style={styles.headerText}>
-          <Text style={styles.greeting}>
-            Hola,{" "}
-            <Text style={{ fontWeight: "bold" }}>Denilxon</Text>
+          <Text style={[styles.greeting, { color: "#FFF" }, getFontSizeStyle(18)]}>
+            Hola, <Text style={{ fontWeight: "bold" }}>{nombrePaciente}</Text>
           </Text>
-          <Text style={styles.subText}>#001</Text>
+          <Text style={[styles.subText, { color: "#EEE" }, getFontSizeStyle(12)]}>
+            #001
+          </Text>
           <TouchableOpacity onPress={() => navigation.navigate("PerfilPaciente")}>
-            <Text style={styles.profileLink}>Ver perfil ➜</Text>
+            <Text style={[styles.profileLink, { color: "#FFF" }, getFontSizeStyle(14)]}>
+              Ver perfil ➜
+            </Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
 
+      {/* CUADRÍCULA */}
       <View style={styles.grid}>
         <TouchableOpacity
           style={[styles.card, { backgroundColor: "#F93827" }]}
           onPress={() => navigation.navigate("Actividades")}
         >
           <FontAwesome5 name="puzzle-piece" size={42} color="#FFF" />
-          <Text style={styles.cardText}>Actividades</Text>
+          <Text style={[styles.cardText, getFontSizeStyle(15)]}>Actividades</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -66,7 +114,7 @@ export default function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate("Bitacora")}
         >
           <FontAwesome5 name="book" size={38} color="#FFF" />
-          <Text style={styles.cardText}>Bitácora</Text>
+          <Text style={[styles.cardText, getFontSizeStyle(15)]}>Bitácora</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -74,7 +122,7 @@ export default function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate("Tarjetas")}
         >
           <FontAwesome5 name="sticky-note" size={42} color="#FFF" />
-          <Text style={styles.cardText}>Tarjetas</Text>
+          <Text style={[styles.cardText, getFontSizeStyle(15)]}>Tarjetas</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -82,15 +130,18 @@ export default function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate("Recuerdos")}
         >
           <Entypo name="images" size={40} color="#FFF" />
-          <Text style={styles.cardText}>Recuerdos</Text>
+          <Text style={[styles.cardText, getFontSizeStyle(15)]}>Recuerdos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.card, { backgroundColor: "#888" }]}
+          style={[
+            styles.card,
+            { backgroundColor: theme === "dark" ? "#444" : "#888" },
+          ]}
           onPress={() => navigation.navigate("Ajustes")}
         >
           <Ionicons name="settings-outline" size={42} color="#FFF" />
-          <Text style={styles.cardText}>Ajustes</Text>
+          <Text style={[styles.cardText, getFontSizeStyle(15)]}>Ajustes</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -98,7 +149,7 @@ export default function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate("Welcome")}
         >
           <MaterialIcons name="logout" size={42} color="#FFF" />
-          <Text style={styles.cardText}>Salida</Text>
+          <Text style={[styles.cardText, getFontSizeStyle(15)]}>Salida</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -106,10 +157,7 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#EDEDED",
-  },
+  container: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -126,24 +174,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#FFF",
   },
-  headerText: {
-    marginLeft: 15,
-    marginTop: 20,
-  },
-  greeting: {
-    fontSize: 18,
-    color: "#FFF",
-  },
-  subText: {
-    fontSize: 12,
-    color: "#EEE",
-    marginBottom: 5,
-  },
-  profileLink: {
-    fontSize: 14,
-    color: "#FFF",
-    textDecorationLine: "underline",
-  },
+  headerText: { marginLeft: 15, marginTop: 20 },
+  greeting: { fontSize: 18 },
+  subText: { fontSize: 12, marginBottom: 5 },
+  profileLink: { fontSize: 14, textDecorationLine: "underline" },
   grid: {
     flex: 1,
     flexDirection: "row",

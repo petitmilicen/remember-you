@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
      alignItems: "center", 
      ustifyContent: "center", 
      argin: 6, 
-     elevation: 4 
+     elevation: 4 ,
     },
   winOverlay: {
      position: "absolute", 

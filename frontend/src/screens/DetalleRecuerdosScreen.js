@@ -1,14 +1,40 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, StatusBar, Platform, Dimensions, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Alert,
+  StatusBar,
+  Dimensions,
+  ScrollView,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
 export default function DetalleRecuerdosScreen({ route, navigation }) {
   const { memory } = route.params;
+  const insets = useSafeAreaInsets();
+  const { settings } = useSettings();
+  const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
+
+  // ✅ Tamaño de texto dinámico
+  const getFontSizeStyle = (baseSize = 16) => {
+    switch (settings.fontSize) {
+      case "small":
+        return { fontSize: baseSize - 2 };
+      case "large":
+        return { fontSize: baseSize + 2 };
+      default:
+        return { fontSize: baseSize };
+    }
+  };
 
   const handleDelete = async () => {
     Alert.alert(
@@ -31,46 +57,82 @@ export default function DetalleRecuerdosScreen({ route, navigation }) {
     );
   };
 
+  const gradientColors =
+    settings.theme === "dark" ? ["#101A50", "#202E8A"] : ["#1A2A80", "#3C4FCE"];
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, themeStyles.container]}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
+      {/* 🔹 Header */}
       <LinearGradient
-        colors={["#1A2A80", "#3C4FCE"]}
-        style={[styles.header, { paddingTop: TOP_PAD + 12 }]}
+        colors={gradientColors}
+        style={[styles.header, { paddingTop: insets.top + 12 }]}
       >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
         </TouchableOpacity>
 
         <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
+          <Text
+            style={[
+              styles.headerTitle,
+              { textAlign: "center" },
+              getFontSizeStyle(20),
+            ]}
+          >
             Detalle del Recuerdo
           </Text>
         </View>
         <View style={{ width: 28 }} />
       </LinearGradient>
 
+      {/* 🧠 Contenido */}
       <View style={styles.content}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {memory.image && (
             <Image source={{ uri: memory.image }} style={styles.image} />
           )}
 
-          <Text style={styles.date}>{memory.date}</Text>
-          <Text style={styles.title}>{memory.title}</Text>
-          <Text style={styles.description}>{memory.description}</Text>
+          <Text
+            style={[styles.date, themeStyles.subtext, getFontSizeStyle(13)]}
+          >
+            {memory.date}
+          </Text>
+          <Text
+            style={[styles.title, themeStyles.text, getFontSizeStyle(22)]}
+          >
+            {memory.title}
+          </Text>
+          <Text
+            style={[styles.description, themeStyles.subtext, getFontSizeStyle(16)]}
+          >
+            {memory.description}
+          </Text>
         </ScrollView>
 
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Eliminar Recuerdo</Text>
+        <TouchableOpacity
+          style={[
+            styles.deleteButton,
+            {
+              backgroundColor:
+                settings.theme === "dark" ? "#B22A2A" : "#E53935",
+            },
+          ]}
+          onPress={handleDelete}
+        >
+          <Text style={[styles.deleteButtonText, getFontSizeStyle(16)]}>
+            Eliminar Recuerdo
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
+/* 🎨 Estilos base */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#EDEDED" },
-
+  container: { flex: 1 },
   header: {
     width,
     flexDirection: "row",
@@ -83,50 +145,33 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#FFF",
-    fontSize: 20,
     fontWeight: "bold",
   },
-
   content: {
     flex: 1,
     justifyContent: "space-between",
     padding: 20,
   },
-
-  scrollContent: {
-    paddingBottom: 20,
-  },
-
+  scrollContent: { paddingBottom: 20 },
   image: {
     width: "100%",
     height: 250,
     borderRadius: 16,
     marginBottom: 20,
   },
-  date: {
-    fontSize: 13,
-    color: "#777",
-    marginBottom: 10,
-    alignSelf: "flex-start",
-  },
+  date: { alignSelf: "flex-start", marginBottom: 10 },
   title: {
-    fontSize: 22,
     fontWeight: "bold",
-    color: "#333",
     marginBottom: 8,
     textAlign: "left",
     alignSelf: "flex-start",
   },
   description: {
-    fontSize: 16,
-    color: "#555",
     marginBottom: 20,
-    textAlign: "left", 
+    textAlign: "left",
     alignSelf: "flex-start",
   },
-
   deleteButton: {
-    backgroundColor: "#E53935",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -135,7 +180,20 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: "#FFF",
-    fontSize: 16,
     fontWeight: "bold",
   },
+});
+
+/* 🌞 Tema Claro */
+const lightStyles = StyleSheet.create({
+  container: { backgroundColor: "#EDEDED" },
+  text: { color: "#333" },
+  subtext: { color: "#555" },
+});
+
+/* 🌙 Tema Oscuro */
+const darkStyles = StyleSheet.create({
+  container: { backgroundColor: "#121212" },
+  text: { color: "#FFF" },
+  subtext: { color: "#BBB" },
 });

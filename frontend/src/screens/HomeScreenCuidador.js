@@ -12,6 +12,7 @@ import {
   Alert,
   Dimensions,
   Vibration,
+  Switch,
 } from "react-native";
 import MapView, { Marker, Circle } from "react-native-maps";
 import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -24,12 +25,13 @@ const ACCENT = "#FF7043";
 
 export default function HomeScreenCuidador({ navigation }) {
   const [cuidador] = useState({ nombre: "María Pérez", rol: "Cuidadora principal" });
-  const [paciente] = useState({ nombre: "Juan García", edad: 74, nivel: "Moderado" });
+  const [paciente] = useState({ nombre: "Denilxon", edad: 74, nivel: "Moderado" });
 
   const [zonaSegura, setZonaSegura] = useState(null);
   const [ubicacionPaciente, setUbicacionPaciente] = useState(null);
   const [alertaActiva, setAlertaActiva] = useState(false);
   const [distanciaActual, setDistanciaActual] = useState(0);
+  const [salidaSegura, setSalidaSegura] = useState(false);
 
   const [alertas, setAlertas] = useState([]);
   const [tarjetas, setTarjetas] = useState([]);
@@ -39,58 +41,48 @@ export default function HomeScreenCuidador({ navigation }) {
   const [alertSound, setAlertSound] = useState(null);
   const mapRef = useRef(null);
 
-  // 🔄 Cargar tarjetas
   useEffect(() => {
-    const cargarTarjetas = async () => {
+    const cargarDatos = async () => {
       try {
-        const stored = await AsyncStorage.getItem("memoryCards");
-        if (stored) {
-          const parsed = JSON.parse(stored);
+        const [zona, cards, ubicacion, salida] = await Promise.all([
+          AsyncStorage.getItem("zonaSegura"),
+          AsyncStorage.getItem("memoryCards"),
+          AsyncStorage.getItem("ubicacionPaciente"),
+          AsyncStorage.getItem("salidaSegura"),
+        ]);
+
+        if (zona) setZonaSegura(JSON.parse(zona));
+        if (ubicacion) setUbicacionPaciente(JSON.parse(ubicacion));
+        if (cards) {
+          const parsed = JSON.parse(cards);
           parsed.sort((a, b) => parseInt(b.id) - parseInt(a.id));
           setTarjetas(parsed);
         }
+        if (salida) setSalidaSegura(JSON.parse(salida));
       } catch (error) {
-        console.error("Error cargando tarjetas:", error);
+        console.error("Error cargando datos:", error);
       }
     };
-    cargarTarjetas();
-    const focusListener = navigation.addListener("focus", cargarTarjetas);
+
+    cargarDatos();
+    const focusListener = navigation.addListener("focus", cargarDatos);
     return focusListener;
   }, [navigation]);
 
-  // 🟢 Cargar zona segura
   useEffect(() => {
-    const cargarZonaSegura = async () => {
-      try {
-        const stored = await AsyncStorage.getItem("zonaSegura");
-        setZonaSegura(stored ? JSON.parse(stored) : null);
-      } catch (error) {
-        console.error("Error cargando zona segura:", error);
-      }
-    };
-    cargarZonaSegura();
-    const focusListener = navigation.addListener("focus", cargarZonaSegura);
-    return focusListener;
-  }, [navigation]);
-
-  // 📍 Sincronizar ubicación del paciente
-  useEffect(() => {
-    const cargarUbicacionPaciente = async () => {
+    const interval = setInterval(async () => {
       try {
         const stored = await AsyncStorage.getItem("ubicacionPaciente");
         if (stored) setUbicacionPaciente(JSON.parse(stored));
       } catch (error) {
         console.error("Error cargando ubicación del paciente:", error);
       }
-    };
-    cargarUbicacionPaciente();
-    const interval = setInterval(cargarUbicacionPaciente, 5000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // 🚨 Detección de alertas
   useEffect(() => {
-    if (!zonaSegura || !ubicacionPaciente) return;
+    if (!zonaSegura || !ubicacionPaciente || salidaSegura) return;
 
     const distancia = Math.hypot(
       (ubicacionPaciente.latitude - zonaSegura.centro.latitude) * 111000,
@@ -98,20 +90,18 @@ export default function HomeScreenCuidador({ navigation }) {
     );
     setDistanciaActual(distancia);
 
-    if (distancia > zonaSegura.radio) {
-      if (!alertaActiva) {
-        const nueva = {
-          id: Date.now().toString(),
-          tipo: "Zona Segura",
-          mensaje: `${paciente.nombre} ha salido de la zona segura`,
-          fecha: new Date().toLocaleTimeString(),
-        };
-        setAlertas((prev) => [nueva, ...prev]);
-        setAlertaActiva(true);
-        Vibration.vibrate(900);
-        reproducirSonidoAlerta();
-      }
-    } else if (alertaActiva) {
+    if (distancia > zonaSegura.radio && !alertaActiva) {
+      const nueva = {
+        id: Date.now().toString(),
+        tipo: "Zona Segura",
+        mensaje: `${paciente.nombre} ha salido de la zona segura`,
+        fecha: new Date().toLocaleTimeString(),
+      };
+      setAlertas((prev) => [nueva, ...prev]);
+      setAlertaActiva(true);
+      Vibration.vibrate(900);
+      reproducirSonidoAlerta();
+    } else if (distancia <= zonaSegura.radio && alertaActiva) {
       const nueva = {
         id: Date.now().toString(),
         tipo: "Zona Segura",
@@ -121,11 +111,11 @@ export default function HomeScreenCuidador({ navigation }) {
       setAlertas((prev) => [nueva, ...prev]);
       setAlertaActiva(false);
     }
-  }, [ubicacionPaciente, zonaSegura]);
+  }, [ubicacionPaciente, zonaSegura, salidaSegura]);
 
   async function reproducirSonidoAlerta() {
     try {
-      const { sound } = await Audio.Sound.createAsync(require("../../assets/sounds/alert.mp3"));
+      const { sound } = await Audio.Sound.createAsync(require("../assets/sounds/alert.mp3"));
       setAlertSound(sound);
       await sound.playAsync();
     } catch (error) {
@@ -133,7 +123,23 @@ export default function HomeScreenCuidador({ navigation }) {
     }
   }
 
-  // ➕ Crear tarjeta
+  useEffect(() => {
+    return () => {
+      if (alertSound) alertSound.unloadAsync();
+    };
+  }, [alertSound]);
+
+  const toggleSalidaSegura = async (value) => {
+    setSalidaSegura(value);
+    await AsyncStorage.setItem("salidaSegura", JSON.stringify(value));
+    Alert.alert(
+      value ? "Salida Segura activada" : "Salida Segura desactivada",
+      value
+        ? "Las alertas por salida de zona segura estarán deshabilitadas temporalmente."
+        : "Las alertas se han reactivado."
+    );
+  };
+
   const agregarTarjeta = async () => {
     if (!nuevoTipo.trim() || !nuevoMensaje.trim()) {
       Alert.alert("Campos incompletos", "Por favor completa todos los campos.");
@@ -160,31 +166,25 @@ export default function HomeScreenCuidador({ navigation }) {
     setNuevoMensaje("");
   };
 
-  // 🗑️ Eliminar tarjeta individual
   const eliminarTarjeta = async (id) => {
-    Alert.alert(
-      "Eliminar tarjeta",
-      "¿Seguro que deseas eliminar esta tarjeta?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const updated = tarjetas.filter((t) => t.id !== id);
-              setTarjetas(updated);
-              await AsyncStorage.setItem("memoryCards", JSON.stringify(updated));
-            } catch (error) {
-              console.error("Error eliminando tarjeta:", error);
-            }
-          },
+    Alert.alert("Eliminar tarjeta", "¿Seguro que deseas eliminar esta tarjeta?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const updated = tarjetas.filter((t) => t.id !== id);
+            setTarjetas(updated);
+            await AsyncStorage.setItem("memoryCards", JSON.stringify(updated));
+          } catch (error) {
+            console.error("Error eliminando tarjeta:", error);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
-  
-  // 🚪 Cerrar sesión
+
   const cerrarSesion = async () => {
     Alert.alert("Cerrar sesión", "¿Deseas cerrar tu sesión actual?", [
       { text: "Cancelar", style: "cancel" },
@@ -203,7 +203,6 @@ export default function HomeScreenCuidador({ navigation }) {
     ]);
   };
 
-  // 📍 Recentrar mapa
   const recentrarMapa = () => {
     if (!mapRef.current || !ubicacionPaciente) return;
     mapRef.current.animateToRegion(
@@ -219,13 +218,11 @@ export default function HomeScreenCuidador({ navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Header */}
         <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
           <Text style={styles.headerName}>{cuidador.nombre}</Text>
           <Text style={styles.headerRole}>{cuidador.rol}</Text>
         </View>
 
-        {/* Panel Paciente */}
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Paciente asignado</Text>
           <Text style={styles.mainText}>{paciente.nombre}</Text>
@@ -233,9 +230,19 @@ export default function HomeScreenCuidador({ navigation }) {
           <Text style={styles.subText}>Nivel de Alzheimer: {paciente.nivel}</Text>
         </View>
 
-        {/* Panel Zona Segura */}
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Zona segura</Text>
+          <View style={styles.rowBetween}>
+            <Text style={styles.panelTitle}>Zona segura</Text>
+            <View style={styles.safeExitRow}>
+              <Text style={styles.safeExitText}>Salida segura</Text>
+              <Switch
+                value={salidaSegura}
+                onValueChange={toggleSalidaSegura}
+                trackColor={{ false: "#BDBDBD", true: "#81C784" }}
+                thumbColor={salidaSegura ? "#2E7D32" : "#FAFAFA"}
+              />
+            </View>
+          </View>
 
           {zonaSegura ? (
             <>
@@ -255,21 +262,31 @@ export default function HomeScreenCuidador({ navigation }) {
                       coordinate={ubicacionPaciente}
                       pinColor={alertaActiva ? "red" : "blue"}
                       title="Paciente"
-                      description={alertaActiva ? "Fuera de la zona 🚨" : "Dentro de la zona ✅"}
+                      description={
+                        salidaSegura
+                          ? "Salida segura activa"
+                          : alertaActiva
+                          ? "Fuera de la zona 🚨"
+                          : "Dentro de la zona ✅"
+                      }
                     />
                   )}
                   <Circle
                     center={zonaSegura.centro}
                     radius={zonaSegura.radio}
                     strokeColor={
-                      alertaActiva
+                      salidaSegura
+                        ? "rgba(76,175,80,0.8)"
+                        : alertaActiva
                         ? "rgba(239,83,80,0.95)"
                         : distanciaActual > zonaSegura.radio * 0.8
                         ? "rgba(255,213,79,0.9)"
                         : "rgba(100,181,246,0.95)"
                     }
                     fillColor={
-                      alertaActiva
+                      salidaSegura
+                        ? "rgba(200,230,201,0.3)"
+                        : alertaActiva
                         ? "rgba(244,67,54,0.15)"
                         : distanciaActual > zonaSegura.radio * 0.8
                         ? "rgba(255,235,59,0.15)"
@@ -283,7 +300,9 @@ export default function HomeScreenCuidador({ navigation }) {
                     style={[
                       styles.statusPill,
                       {
-                        backgroundColor: alertaActiva
+                        backgroundColor: salidaSegura
+                          ? "rgba(76,175,80,0.9)"
+                          : alertaActiva
                           ? "rgba(239,83,80,0.95)"
                           : distanciaActual > (zonaSegura?.radio || 1) * 0.8
                           ? "rgba(255,213,79,0.95)"
@@ -292,12 +311,20 @@ export default function HomeScreenCuidador({ navigation }) {
                     ]}
                   >
                     <Ionicons
-                      name={alertaActiva ? "alert" : "checkmark-circle"}
+                      name={
+                        salidaSegura
+                          ? "walk"
+                          : alertaActiva
+                          ? "alert"
+                          : "checkmark-circle"
+                      }
                       size={16}
                       color="#fff"
                     />
                     <Text style={styles.statusPillText}>
-                      {alertaActiva
+                      {salidaSegura
+                        ? "Salida segura activa"
+                        : alertaActiva
                         ? "Paciente fuera"
                         : distanciaActual > (zonaSegura?.radio || 1) * 0.8
                         ? "Cerca del límite"
@@ -357,7 +384,6 @@ export default function HomeScreenCuidador({ navigation }) {
           )}
         </View>
 
-        {/* Panel Tarjetas */}
         <View style={styles.panel}>
           <View style={styles.rowBetween}>
             <Text style={styles.panelTitle}>Tarjetas compartidas</Text>
@@ -395,7 +421,6 @@ export default function HomeScreenCuidador({ navigation }) {
           )}
         </View>
 
-        {/* Menú rápido */}
         <View style={styles.quickMenu}>
           <TouchableOpacity
             style={[styles.menuItem, { backgroundColor: "#B3E5FC" }]}
@@ -429,15 +454,12 @@ export default function HomeScreenCuidador({ navigation }) {
             <Text style={styles.menuText}>Red de Apoyo</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Cerrar Sesión */}
         <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
           <FontAwesome5 name="sign-out-alt" size={16} color="#FFF" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal Nueva Tarjeta */}
       <Modal animationType="fade" transparent visible={modalVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
@@ -476,30 +498,95 @@ export default function HomeScreenCuidador({ navigation }) {
   );
 }
 
-// 🧩 Estilos idénticos a los tuyos, sin cambios visuales relevantes
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FAFAFA" },
-  header: { paddingHorizontal: 20, marginBottom: 10 },
-  headerName: { fontSize: 22, fontWeight: "700", color: "#212121" },
-  headerRole: { fontSize: 14, color: "#757575", marginTop: 2 },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#FAFAFA" 
+  },
+  header: { 
+    paddingHorizontal: 20,
+     marginBottom: 10 
+    },
+  headerName: { 
+    fontSize: 22, 
+    fontWeight: "700", 
+    color: "#212121" 
+  },
+  headerRole: { 
+    fontSize: 14, 
+    color: "#757575", 
+    marginTop: 2 
+  },
   panel: {
     backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    elevation: 2,
     marginHorizontal: 16,
     marginTop: 14,
     padding: 16,
-    borderRadius: 16,
-    elevation: 2,
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
-  panelTitle: { fontSize: 16, fontWeight: "700", color: "#263238", marginBottom: 6 },
-  rowBetween: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  mainText: { fontSize: 15, fontWeight: "600", color: "#37474F" },
-  subText: { fontSize: 13, color: "#607D8B", marginTop: 2 },
-  mapWrap: { borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#E3F2FD" },
-  map: { width: "100%", height: 220 },
+  panelTitle: { 
+    fontSize: 16, 
+    fontWeight: "700", 
+    color: "#263238", 
+    marginBottom: 6 
+  },
+  mainText: { 
+    fontSize: 15, 
+    fontWeight: "600", 
+    color: "#37474F" 
+  },
+  subText: { 
+    fontSize: 13, 
+    color: "#607D8B",
+    marginTop: 2 
+  },
+  muted: { 
+    fontStyle: "italic", 
+    color: "#9E9E9E" 
+  },
+  rowBetween: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center" 
+  },
+  safeExitRow: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    gap: 8 
+  },
+  safeExitText: { 
+    fontSize: 13, 
+    fontWeight: "600", 
+    color: "#2E7D32" 
+  },
+  zoneInfoRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    marginTop: 10 
+  },
+  zoneInfoText: { 
+    color: "#455A64", 
+    fontSize: 13 
+  },
+  zoneInfoStrong: { 
+    fontWeight: "700", 
+    color: "#263238" 
+  },
+  mapWrap: { 
+    borderRadius: 14, 
+    overflow: "hidden", 
+    borderWidth: 1, 
+    borderColor: "#E3F2FD"
+   },
+  map: { 
+    width: "100%", 
+    height: 220 
+  },
   mapOverlay: {
     position: "absolute",
     top: 10,
@@ -517,7 +604,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
   },
-  statusPillText: { color: "#fff", fontWeight: "700", fontSize: 12 },
+  statusPillText: { 
+    color: "#fff", 
+    fontWeight: "700", 
+    fontSize: 12 },
   centerButton: {
     flexDirection: "row",
     backgroundColor: "#0D47A1",
@@ -528,112 +618,24 @@ const styles = StyleSheet.create({
     elevation: 2,
     gap: 6,
   },
-  centerButtonText: { color: "#FFF", fontWeight: "700", fontSize: 12 },
-  zoneInfoRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
-  zoneInfoText: { color: "#455A64", fontSize: 13 },
-  zoneInfoStrong: { fontWeight: "700", color: "#263238" },
-  noZoneContainer: { alignItems: "center", paddingVertical: 8 },
-  noZoneText: { color: "#607D8B", fontStyle: "italic" },
-  noZoneSub: { color: "#90A4AE", fontSize: 12, marginTop: 2 },
-  muted: { fontStyle: "italic", color: "#9E9E9E" },
-  alertBox: {
-    backgroundColor: "#FFF",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    marginTop: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderLeftWidth: 5,
-    borderLeftColor: "#C0CA33",
+  centerButtonText: { 
+    color: "#FFF", 
+    fontWeight: "700", 
+    fontSize: 12 
   },
-  alertMessage: { flex: 1, color: "#37474F" },
-  alertDate: { color: "#90A4AE", fontSize: 11 },
-  cardNote: {
-    padding: 10,
-    borderRadius: 12,
-    marginTop: 8,
-    borderLeftWidth: 5,
-    backgroundColor: "#E3F2FD",
-    borderLeftColor: "#64B5F6",
+  noZoneContainer: { 
+    alignItems: "center", 
+    paddingVertical: 8 
   },
-  tarjetaHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-    paddingRight: 4,
+  noZoneText: { 
+    color: "#607D8B", 
+    fontStyle: "italic" 
   },
-  tarjetaAutor: { fontWeight: "700", color: "#37474F" },
-  tarjetaMensaje: { color: "#455A64", marginBottom: 4 },
-  tarjetaTipo: { fontSize: 12, color: "#607D8B", textAlign: "right" },
-  tarjetaFecha: { fontSize: 12, color: "#90A4AE", textAlign: "right" },
-  quickMenu: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    padding: 14,
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-around",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    marginBottom: 20,
+  noZoneSub: { 
+    color: "#90A4AE", 
+    fontSize: 12, 
+    marginTop: 2 
   },
-  menuItem: {
-    width: (width - 16 * 2 - 40) / 2,
-    marginVertical: 12,
-    paddingVertical: 20,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  menuText: { color: "#212121", fontWeight: "700" },
-  logoutButton: {
-    backgroundColor: ACCENT,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 60,
-    marginTop: 8,
-    marginBottom: 28,
-    paddingVertical: 12,
-    borderRadius: 16,
-    elevation: 2,
-    gap: 8,
-  },
-  logoutText: { color: "#FFF", fontWeight: "700" },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.45)",
-  },
-  modalBox: { width: "88%", backgroundColor: "#FFF", borderRadius: 18, padding: 18 },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#263238", marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#CFD8DC",
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 10,
-    color: "#37474F",
-  },
-  modalButtons: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
-  modalBtn: {
-    flex: 1,
-    marginHorizontal: 6,
-    paddingVertical: 10,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  modalBtnText: { color: "#FFF", fontWeight: "700", fontSize: 15 },
   editZoneButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -649,6 +651,34 @@ const styles = StyleSheet.create({
     fontWeight: "700", 
     fontSize: 14 
   },
+  alertBox: {
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    borderLeftWidth: 5,
+    borderLeftColor: "#C0CA33",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  alertMessage: { 
+    flex: 1, 
+    color: "#37474F" 
+  },
+  alertDate: { 
+    color: "#90A4AE", 
+    fontSize: 11 
+  },
+  cardNote: {
+    backgroundColor: "#E3F2FD",
+    borderLeftWidth: 5,
+    borderLeftColor: "#64B5F6",
+    borderRadius: 12,
+    marginTop: 8,
+    padding: 10,
+  },
   tarjetaHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -656,4 +686,111 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     paddingRight: 4,
   },
+  tarjetaAutor: { 
+    fontWeight: "700", 
+    color: "#37474F" 
+  },
+  tarjetaMensaje: { 
+    color: "#455A64", 
+    marginBottom: 4 
+  },
+  tarjetaTipo: { 
+    fontSize: 12, 
+    color: "#607D8B", 
+    textAlign: "right" 
+  },
+  tarjetaFecha: { 
+    fontSize: 12, 
+    color: "#90A4AE", 
+    textAlign: "right" 
+  },
+  quickMenu: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    elevation: 3,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+    marginHorizontal: 16,
+    marginTop: 20,
+    marginBottom: 20,
+    padding: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  menuItem: {
+    alignItems: "center",
+    borderRadius: 16,
+    justifyContent: "center",
+    gap: 8,
+    marginVertical: 12,
+    paddingVertical: 20,
+    width: (width - 16 * 2 - 40) / 2,
+  },
+  menuText: { 
+    color: "#212121", 
+    fontWeight: "700" 
+  },
+  logoutButton: {
+    alignItems: "center",
+    backgroundColor: ACCENT,
+    borderRadius: 16,
+    elevation: 2,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginHorizontal: 60,
+    marginTop: 8,
+    marginBottom: 28,
+    paddingVertical: 12,
+  },
+  logoutText: { 
+    color: "#FFF", 
+    fontWeight: "700" 
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  modalBox: { 
+    width: "88%", 
+    backgroundColor: "#FFF", 
+    borderRadius: 18, 
+    padding: 18 },
+  modalTitle: { 
+    fontSize: 18, 
+    fontWeight: "700", 
+    color: "#263238", 
+    marginBottom: 12 
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#CFD8DC",
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 10,
+    color: "#37474F",
+  },
+  modalButtons: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    marginTop: 6
+   },
+  modalBtn: {
+    flex: 1,
+    alignItems: "center",
+    borderRadius: 12,
+    marginHorizontal: 6,
+    paddingVertical: 10,
+  },
+  modalBtnText: { 
+    color: "#FFF", 
+    fontWeight: "700", 
+    fontSize: 15 },
 });
+

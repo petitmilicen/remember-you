@@ -1,11 +1,26 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, Platform, StatusBar, Dimensions, Alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Platform,
+  StatusBar,
+  Dimensions,
+  Alert,
+} from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
 const GUTTER = 20;
-const TOP_PAD = Platform.OS === "android" ? (StatusBar.currentHeight || 0) : 0;
 
 function formatDate(date) {
   const days = [
@@ -28,6 +43,22 @@ export default function BitacoraScreen({ navigation }) {
   const [text, setText] = useState("");
   const [notes, setNotes] = useState([]);
   const [editingNote, setEditingNote] = useState(null);
+  const insets = useSafeAreaInsets();
+
+  const { settings } = useSettings();
+  const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
+
+  // ✅ Función para aplicar el tamaño de texto dinámico
+  const getFontSizeStyle = (baseSize = 16) => {
+    switch (settings.fontSize) {
+      case "small":
+        return { fontSize: baseSize - 2 };
+      case "large":
+        return { fontSize: baseSize + 2 };
+      default:
+        return { fontSize: baseSize };
+    }
+  };
 
   const handleSave = () => {
     if (text.trim() === "") return;
@@ -75,38 +106,46 @@ export default function BitacoraScreen({ navigation }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
+      <View style={[styles.container, themeStyles.container]}>
+        <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
+        {/* HEADER */}
         <View style={styles.headerBleed}>
           <LinearGradient
             colors={["#FEBA17", "#FFD166"]}
-            style={[styles.header, { paddingTop: TOP_PAD + 12 }]}
+            style={[styles.header, { paddingTop: insets.top + 12 }]}
           >
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
             </TouchableOpacity>
 
             <View style={styles.headerTitleWrap}>
-              <Text style={styles.headerTitle}>Bitácora</Text>
+              <Text style={[styles.headerTitle, getFontSizeStyle(20)]}>Bitácora</Text>
             </View>
 
             <View style={{ width: 28 }} />
           </LinearGradient>
         </View>
+
+        {/* CONTENIDO */}
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={TOP_PAD + 80}
+          keyboardVerticalOffset={insets.top + 80}
         >
           <ScrollView
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
           >
-            <View style={styles.noteCard}>
+            {/* 📝 Área de escritura */}
+            <View style={[styles.noteCard, themeStyles.card]}>
               <TextInput
-                style={styles.noteInput}
+                style={[styles.noteInput, themeStyles.text, getFontSizeStyle(16)]}
                 placeholder="Comienza escribiendo algo..."
-                placeholderTextColor="#9AA0A6"
+                placeholderTextColor={
+                  settings.theme === "dark" ? "#AAAAAA" : "#9AA0A6"
+                }
                 multiline
                 value={text}
                 onChangeText={setText}
@@ -116,11 +155,14 @@ export default function BitacoraScreen({ navigation }) {
                 <FontAwesome5 name="save" size={18} color="#FFF" />
               </TouchableOpacity>
             </View>
-            
+
+            {/* 📜 Notas guardadas */}
             {notes.map((note) => (
-              <View key={note.id} style={styles.savedNoteCard}>
+              <View key={note.id} style={[styles.savedNoteCard, themeStyles.card]}>
                 <View style={styles.noteHeader}>
-                  <Text style={styles.savedDate}>{note.date}</Text>
+                  <Text style={[styles.savedDate, themeStyles.subtext, getFontSizeStyle(12)]}>
+                    {note.date}
+                  </Text>
                   <View style={styles.actions}>
                     <TouchableOpacity onPress={() => handleEdit(note)}>
                       <FontAwesome5
@@ -140,7 +182,9 @@ export default function BitacoraScreen({ navigation }) {
                     </TouchableOpacity>
                   </View>
                 </View>
-                <Text style={styles.savedText}>{note.text}</Text>
+                <Text style={[styles.savedText, themeStyles.text, getFontSizeStyle(16)]}>
+                  {note.text}
+                </Text>
               </View>
             ))}
           </ScrollView>
@@ -150,10 +194,10 @@ export default function BitacoraScreen({ navigation }) {
   );
 }
 
+/* 🎨 Estilos base */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EDEDED",
     paddingHorizontal: GUTTER,
   },
 
@@ -173,29 +217,19 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   headerTitleWrap: { flex: 1, alignItems: "center" },
-  headerTitle: {
-    color: "#FFF",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
+  headerTitle: { color: "#FFF", fontWeight: "bold" },
 
-  content: {
-    paddingVertical: 20,
-  },
+  content: { paddingVertical: 20 },
 
   noteCard: {
-    backgroundColor: "#FFF",
     borderRadius: 26,
     padding: 16,
     minHeight: 200,
     marginBottom: 20,
     elevation: 6,
   },
-  noteInput: {
-    height: 140,
-    fontSize: 16,
-    color: "#111",
-  },
+  noteInput: { height: 140 },
+
   fabSave: {
     position: "absolute",
     right: 16,
@@ -209,7 +243,6 @@ const styles = StyleSheet.create({
   },
 
   savedNoteCard: {
-    backgroundColor: "#FFF",
     borderRadius: 20,
     padding: 16,
     marginBottom: 15,
@@ -220,18 +253,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 6,
   },
-  actions: {
-    flexDirection: "row",
-  },
-  actionIcon: {
-    marginLeft: 12,
-  },
-  savedDate: {
-    fontSize: 12,
-    color: "#999",
-  },
-  savedText: {
-    fontSize: 16,
-    color: "#333",
-  },
+  actions: { flexDirection: "row" },
+  actionIcon: { marginLeft: 12 },
+  savedDate: {},
+  savedText: {},
+});
+
+/* 🎨 Modo claro / oscuro */
+const lightStyles = StyleSheet.create({
+  container: { backgroundColor: "#EDEDED" },
+  card: { backgroundColor: "#FFF" },
+  text: { color: "#111" },
+  subtext: { color: "#999" },
+});
+
+const darkStyles = StyleSheet.create({
+  container: { backgroundColor: "#121212" },
+  card: { backgroundColor: "#1E1E1E" },
+  text: { color: "#FFFFFF" },
+  subtext: { color: "#AAAAAA" },
 });

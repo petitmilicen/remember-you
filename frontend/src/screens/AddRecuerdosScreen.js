@@ -1,13 +1,25 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, Alert, StatusBar, Platform, Dimensions, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  Alert,
+  StatusBar,
+  Dimensions,
+  ScrollView,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
 const GUTTER = 20;
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
 function formatDate(date) {
   const days = [
@@ -30,6 +42,21 @@ export default function AddRecuerdosScreen({ navigation }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+  const insets = useSafeAreaInsets();
+  const { settings } = useSettings();
+  const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
+
+  // ✅ Ajuste dinámico del tamaño de fuente
+  const getFontSizeStyle = (baseSize = 16) => {
+    switch (settings.fontSize) {
+      case "small":
+        return { fontSize: baseSize - 2 };
+      case "large":
+        return { fontSize: baseSize + 2 };
+      default:
+        return { fontSize: baseSize };
+    }
+  };
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -39,7 +66,7 @@ export default function AddRecuerdosScreen({ navigation }) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       quality: 0.8,
     });
 
@@ -76,94 +103,119 @@ export default function AddRecuerdosScreen({ navigation }) {
     }
   };
 
+  const gradientColors =
+    settings.theme === "dark" ? ["#101A50", "#202E8A"] : ["#1A2A80", "#3C4FCE"];
+
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={["#1A2A80", "#3C4FCE"]}
-        style={[styles.header, { paddingTop: TOP_PAD + 12 }]}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
-        </TouchableOpacity>
+    <View style={[styles.container, themeStyles.container]}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            Añadir Recuerdo
-          </Text>
-        </View>
-        <View style={{ width: 28 }} />
-      </LinearGradient>
+      {/* 🔹 Header */}
+      <View style={styles.headerBleed}>
+        <LinearGradient
+          colors={gradientColors}
+          style={[styles.header, { paddingTop: insets.top + 12 }]}
+        >
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
+          </TouchableOpacity>
 
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[styles.headerTitle, { textAlign: "center" }, getFontSizeStyle(20)]}
+            >
+              Añadir Recuerdo
+            </Text>
+          </View>
+          <View style={{ width: 28 }} />
+        </LinearGradient>
+      </View>
+
+      {/* 🧠 Formulario */}
       <ScrollView contentContainerStyle={styles.form}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, themeStyles.card, themeStyles.text, getFontSizeStyle(16)]}
           placeholder="Título"
-          placeholderTextColor="#999"
+          placeholderTextColor={settings.theme === "dark" ? "#AAA" : "#999"}
           value={title}
           onChangeText={setTitle}
         />
 
         <TextInput
-          style={[styles.input, styles.textArea]}
+          style={[
+            styles.input,
+            styles.textArea,
+            themeStyles.card,
+            themeStyles.text,
+            getFontSizeStyle(16),
+          ]}
           placeholder="Descripción"
-          placeholderTextColor="#999"
+          placeholderTextColor={settings.theme === "dark" ? "#AAA" : "#999"}
           multiline
           textAlignVertical="top"
           value={description}
           onChangeText={setDescription}
         />
 
-        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+        <TouchableOpacity
+          style={[styles.imagePicker, themeStyles.card]}
+          onPress={pickImage}
+        >
           {image ? (
             <Image source={{ uri: image }} style={styles.previewImage} />
           ) : (
-            <Text style={styles.imagePickerText}>Seleccionar Imagen</Text>
+            <Text style={[styles.imagePickerText, themeStyles.subtext, getFontSizeStyle(16)]}>
+              Seleccionar Imagen
+            </Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Guardar Recuerdo</Text>
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            {
+              backgroundColor: settings.theme === "dark" ? "#2F3A9D" : "#1A2A80",
+            },
+          ]}
+          onPress={handleSave}
+        >
+          <Text style={[styles.saveButtonText, getFontSizeStyle(16)]}>
+            Guardar Recuerdo
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
   );
 }
 
+/* 🎨 Estilos base */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#EDEDED" },
-
+  container: { flex: 1 },
+  headerBleed: {
+    marginLeft: 0,
+    marginRight: 0,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: "hidden",
+    elevation: 5,
+  },
   header: {
     width,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: GUTTER,
     paddingBottom: 16,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
   },
-  headerTitle: {
-    color: "#FFF",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-
-  form: {
-    padding: 20,
-  },
+  headerTitle: { color: "#FFF", fontWeight: "bold" },
+  form: { padding: 20 },
   input: {
-    backgroundColor: "#FFF",
     borderRadius: 12,
     padding: 12,
-    fontSize: 16,
     marginBottom: 15,
     elevation: 2,
   },
-  textArea: {
-    height: 100,
-  },
+  textArea: { height: 100 },
   imagePicker: {
-    backgroundColor: "#FFF",
     borderRadius: 12,
     height: 200,
     justifyContent: "center",
@@ -171,17 +223,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     elevation: 2,
   },
-  imagePickerText: {
-    fontSize: 16,
-    color: "#999",
-  },
+  imagePickerText: {},
   previewImage: {
     width: "100%",
     height: "100%",
     borderRadius: 12,
   },
   saveButton: {
-    backgroundColor: "#1A2A80",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -189,7 +237,21 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: "#FFF",
-    fontSize: 16,
     fontWeight: "bold",
   },
+});
+
+/* 🎨 Estilos por tema */
+const lightStyles = StyleSheet.create({
+  container: { backgroundColor: "#EDEDED" },
+  card: { backgroundColor: "#FFF" },
+  text: { color: "#222" },
+  subtext: { color: "#999" },
+});
+
+const darkStyles = StyleSheet.create({
+  container: { backgroundColor: "#121212" },
+  card: { backgroundColor: "#1E1E1E" },
+  text: { color: "#FFF" },
+  subtext: { color: "#AAA" },
 });

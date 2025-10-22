@@ -28,39 +28,42 @@ import ZonaSeguraScreen from "./src/screens/ZonaSeguraScreen";
 import BitacoiraScreenCuidador from "./src/screens/BitacoraScreenCuidador";
 import CitasMedicasScreen from "./src/screens/CitasMedicasScreen";
 import RedApoyoScreen from "./src/screens/RedApoyoScreen";
+import { SettingsProvider } from './src/context/SettingsContext'; 
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <StatusBar style="auto" />
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="LoginPaciente" component={LoginPacienteScreen} />
-        <Stack.Screen name="LoginCuidador" component={LoginCuidadorScreen} />
-        <Stack.Screen name="RegisterPaciente" component={RegisterPacienteScreen} />
-        <Stack.Screen name="RegisterCuidador" component={RegisterCuidadorScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Actividades" component={ActividadesScreen} />
-        <Stack.Screen name="Memorice" component={MemoriceScreen} />
-        <Stack.Screen name="CaminoCorrecto" component={CaminoCorrectoScreen} />
-        <Stack.Screen name="Puzzle" component={PuzzleScreen}options={{ title: 'Rompecabezas' }}/>
-        <Stack.Screen name="Sudoku" component={SudokuScreen}options={{ title: 'Sudoku' }}/>
-        <Stack.Screen name="Bitacora" component={BitacoraScreen} />
-        <Stack.Screen name="Tarjetas" component={TarjetasScreen} />
-        <Stack.Screen name="AddTarjetas" component={AddTarjetasScreen} />
-        <Stack.Screen name="Recuerdos" component={RecuerdosScreen} />
-        <Stack.Screen name="AddRecuerdos" component={AddRecuerdosScreen} />
-        <Stack.Screen name="DetalleRecuerdos" component={DetalleRecuerdosScreen} />
-        <Stack.Screen name="Ajustes" component={AjustesScreen} />
-        <Stack.Screen name="PerfilPaciente" component={PerfilPacienteScreen} />
-        <Stack.Screen name="HomeCuidador" component={HomeScreenCuidador} />
-        <Stack.Screen name="ZonaSegura" component={ZonaSeguraScreen} />
-        <Stack.Screen name="BitacoraCuidador" component={BitacoiraScreenCuidador} />
-        <Stack.Screen name="CitasMedicas" component={CitasMedicasScreen} />
-        <Stack.Screen name="RedApoyo" component={RedApoyoScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SettingsProvider>
+      <NavigationContainer>
+        <StatusBar style="auto" />
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="LoginPaciente" component={LoginPacienteScreen} />
+          <Stack.Screen name="LoginCuidador" component={LoginCuidadorScreen} />
+          <Stack.Screen name="RegisterPaciente" component={RegisterPacienteScreen} />
+          <Stack.Screen name="RegisterCuidador" component={RegisterCuidadorScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Actividades" component={ActividadesScreen} />
+          <Stack.Screen name="Memorice" component={MemoriceScreen} />
+          <Stack.Screen name="CaminoCorrecto" component={CaminoCorrectoScreen} />
+          <Stack.Screen name="Puzzle" component={PuzzleScreen}options={{ title: 'Rompecabezas' }}/>
+          <Stack.Screen name="Sudoku" component={SudokuScreen}options={{ title: 'Sudoku' }}/>
+          <Stack.Screen name="Bitacora" component={BitacoraScreen} />
+          <Stack.Screen name="Tarjetas" component={TarjetasScreen} />
+          <Stack.Screen name="AddTarjetas" component={AddTarjetasScreen} />
+          <Stack.Screen name="Recuerdos" component={RecuerdosScreen} />
+          <Stack.Screen name="AddRecuerdos" component={AddRecuerdosScreen} />
+          <Stack.Screen name="DetalleRecuerdos" component={DetalleRecuerdosScreen} />
+          <Stack.Screen name="Ajustes" component={AjustesScreen} />
+          <Stack.Screen name="PerfilPaciente" component={PerfilPacienteScreen} />
+          <Stack.Screen name="HomeCuidador" component={HomeScreenCuidador} />
+          <Stack.Screen name="ZonaSegura" component={ZonaSeguraScreen} />
+          <Stack.Screen name="BitacoraCuidador" component={BitacoiraScreenCuidador} />
+          <Stack.Screen name="CitasMedicas" component={CitasMedicasScreen} />
+          <Stack.Screen name="RedApoyo" component={RedApoyoScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SettingsProvider>
   );
 }

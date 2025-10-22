@@ -7,32 +7,45 @@ import {
   TouchableOpacity,
   Alert,
   StatusBar,
-  Platform,
   Dimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
 export default function TarjetasScreen({ navigation }) {
   const [cards, setCards] = useState([]);
+  const insets = useSafeAreaInsets();
+  const { settings } = useSettings();
+  const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
 
-  // 🔄 Cargar tarjetas cada vez que la pantalla se enfoca
+  // ✅ Tamaño de texto dinámico
+  const getFontSizeStyle = (baseSize = 16) => {
+    switch (settings.fontSize) {
+      case "small":
+        return { fontSize: baseSize - 2 };
+      case "large":
+        return { fontSize: baseSize + 2 };
+      default:
+        return { fontSize: baseSize };
+    }
+  };
+
+  // 🔄 Cargar tarjetas al enfocar
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", loadCards);
     return unsubscribe;
   }, [navigation]);
 
-  // 📦 Cargar desde AsyncStorage
   const loadCards = async () => {
     try {
       const stored = await AsyncStorage.getItem("memoryCards");
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Ordenar por más recientes
         parsed.sort((a, b) => parseInt(b.id) - parseInt(a.id));
         setCards(parsed);
       }
@@ -41,7 +54,6 @@ export default function TarjetasScreen({ navigation }) {
     }
   };
 
-  // 💾 Guardar en AsyncStorage
   const saveCards = async (newCards) => {
     try {
       await AsyncStorage.setItem("memoryCards", JSON.stringify(newCards));
@@ -50,20 +62,15 @@ export default function TarjetasScreen({ navigation }) {
     }
   };
 
-  // 🗑️ Eliminar tarjeta con confirmación
   const handleDeleteCard = (id) => {
-    Alert.alert(
-      "Eliminar Tarjeta",
-      "¿Seguro que quieres eliminar esta tarjeta?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: () => deleteCard(id),
-        },
-      ]
-    );
+    Alert.alert("Eliminar Tarjeta", "¿Seguro que quieres eliminar esta tarjeta?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: () => deleteCard(id),
+      },
+    ]);
   };
 
   const deleteCard = async (id) => {
@@ -76,32 +83,64 @@ export default function TarjetasScreen({ navigation }) {
     }
   };
 
-  // 💌 Render de cada tarjeta estilo post-it
   const renderCard = ({ item }) => {
     const isCuidador = item.creadoPor === "cuidador";
-    const color = isCuidador ? "#FFF3CD" : "#D0F0C0"; // amarillo o verde
-    const bordeColor = isCuidador ? "#FFB74D" : "#81C784";
+    const color = isCuidador
+      ? settings.theme === "dark"
+        ? "#3C3A1E"
+        : "#FFF3CD"
+      : settings.theme === "dark"
+      ? "#2E3D2E"
+      : "#D0F0C0";
+    const bordeColor = isCuidador
+      ? settings.theme === "dark"
+        ? "#C9A13C"
+        : "#FFB74D"
+      : settings.theme === "dark"
+      ? "#5FA77A"
+      : "#81C784";
 
     return (
       <TouchableOpacity
-        style={[styles.postIt, { backgroundColor: color, borderLeftColor: bordeColor }]}
+        style={[
+          styles.postIt,
+          { backgroundColor: color, borderLeftColor: bordeColor },
+        ]}
         onLongPress={() => handleDeleteCard(item.id)}
         activeOpacity={0.9}
       >
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
-            <Text style={styles.postItTipo}>
+            <Text style={[styles.postItTipo, themeStyles.text, getFontSizeStyle(14)]}>
               {isCuidador ? "👨‍⚕️ Cuidador" : "🧠 Paciente"}
             </Text>
-            <Text style={styles.postItDate}>{item.date}</Text>
+            <Text style={[styles.postItDate, themeStyles.subtext, getFontSizeStyle(12)]}>
+              {item.date}
+            </Text>
           </View>
 
-          <Text style={styles.postItMensaje}>{item.mensaje}</Text>
-          <Text style={styles.postItTipoSecundario}>{item.tipo}</Text>
+          <Text
+            style={[
+              styles.postItMensaje,
+              themeStyles.text,
+              getFontSizeStyle(15),
+            ]}
+          >
+            {item.mensaje}
+          </Text>
+          <Text
+            style={[
+              styles.postItTipoSecundario,
+              themeStyles.subtext,
+              getFontSizeStyle(12),
+            ]}
+          >
+            {item.tipo}
+          </Text>
         </View>
 
         <TouchableOpacity
-          style={styles.deleteButton}
+          style={[styles.deleteButton, themeStyles.card]}
           onPress={() => handleDeleteCard(item.id)}
         >
           <FontAwesome5 name="trash" size={14} color="red" />
@@ -110,26 +149,41 @@ export default function TarjetasScreen({ navigation }) {
     );
   };
 
+  const gradientColors =
+    settings.theme === "dark"
+      ? ["#008366", "#00C897"]
+      : ["#00C897", "#00E0AC"];
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, themeStyles.container]}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
       {/* 🔹 Header */}
-      <LinearGradient
-        colors={["#00C897", "#00E0AC"]}
-        style={[styles.header, { paddingTop: TOP_PAD + 12 }]}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
-        </TouchableOpacity>
+      <View style={styles.headerBleed}>
+        <LinearGradient
+          colors={gradientColors}
+          style={[styles.header, { paddingTop: insets.top + 12 }]}
+        >
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
+          </TouchableOpacity>
 
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            Tarjetas
-          </Text>
-        </View>
-        <View style={{ width: 28 }} />
-      </LinearGradient>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.headerTitle,
+                { textAlign: "center" },
+                getFontSizeStyle(20),
+              ]}
+            >
+              Tarjetas
+            </Text>
+          </View>
+          <View style={{ width: 28 }} />
+        </LinearGradient>
+      </View>
 
-      {/* 🟨 Lista de tarjetas */}
+      {/* 🟨 Lista */}
       <FlatList
         data={cards}
         renderItem={renderCard}
@@ -141,40 +195,53 @@ export default function TarjetasScreen({ navigation }) {
             : { paddingBottom: 100 }
         }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay tarjetas todavía</Text>
+          <Text style={[styles.emptyText, themeStyles.subtext, getFontSizeStyle(16)]}>
+            No hay tarjetas todavía
+          </Text>
         }
       />
 
-      {/* ➕ Botón para añadir tarjeta */}
+      {/* ➕ Botón añadir */}
       <TouchableOpacity
-        style={styles.addButton}
+        style={[
+          styles.addButton,
+          {
+            backgroundColor:
+              settings.theme === "dark" ? "#009E7A" : "#00C897",
+          },
+        ]}
         onPress={() => navigation.navigate("AddTarjetas")}
       >
-        <Text style={styles.addButtonText}>+ Añadir Tarjeta</Text>
+        <Text style={[styles.addButtonText, getFontSizeStyle(16)]}>
+          + Añadir Tarjeta
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
 
+/* 🎨 Estilos base */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#EDEDED" },
-
+  container: { flex: 1 },
+  headerBleed: {
+    marginLeft: 0,
+    marginRight: 0,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: "hidden",
+    elevation: 5,
+  },
   header: {
     width,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingBottom: 20,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
   },
   headerTitle: {
     color: "#FFF",
-    fontSize: 20,
     fontWeight: "bold",
   },
-
   postIt: {
     flex: 1,
     borderRadius: 10,
@@ -196,37 +263,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 6,
   },
-  postItTipo: {
-    fontWeight: "bold",
-    color: "#4E342E",
-  },
-  postItDate: {
-    fontSize: 12,
-    color: "#666",
-  },
+  postItTipo: { fontWeight: "bold" },
+  postItDate: {},
   postItMensaje: {
-    fontSize: 15,
-    color: "#333",
     fontStyle: "italic",
     marginVertical: 4,
   },
-  postItTipoSecundario: {
-    fontSize: 12,
-    color: "#555",
-    textAlign: "right",
-  },
+  postItTipoSecundario: { textAlign: "right" },
   deleteButton: {
     position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: "#FFF",
     borderRadius: 12,
     padding: 4,
     elevation: 2,
   },
-
   addButton: {
-    backgroundColor: "#00C897",
     padding: 16,
     borderRadius: 25,
     alignItems: "center",
@@ -235,12 +287,22 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: "#FFF",
-    fontSize: 16,
     fontWeight: "bold",
   },
+  emptyText: { textAlign: "center" },
+});
 
-  emptyText: {
-    fontSize: 16,
-    color: "#888",
-  },
+/* 🎨 Estilos por tema */
+const lightStyles = StyleSheet.create({
+  container: { backgroundColor: "#EDEDED" },
+  card: { backgroundColor: "#FFF" },
+  text: { color: "#333" },
+  subtext: { color: "#666" },
+});
+
+const darkStyles = StyleSheet.create({
+  container: { backgroundColor: "#121212" },
+  card: { backgroundColor: "#1E1E1E" },
+  text: { color: "#FFFFFF" },
+  subtext: { color: "#AAAAAA" },
 });
