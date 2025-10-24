@@ -25,7 +25,7 @@ const ACCENT = "#FF7043";
 
 export default function HomeScreenCuidador({ navigation }) {
   const [cuidador] = useState({ nombre: "María Pérez", rol: "Cuidadora principal" });
-  const [paciente] = useState({ nombre: "Denilxon", edad: 74, nivel: "Moderado" });
+  const [paciente, setPaciente] = useState(null);
 
   const [zonaSegura, setZonaSegura] = useState(null);
   const [ubicacionPaciente, setUbicacionPaciente] = useState(null);
@@ -44,11 +44,12 @@ export default function HomeScreenCuidador({ navigation }) {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const [zona, cards, ubicacion, salida] = await Promise.all([
+        const [zona, cards, ubicacion, salida, pacienteStored] = await Promise.all([
           AsyncStorage.getItem("zonaSegura"),
           AsyncStorage.getItem("memoryCards"),
           AsyncStorage.getItem("ubicacionPaciente"),
           AsyncStorage.getItem("salidaSegura"),
+          AsyncStorage.getItem("pacienteAsignado"),
         ]);
 
         if (zona) setZonaSegura(JSON.parse(zona));
@@ -59,6 +60,15 @@ export default function HomeScreenCuidador({ navigation }) {
           setTarjetas(parsed);
         }
         if (salida) setSalidaSegura(JSON.parse(salida));
+        if (pacienteStored) {
+          try {
+            setPaciente(JSON.parse(pacienteStored));
+          } catch {
+            setPaciente(null);
+          }
+        } else {
+          setPaciente(null);
+        }
       } catch (error) {
         console.error("Error cargando datos:", error);
       }
@@ -94,7 +104,7 @@ export default function HomeScreenCuidador({ navigation }) {
       const nueva = {
         id: Date.now().toString(),
         tipo: "Zona Segura",
-        mensaje: `${paciente.nombre} ha salido de la zona segura`,
+        mensaje: `${paciente?.nombre || "El paciente"} ha salido de la zona segura`,
         fecha: new Date().toLocaleTimeString(),
       };
       setAlertas((prev) => [nueva, ...prev]);
@@ -105,7 +115,7 @@ export default function HomeScreenCuidador({ navigation }) {
       const nueva = {
         id: Date.now().toString(),
         tipo: "Zona Segura",
-        mensaje: `${paciente.nombre} ha regresado a la zona segura`,
+        mensaje: `${paciente?.nombre || "El paciente"} ha regresado a la zona segura`,
         fecha: new Date().toLocaleTimeString(),
       };
       setAlertas((prev) => [nueva, ...prev]);
@@ -225,9 +235,36 @@ export default function HomeScreenCuidador({ navigation }) {
 
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Paciente asignado</Text>
-          <Text style={styles.mainText}>{paciente.nombre}</Text>
-          <Text style={styles.subText}>Edad: {paciente.edad}</Text>
-          <Text style={styles.subText}>Nivel de Alzheimer: {paciente.nivel}</Text>
+          {paciente ? (
+            <>
+              <Text style={styles.mainText}>{paciente.nombre}</Text>
+              <Text style={styles.subText}>Edad: {paciente.edad}</Text>
+              <Text style={styles.subText}>Nivel de Alzheimer: {paciente.nivel}</Text>
+            </>
+          ) : (
+            <View style={{ alignItems: "center", marginTop: 8 }}>
+              <Text style={[styles.subText, { marginBottom: 10 }]}>
+                No hay paciente vinculado aún.
+              </Text>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: ACCENT,
+                  paddingVertical: 10,
+                  paddingHorizontal: 16,
+                  borderRadius: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+                onPress={() => navigation.navigate("LectorQR")}
+              >
+                <Ionicons name="qr-code" size={18} color="#FFF" />
+                <Text style={{ color: "#FFF", fontWeight: "700" }}>
+                  Escanear QR de paciente
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <View style={styles.panel}>
@@ -237,9 +274,22 @@ export default function HomeScreenCuidador({ navigation }) {
               <Text style={styles.safeExitText}>Salida segura</Text>
               <Switch
                 value={salidaSegura}
-                onValueChange={toggleSalidaSegura}
-                trackColor={{ false: "#BDBDBD", true: "#81C784" }}
-                thumbColor={salidaSegura ? "#2E7D32" : "#FAFAFA"}
+                onValueChange={(value) => {
+                  if (!zonaSegura) {
+                    Alert.alert(
+                      "Zona segura no definida",
+                      "Debes crear una zona segura antes de activar la salida segura."
+                    );
+                    return;
+                  }
+                  toggleSalidaSegura(value);
+                }}
+                disabled={!zonaSegura}
+                trackColor={{
+                  false: "#BDBDBD",
+                  true: zonaSegura ? "#81C784" : "#E0E0E0",
+                }}
+                thumbColor={zonaSegura ? (salidaSegura ? "#2E7D32" : "#FAFAFA") : "#BDBDBD"}
               />
             </View>
           </View>
@@ -364,7 +414,6 @@ export default function HomeScreenCuidador({ navigation }) {
           )}
         </View>
 
-        {/* Panel Alertas */}
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Alertas recientes</Text>
           {alertas.length === 0 ? (
@@ -793,4 +842,3 @@ const styles = StyleSheet.create({
     fontWeight: "700", 
     fontSize: 15 },
 });
-

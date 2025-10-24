@@ -21,7 +21,6 @@ import { useSettings } from "../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
 
-/* ---------- Hexágono puro con 3 vistas (rectángulo + triángulos) ---------- */
 const Hexagon = memo(function Hexagon({
   size = 80,
   unlocked = false,
@@ -29,20 +28,19 @@ const Hexagon = memo(function Hexagon({
   dark = false,
 }) {
   const W = size;
-  const H = Math.round((Math.sqrt(3) / 2) * W); // proporción de hex regular
-  const TRI_H = Math.round(H * 0.25); // altura de los triángulos
+  const H = Math.round((Math.sqrt(3) / 2) * W);
+  const TRI_H = Math.round(H * 0.25);
   const MID_H = H - TRI_H * 2;
 
-  const borderColor = unlocked ? "#FFD700" : dark ? "#3A3A3A" : "#CFCFCF";
-  const midBg = unlocked
-    ? "rgba(255,215,0,0.18)"
+  const fillColor = unlocked
+    ? "rgba(255,215,0,0.25)"
     : dark
-    ? "rgba(255,255,255,0.04)"
-    : "rgba(0,0,0,0.03)";
+    ? "#1C1C1C"
+    : "#F0F0F0";
+  const borderColor = unlocked ? "#FFD700" : dark ? "#3A3A3A" : "#CFCFCF";
 
   return (
     <View style={{ width: W, height: H, alignItems: "center" }}>
-      {/* Triángulo superior */}
       <View
         style={[
           styles.hexTri,
@@ -56,22 +54,19 @@ const Hexagon = memo(function Hexagon({
           },
         ]}
       />
-      {/* Rectángulo central */}
       <View
         style={[
           styles.hexMid,
           {
             width: W,
             height: MID_H,
-            backgroundColor: midBg,
-            borderLeftColor: borderColor,
-            borderRightColor: borderColor,
+            backgroundColor: fillColor,
             borderLeftWidth: 2,
             borderRightWidth: 2,
-            shadowColor: unlocked ? "#FFD700" : dark ? "#000" : "#999",
-            shadowOpacity: unlocked ? 0.45 : 0.25,
-            shadowRadius: unlocked ? 6 : 4,
-            elevation: unlocked ? 6 : 3,
+            borderLeftColor: borderColor,
+            borderRightColor: borderColor,
+            justifyContent: "center",
+            alignItems: "center",
           },
         ]}
       >
@@ -87,21 +82,15 @@ const Hexagon = memo(function Hexagon({
                   fontSize: 11,
                   textAlign: "center",
                   color: dark ? "#FFF" : "#222",
+                  paddingHorizontal: 4,
                 }}
               >
                 {label}
               </Text>
             )}
           </>
-        ) : (
-          <FontAwesome5
-            name="circle"
-            size={20}
-            color={dark ? "#444" : "#BFBFBF"}
-          />
-        )}
+        ) : null}
       </View>
-      {/* Triángulo inferior */}
       <View
         style={[
           styles.hexTri,
@@ -119,15 +108,13 @@ const Hexagon = memo(function Hexagon({
   );
 });
 
-/* ---------- Acordeón de grupo (título + 2x2 hexágonos) ---------- */
 const GroupAccordion = memo(function GroupAccordion({
   title,
-  items = [], // [{Nombre, ...}]
+  items = [],
   open = false,
   onToggle,
   dark = false,
 }) {
-  // aseguramos 4 espacios siempre
   const slots = Array.from({ length: 4 }).map((_, i) => items[i] || null);
 
   return (
@@ -141,10 +128,7 @@ const GroupAccordion = memo(function GroupAccordion({
         ]}
       >
         <Text
-          style={[
-            styles.groupTitle,
-            { color: dark ? "#A88BFF" : "#8A6DE9" },
-          ]}
+          style={[styles.groupTitle, { color: dark ? "#A88BFF" : "#8A6DE9" }]}
         >
           {title}
         </Text>
@@ -156,35 +140,20 @@ const GroupAccordion = memo(function GroupAccordion({
       </TouchableOpacity>
 
       {open && (
-        <View style={[styles.groupBody, dark ? styles.groupBodyDark : styles.groupBodyLight]}>
+        <View
+          style={[
+            styles.groupBody,
+            dark ? styles.groupBodyDark : styles.groupBodyLight,
+          ]}
+        >
           <View style={styles.hexRow}>
-            <Hexagon
-              unlocked={!!slots[0]}
-              label={slots[0]?.Nombre}
-              dark={dark}
-              size={78}
-            />
-            <Hexagon
-              unlocked={!!slots[1]}
-              label={slots[1]?.Nombre}
-              dark={dark}
-              size={78}
-            />
+            <Hexagon unlocked={!!slots[0]} label={slots[0]?.Nombre} dark={dark} size={78} />
+            <Hexagon unlocked={!!slots[1]} label={slots[1]?.Nombre} dark={dark} size={78} />
           </View>
           <View style={{ height: 10 }} />
           <View style={styles.hexRow}>
-            <Hexagon
-              unlocked={!!slots[2]}
-              label={slots[2]?.Nombre}
-              dark={dark}
-              size={78}
-            />
-            <Hexagon
-              unlocked={!!slots[3]}
-              label={slots[3]?.Nombre}
-              dark={dark}
-              size={78}
-            />
+            <Hexagon unlocked={!!slots[2]} label={slots[2]?.Nombre} dark={dark} size={78} />
+            <Hexagon unlocked={!!slots[3]} label={slots[3]?.Nombre} dark={dark} size={78} />
           </View>
         </View>
       )}
@@ -204,11 +173,9 @@ export default function PerfilPacienteScreen({ navigation }) {
   });
 
   const [cuidador, setCuidador] = useState({ Nombre: "Sin asignar", Rol: "—" });
-  const [logros, setLogros] = useState([]); // [{ID_Logro, Nombre, FechaObtencion, Juego}]
+  const [logros, setLogros] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalQR, setModalQR] = useState(false);
-
-  // acordeón: solo uno abierto a la vez
   const [openGroup, setOpenGroup] = useState("Memorice");
 
   const insets = useSafeAreaInsets();
@@ -299,9 +266,9 @@ export default function PerfilPacienteScreen({ navigation }) {
     ]);
   };
 
-  const gradientColors = dark ? ["#5B3AB4", "#7D5FE5"] : ["#8A6DE9", "#A88BFF"];
+  const gradientColors =
+    dark ? ["#5B3AB4", "#7D5FE5"] : ["#8A6DE9", "#A88BFF"];
 
-  // helper para agrupar logros por juego (tomamos máximo 4 por grupo)
   const groupByGame = (gameName) =>
     (logros || [])
       .filter((l) => (l.Juego || "").toLowerCase().includes(gameName.toLowerCase()))
@@ -318,7 +285,6 @@ export default function PerfilPacienteScreen({ navigation }) {
     <View style={[styles.container, themeStyles.container]}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      {/* HEADER */}
       <View style={styles.headerBleed}>
         <LinearGradient
           colors={gradientColors}
@@ -336,12 +302,10 @@ export default function PerfilPacienteScreen({ navigation }) {
         </LinearGradient>
       </View>
 
-      {/* CONTENIDO */}
       <ScrollView
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* PERFIL */}
         <View style={[styles.profileCard, themeStyles.card]}>
           <TouchableOpacity
             activeOpacity={0.9}
@@ -377,7 +341,6 @@ export default function PerfilPacienteScreen({ navigation }) {
           </Text>
         </View>
 
-        {/* DATOS PERSONALES */}
         <View style={styles.infoSection}>
           <Text style={[styles.sectionTitle, themeStyles.sectionTitle, getFontSizeStyle(18)]}>
             Datos personales
@@ -404,7 +367,6 @@ export default function PerfilPacienteScreen({ navigation }) {
           </View>
         </View>
 
-        {/* CUIDADOR */}
         <View style={styles.infoSection}>
           <Text style={[styles.sectionTitle, themeStyles.sectionTitle, getFontSizeStyle(18)]}>
             Cuidador actual
@@ -423,32 +385,30 @@ export default function PerfilPacienteScreen({ navigation }) {
           </View>
         </View>
 
-        {/* EXPOSITOR (Acordeón 4× grupos, cada uno 2×2 = 4 slots) */}
         <View style={styles.infoSection}>
           <Text style={[styles.sectionTitle, themeStyles.sectionTitle, getFontSizeStyle(18)]}>
             Expositor de Logros
           </Text>
-
-          {groups.map((g) => (
+          {[
+            { key: "Memorice", title: "Memorice", data: groups[0].data },
+            { key: "Puzzle", title: "Puzzle", data: groups[1].data },
+            { key: "Lectura", title: "Lectura Guiada", data: groups[2].data },
+            { key: "Camino", title: "Camino Correcto", data: groups[3].data },
+          ].map((g) => (
             <GroupAccordion
               key={g.key}
               title={g.title}
               items={g.data}
               open={openGroup === g.key}
               dark={dark}
-              onToggle={() => setOpenGroup((prev) => (prev === g.key ? "" : g.key))}
+              onToggle={() =>
+                setOpenGroup((prev) => (prev === g.key ? "" : g.key))
+              }
             />
           ))}
-
-          {(!logros || logros.length === 0) && (
-            <Text style={[styles.emptyText, themeStyles.subtext, getFontSizeStyle(14)]}>
-              Aún no hay logros desbloqueados 🕊️
-            </Text>
-          )}
         </View>
       </ScrollView>
 
-      {/* MODALES */}
       <Modal transparent visible={modalQR} animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={[styles.modalQRBox, themeStyles.card]}>
@@ -470,6 +430,7 @@ export default function PerfilPacienteScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+
 
       <Modal transparent visible={modalVisible} animationType="fade">
         <View style={styles.modalOverlay}>
@@ -501,7 +462,6 @@ export default function PerfilPacienteScreen({ navigation }) {
   );
 }
 
-/* 🎨 Estilos */
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerBleed: {
@@ -519,6 +479,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerTitle: { color: "#FFF", fontWeight: "bold" },
+
   profileCard: {
     alignItems: "center",
     borderRadius: 20,
@@ -571,7 +532,6 @@ const styles = StyleSheet.create({
   infoLabel: { fontWeight: "bold" },
   emptyText: { textAlign: "center", marginTop: 12 },
 
-  /* Acordeón */
   groupHeader: {
     borderRadius: 12,
     paddingVertical: 10,
@@ -600,11 +560,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  /* Hex building blocks */
-  hexTri: {
-    width: 0,
-    height: 0,
-  },
+  hexTri: { width: 0, height: 0 },
   hexMid: {
     justifyContent: "center",
     alignItems: "center",
@@ -613,9 +569,42 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 6,
   },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    borderRadius: 16,
+    padding: 20,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalQRBox: {
+    borderRadius: 20,
+    padding: 30,
+    width: "85%",
+    alignItems: "center",
+    elevation: 5,
+  },
+  modalTitle: { fontWeight: "bold", marginBottom: 15 },
+  modalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    borderRadius: 10,
+    paddingVertical: 10,
+    marginVertical: 5,
+  },
+  modalButtonText: { color: "#FFF", marginLeft: 10, fontWeight: "bold" },
+  cancelButton: { marginTop: 10 },
+  cancelText: { color: "#8A6DE9", fontWeight: "bold" },
+  qrText: { marginTop: 10 },
 });
 
-/* 🌙 Estilos temáticos */
 const lightStyles = StyleSheet.create({
   container: { backgroundColor: "#EDEDED" },
   card: { backgroundColor: "#FFF" },

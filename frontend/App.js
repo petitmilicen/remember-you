@@ -24,6 +24,7 @@ import RegisterPacienteScreen from "./src/screens/RegisterPacienteScreen";
 import RegisterCuidadorScreen from "./src/screens/RegisterCuidadorScreen";
 import PerfilPacienteScreen from "./src/screens/PerfilPacienteScreen";
 import HomeScreenCuidador from "./src/screens/HomeScreenCuidador";
+import LectorQRScreen from "./src/screens/LectorQRScreen";
 import ZonaSeguraScreen from "./src/screens/ZonaSeguraScreen";
 import BitacoiraScreenCuidador from "./src/screens/BitacoraScreenCuidador";
 import CitasMedicasScreen from "./src/screens/CitasMedicasScreen";
@@ -58,6 +59,7 @@ export default function App() {
           <Stack.Screen name="Ajustes" component={AjustesScreen} />
           <Stack.Screen name="PerfilPaciente" component={PerfilPacienteScreen} />
           <Stack.Screen name="HomeCuidador" component={HomeScreenCuidador} />
+          <Stack.Screen name="LectorQR" component={LectorQRScreen} />
           <Stack.Screen name="ZonaSegura" component={ZonaSeguraScreen} />
           <Stack.Screen name="BitacoraCuidador" component={BitacoiraScreenCuidador} />
           <Stack.Screen name="CitasMedicas" component={CitasMedicasScreen} />

@@ -268,7 +268,6 @@ export default function ZonaSeguraScreen({ navigation }) {
         )}
       </View>
 
-      {/* Mensaje animado */}
       {mensaje && (
         <Animated.View
           style={[
@@ -421,14 +420,14 @@ const styles = StyleSheet.create({
 
   bottomPanel: {
     position: "absolute",
-    bottom: 0, // 🔹 Ahora ocupa todo el espacio hasta el borde inferior
+    bottom: 0, 
     width: "100%",
     backgroundColor: "#FFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 20,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === "android" ? 40 : 30, // 🔹 Cubre la barra de navegación según plataforma
+    paddingBottom: Platform.OS === "android" ? 40 : 30, 
     elevation: 10,
     shadowColor: "#000",
     shadowOpacity: 0.08,
