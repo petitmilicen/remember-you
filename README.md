@@ -12,20 +12,24 @@
 ```bash
 cd backend
 ```
+
 #### 2. Crear y activar un entorno virtual
 **Linux / macOS**
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
+
 **Windows (PowerShell)**
 ```bash
 python -m venv venv
 venv\Scripts\activate
 ```
+
 #### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
+```
 
 #### 4. Configurar la base de datos SQLite
 Abre `backend/remember_you/settings.py` y asegúrate de tener esta configuración:
