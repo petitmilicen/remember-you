@@ -26,3 +26,34 @@ venv\Scripts\activate
 #### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
+#### 4. Configurar la base de datos SQLite
+Abre `backend/remember_you/settings.py` y asegúrate de tener esta configuración:
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+```
+
+#### 5. Ejecutar migraciones
+```bash
+python manage.py migrate
+```
+
+#### 6. Crear un superusuario (opcional pero recomendado)
+```bash
+python manage.py createsuperuser
+```
+
+#### 7. Correr el servidor de desarrollo
+```bash
+python manage.py runserver
+```
+
+El backend estará disponible en:
+```
+http://127.0.0.1:8000/
+```
