@@ -55,7 +55,7 @@ python manage.py createsuperuser
 
 #### 7. Correr el servidor de desarrollo
 ```bash
-python manage.py runserver
+python manage.py runserver 0.0.0.0:8000
 ```
 
 El backend estará disponible en:
