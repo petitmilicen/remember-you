@@ -45,7 +45,7 @@ DATABASES = {
 
 #### 5. Ejecutar migraciones
 ```bash
-python manage.py migrate
+python manage.py makemigrations -> python manage.py migrate
 ```
 
 #### 6. Crear un superusuario (opcional pero recomendado)
