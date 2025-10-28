@@ -32,7 +32,7 @@ pip install -r requirements.txt
 ```
 
 #### 4. Configurar la base de datos SQLite
-Abre `backend/remember_you/settings.py` y asegúrate de tener esta configuración:
+Abre `remember-you/core/settings.py` y asegúrate de tener esta configuración:
 
 ```python
 DATABASES = {
