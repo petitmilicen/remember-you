@@ -30,11 +30,13 @@ import BitacoiraScreenCuidador from "./src/screens/BitacoraScreenCuidador";
 import CitasMedicasScreen from "./src/screens/CitasMedicasScreen";
 import RedApoyoScreen from "./src/screens/RedApoyoScreen";
 import { SettingsProvider } from './src/context/SettingsContext'; 
+import { AuthProvider } from "./src/auth/AuthContext";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
+    <AuthProvider>
     <SettingsProvider>
       <NavigationContainer>
         <StatusBar style="auto" />
@@ -67,5 +69,6 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </SettingsProvider>
+    </AuthProvider>
   );
 }

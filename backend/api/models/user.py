@@ -7,6 +7,7 @@ class User(AbstractUser):
         CAREGIVER = 'Caregiver'
         PATIENT = 'Patient'
 
+    email = models.EmailField(unique=True)
     user_type = models.CharField(
         max_length=20,
         choices=UserType.choices,
@@ -21,6 +22,9 @@ class User(AbstractUser):
     related_name='caregivers'
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
     def validate_patient_assignment(self):
         if self.user_type == self.UserType.PATIENT and self.patient is not None:
             raise ValidationError("A patient cannot have another patient assigned.")
@@ -32,5 +36,9 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         self.validate_patient_assignment()
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.username
+    
     
 

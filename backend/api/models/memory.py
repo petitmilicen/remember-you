@@ -3,7 +3,7 @@ from .user import User
 from django.db import models
 
 class Memory(models.Model):
-
+ 
     memory_id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     title = models.CharField(max_length=50, default='')
     user = models.ForeignKey(User, on_delete=models.CASCADE)

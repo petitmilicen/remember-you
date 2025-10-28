@@ -1,7 +1,14 @@
-from api.serializers import MemorySerializer, MedicalLogSerializer
-from api.models import Memory, MedicalLog
+from api.serializers import MemorySerializer, MedicalLogSerializer, UserDataSerializer
+from api.models import Memory, MedicalLog, User
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
+class UserDataView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserDataSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 class MemoryListCreateView(generics.ListCreateAPIView):
     queryset = Memory.objects.all()

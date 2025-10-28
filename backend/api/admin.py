@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Memory, User, MedicalLog
+from .models import Memory, User, MedicalLog, MedicalAppointment, SafeZone
 
-@admin.register(Memory)
-class MemoryAdmin(admin.ModelAdmin):
-    list_display = ('memory_id', 'title', 'user', 'created_at', 'description', 'image' )
-
+admin.site.register(Memory)
 admin.site.register(User)
 admin.site.register(MedicalLog)
+admin.site.register(MedicalAppointment)
+admin.site.register(SafeZone)
+

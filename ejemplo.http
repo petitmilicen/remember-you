@@ -3,16 +3,19 @@ POST http://127.0.0.1:8000/auth/users/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "xd1",
+    "username": "blur",
     "password": "xd123456",
-    "user_type": "sd"
+    "user_type": "sd",
+    "phone_number": "123",
+    "user_type": "Caregiver"
 }
 
 ### Obtiene JWT a partir de logearse (username, password)
 POST http://127.0.0.1:8000/auth/jwt/create/ HTTP/1.1
 Content-Type: application/json
+
 {
-    "username": "Diego",
+    "email": "diego@gmail.com",
     "password": "1234"
 }
 
@@ -22,4 +25,4 @@ Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNj
 
 ### Cerrar sesion
 POST http://127.0.0.1:8000/auth/token/logout/ HTTP/1.1
-Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU5ODgwMDEyLCJpYXQiOjE3NTk4Nzk3MTIsImp0aSI6ImU1YzliZDgxNzExNzRmZjZiNWQxMThhYzkzOTc3ZjRiIiwidXNlcl9pZCI6IjEifQ.lJviTMTcqMU1o16SUXuv7ZqQUfb0N9F61WrYC8zxnA0
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc2MzQwMTMyNCwiaWF0IjoxNzYwODA5MzI0LCJqdGkiOiI3ZTZkZWRlZWI3Mjg0Mjk1ODNiMjUwYzVjN2RmZmQyMCIsInVzZXJfaWQiOiIyIn0.2ss7-z7a14QUVpAD8Oq7HhlXLoMOyYB5onAT_-wDCTs

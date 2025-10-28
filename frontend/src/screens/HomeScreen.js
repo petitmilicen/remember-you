@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext} from "react";
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   StatusBar,
+  Alert
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -19,34 +20,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import { AuthContext } from "../auth/AuthContext";
 
 const { width } = Dimensions.get("window");
 
 export default function HomeScreen({ navigation }) {
+  const { user, logout, loading } = useContext(AuthContext);
   const [fotoPerfil, setFotoPerfil] = useState(null);
   const [nombrePaciente, setNombrePaciente] = useState("Paciente");
 
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
   const theme = settings.theme;
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchPaciente = async () => {
-        try {
-          const stored = await AsyncStorage.getItem("pacienteData");
-          if (stored) {
-            const data = JSON.parse(stored);
-            setFotoPerfil(data.FotoPerfil || null);
-            setNombrePaciente(data.NombreCompleto || "Paciente");
-          }
-        } catch (error) {
-          console.error("Error al cargar datos del paciente:", error);
-        }
-      };
-      fetchPaciente();
-    }, [])
-  );
 
   const getFontSizeStyle = (baseSize = 16) => {
     switch (settings.fontSize) {
@@ -56,6 +41,29 @@ export default function HomeScreen({ navigation }) {
         return { fontSize: baseSize + 2 };
       default:
         return { fontSize: baseSize };
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      Alert.alert(
+        "Cerrar sesión",
+        "¿Estás seguro que quieres cerrar sesión?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Sí",
+            onPress: async () => {
+              console.log("Cerrando sesión");
+              await logout();
+              navigation.navigate("Welcome");
+              console.log("Logout completado");
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Error en handleLogout:", error);
     }
   };
 
@@ -86,7 +94,7 @@ export default function HomeScreen({ navigation }) {
 
         <View style={styles.headerText}>
           <Text style={[styles.greeting, { color: "#FFF" }, getFontSizeStyle(18)]}>
-            Hola, <Text style={{ fontWeight: "bold" }}>{nombrePaciente}</Text>
+            Hola, <Text style={{ fontWeight: "bold" }}>{user?.username}</Text>
           </Text>
           <Text style={[styles.subText, { color: "#EEE" }, getFontSizeStyle(12)]}>
             #001
@@ -146,11 +154,13 @@ export default function HomeScreen({ navigation }) {
 
         <TouchableOpacity
           style={[styles.card, { backgroundColor: "#FF9BDE" }]}
-          onPress={() => navigation.navigate("Welcome")}
+          onPress={handleLogout}
         >
-          <MaterialIcons name="logout" size={42} color="#FFF" />
+
+        <MaterialIcons name="logout" size={42} color="#FFF" />
           <Text style={[styles.cardText, getFontSizeStyle(15)]}>Salida</Text>
         </TouchableOpacity>
+
       </View>
     </View>
   );

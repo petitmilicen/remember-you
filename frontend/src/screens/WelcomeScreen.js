@@ -5,30 +5,28 @@ import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 export default function WelcomeScreen({ navigation }) {
     return(
         <View style={styles.container}>
-            <Image
-                source={require("../assets/images/Logo.png")}
-                style={styles.logo}
-                resizeMode="contain"
-            />
+          <Image source={require("../assets/images/Logo.png")}
+            style={styles.logo}
+            resizeMode="contain"/>
 
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate("Home")}
-            >
-                <Text style={styles.buttonText}>Iniciar sesión</Text>
-            </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => navigation.navigate("LoginPaciente")}>
+            <Text style={styles.buttonText}>Iniciar sesión</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate("RegisterCuidador")}
-            >
-                <Text style={styles.buttonText}>Registrarme</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("RegisterCuidador")}>
+            <Text style={styles.buttonText}>Registrarme</Text>
+          </TouchableOpacity>
 
-            <Text style={styles.footerText} onPress={() => navigation.navigate("LoginCuidador")}>
-                ¿Eres Familiar o cuidador?{""}
-                <Text style={styles.linkText}> Ingresa aquí.</Text>
-            </Text>
+          <Text 
+            style={styles.footerText}
+            onPress={() => navigation.navigate("LoginCuidador")}>
+            ¿Eres Familiar o cuidador?{""}
+            <Text style={styles.linkText}> Ingresa aquí.</Text>
+          </Text>
         </View>
     )
 }

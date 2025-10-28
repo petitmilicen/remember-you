@@ -1,75 +1,86 @@
-import { StatusBar } from 'expo-status-bar';
-import React, {useState} from 'react';
+import React, { useState, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform} from 'react-native';
+import { AuthContext } from '../auth/AuthContext';
 
 export default function LoginCuidadorScreen({ navigation }) {
-    const [email, setEmail] = useState("");
-    const [password, setPasword] = useState("");
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-    const handleLogin = () => {
-        console.log("login con :", email, password);
-    };
+const handleLogin = async () => {
+  try {
+    await login(email, password);
+    navigation.navigate("HomeCuidador");
+  } catch (err) {
 
-    return(
-        <KeyboardAvoidingView 
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    setError('Correo o contraseña incorrectos');
+  }
+};
+
+return (
+  <KeyboardAvoidingView
+    style={styles.container}
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
+  >
+    <Image
+      source={require("../assets/images/Logo.png")}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+
+    <View style={styles.formContainer}>
+      <Text style={styles.welcomeText}>
+        Bienvenido cuidador, {"\n"}te extrañamos.
+      </Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Correo electrónico"
+        placeholderTextColor="#999"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Contraseña"
+        placeholderTextColor="#999"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Iniciar sesión</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.footerText}>
+        ¿No tienes una cuenta?{" "}
+        <Text
+          style={styles.linkText}
+          onPress={() => navigation.navigate("RegisterCuidador")}
         >
-            <Image
-                source={require("../assets/images/Logo.png")}
-                style={styles.logo}
-                rsizeMode="contain"
-            />
+          Ingresa aquí.
+        </Text>
+      </Text>
 
-            <View style={styles.formContainer}>
-                <Text style={styles.welcomeText}>
-                    Bienvenido cuidador, {"\n"}te extrañamos.
-                </Text>
+      <Text style={styles.footerText}>
+        ¿No eres familiar o cuidador?{" "}
+        <Text
+          style={styles.linkText}
+          onPress={() => navigation.navigate("Welcome")}
+        >
+          Ingresa aquí.
+        </Text>
+      </Text>
 
-                <TextInput
-                    style={styles.input}
-                    placeholder='Correo electronico'
-                    placeholdelTectColor="#999"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder='Contraseña'
-                    placeholdelTectColor="#999"
-                    value={password}
-                    onChangeText={setPasword}
-                    secureTextEntry
-                />
-
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("HomeCuidador")}>
-                    <Text style={styles.buttonText}>Iniciar sesión</Text>
-                </TouchableOpacity>
-
-                <Text style={styles.footerText}>
-                    ¿No tienes una cuenta? {""}
-                    <Text 
-                        style={styles.linkText} 
-                        onPress={() => navigation.navigate("RegisterCuidador")}
-                    >
-                        Ingresa aquí.
-                    </Text>
-                </Text>
-
-                <Text style = {styles.footerText}>
-                  ¿No eres familiar o cuidador? {""}
-                    <Text 
-                      style = {styles.linkText}
-                      onPress = {() => navigation.navigate("Welcome")}
-                    >
-                      Ingresa aquí.    
-                    </Text>    
-                </Text>
-            </View>
-        </KeyboardAvoidingView>
-    );
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+    </View>
+  </KeyboardAvoidingView>
+);
 }
 
 const styles = StyleSheet.create({
