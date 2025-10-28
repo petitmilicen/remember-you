@@ -26,6 +26,7 @@ venv\Scripts\activate
 #### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
+
 #### 4. Configurar la base de datos SQLite
 Abre `backend/remember_you/settings.py` y asegúrate de tener esta configuración:
 
