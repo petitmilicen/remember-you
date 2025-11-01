@@ -97,7 +97,7 @@ export default function HomeScreen({ navigation }) {
             Hola, <Text style={{ fontWeight: "bold" }}>{user?.username}</Text>
           </Text>
           <Text style={[styles.subText, { color: "#EEE" }, getFontSizeStyle(12)]}>
-            #001
+          #{user?.id}
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate("PerfilPaciente")}>
             <Text style={[styles.profileLink, { color: "#FFF" }, getFontSizeStyle(14)]}>

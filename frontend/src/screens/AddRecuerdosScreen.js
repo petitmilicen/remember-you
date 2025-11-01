@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -17,28 +17,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import { AuthContext } from "../auth/AuthContext";
 
 const { width } = Dimensions.get("window");
 const GUTTER = 20;
 
-function formatDate(date) {
-  const days = [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-  ];
-  const dayName = days[date.getDay()];
-  const day = date.getDate();
-  const month = date.toLocaleString("es-ES", { month: "long" });
-  const year = date.getFullYear();
-  return `${dayName}, ${day} de ${month} ${year}`;
-}
-
 export default function AddRecuerdosScreen({ navigation }) {
+
+  const { user, logout, loading } = useContext(AuthContext);
+
+  console.log(user);
+  
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
@@ -46,7 +35,6 @@ export default function AddRecuerdosScreen({ navigation }) {
   const { settings } = useSettings();
   const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
 
-  // ✅ Ajuste dinámico del tamaño de fuente
   const getFontSizeStyle = (baseSize = 16) => {
     switch (settings.fontSize) {
       case "small":

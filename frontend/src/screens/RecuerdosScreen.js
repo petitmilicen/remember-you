@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,9 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import { deleteMemory } from "../api/memoryService";
+import { getMemories } from "../api/memoryService";
+import { AuthContext } from "../auth/AuthContext";
 
 const { width } = Dimensions.get("window");
 
@@ -32,19 +35,19 @@ const MemoryCard = ({ memory, onPress, onLongPress, themeStyles, getFontSizeStyl
         {memory.title}
       </Text>
       <Text style={[styles.memoryDate, themeStyles.subtext, getFontSizeStyle(12)]}>
-        {memory.date}
+        {memory.created_at.split("T")[0]}
       </Text>
     </View>
   </TouchableOpacity>
 );
 
 export default function RecuerdosScreen({ navigation }) {
+  const { user, logout, loading } = useContext(AuthContext);
   const [memories, setMemories] = useState([]);
   const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
   const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
-
   // ✅ Ajuste de tamaño de texto global
   const getFontSizeStyle = (baseSize = 16) => {
     switch (settings.fontSize) {
@@ -63,8 +66,10 @@ export default function RecuerdosScreen({ navigation }) {
 
   const loadMemories = async () => {
     try {
-      const stored = await AsyncStorage.getItem("imageMemories");
-      if (stored) setMemories(JSON.parse(stored));
+      const data = await getMemories();
+      console.log('MEMORIES', data);
+      
+      setMemories(data);
     } catch (error) {
       console.error("Error cargando recuerdos:", error);
     }
@@ -76,27 +81,23 @@ export default function RecuerdosScreen({ navigation }) {
       {
         text: "Eliminar",
         style: "destructive",
-        onPress: () => deleteMemory(id),
+        onPress: () => removeMemory(id),
       },
     ]);
   };
 
-  const deleteMemory = async (id) => {
+  const removeMemory = async (id) => {
     try {
-      const stored = await AsyncStorage.getItem("imageMemories");
-      let current = stored ? JSON.parse(stored) : [];
-      const updated = current.filter((m) => m.id !== id);
-      setMemories(updated);
-      await AsyncStorage.setItem("imageMemories", JSON.stringify(updated));
+      await deleteMemory(id);
     } catch (error) {
-      console.error("Error eliminando recuerdo:", error);
+      console.error("Error deleting memory:", error);
     }
   };
 
   const renderMemory = ({ item }) => (
     <MemoryCard
       memory={item}
-      onPress={() => navigation.navigate("DetalleRecuerdos", { memory: item })}
+      //onPress={() => navigation.navigate("DetalleRecuerdos", { memory: item })}
       onLongPress={() => handleDeleteMemory(item.id)}
       themeStyles={themeStyles}
       getFontSizeStyle={getFontSizeStyle}

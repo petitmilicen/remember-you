@@ -94,8 +94,6 @@ DATABASES = {
     }
 }
 
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -161,6 +159,6 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
         'user_create': 'api.serializers.user.UserCreateSerializer',
-        'user': 'api.serializers.user.UserSerializer',
+        'user': 'api.serializers.UserSerializer',
     }
 }
