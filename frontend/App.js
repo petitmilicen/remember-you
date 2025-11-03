@@ -19,16 +19,16 @@ import AddRecuerdosScreen from "./src/screens/PacienteScreens/AddRecuerdosScreen
 import DetalleRecuerdosScreen from "./src/screens/PacienteScreens/DetalleRecuerdosScreen";
 import AjustesScreen from "./src/screens/PacienteScreens/AjustesScreen";
 import LoginPacienteScreen from "./src/screens/PacienteScreens/LoginPacienteScreen";
-import LoginCuidadorScreen from "./src/screens/CuidadorSreens/LoginCuidadorScreen";
+import LoginCuidadorScreen from "./src/screens/CuidadorScreens/LoginCuidadorScreen";
 import RegisterPacienteScreen from "./src/screens/PacienteScreens/RegisterPacienteScreen";
-import RegisterCuidadorScreen from "./src/screens/CuidadorSreens/RegisterCuidadorScreen";
+import RegisterCuidadorScreen from "./src/screens/CuidadorScreens/RegisterCuidadorScreen";
 import PerfilPacienteScreen from "./src/screens/PacienteScreens/PerfilPacienteScreen";
-import HomeScreenCuidador from "./src/screens/CuidadorSreens/HomeScreenCuidador";
-import LectorQRScreen from "./src/screens/CuidadorSreens/LectorQRScreen";
-import ZonaSeguraScreen from "./src/screens/CuidadorSreens/ZonaSeguraScreen";
-import BitacoiraScreenCuidador from "./src/screens/CuidadorSreens/BitacoraScreenCuidador";
-import CitasMedicasScreen from "./src/screens/CuidadorSreens/CitasMedicasScreen";
-import RedApoyoScreen from "./src/screens/CuidadorSreens/RedApoyoScreen";
+import HomeScreenCuidador from "./src/screens/CuidadorScreens/HomeScreenCuidador";
+import LectorQRScreen from "./src/screens/CuidadorScreens/LectorQRScreen";
+import ZonaSeguraScreen from "./src/screens/CuidadorScreens/ZonaSeguraScreen";
+import BitacoiraScreenCuidador from "./src/screens/CuidadorScreens/BitacoraScreenCuidador";
+import CitasMedicasScreen from "./src/screens/CuidadorScreens/CitasMedicasScreen";
+import RedApoyoScreen from "./src/screens/CuidadorScreens/RedApoyoScreen";
 import { SettingsProvider } from './src/context/SettingsContext'; 
 import { AuthProvider } from "./src/auth/AuthContext";
 
