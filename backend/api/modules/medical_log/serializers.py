@@ -10,5 +10,5 @@ class MedicalLogSerializer(serializers.ModelSerializer):
             'created_at',
             'description',
         )
-        read_only_fields =  ('medical_log_id', 'created_at')
+        read_only_fields =  ('medical_log_id', 'created_at', 'user')
 

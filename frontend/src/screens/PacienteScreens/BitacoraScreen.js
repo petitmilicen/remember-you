@@ -1,5 +1,5 @@
 // src/screens/PacienteScreens/BitacoraScreen.js
-import React from "react";
+import React, {useEffect} from "react";
 import {
   View,
   Text,
@@ -16,14 +16,16 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../../context/SettingsContext";
+import { useIsFocused } from "@react-navigation/native";
 import useBitacora from "../../hooks/useBitacora";
 import NotaItem from "../../components/paciente/NotaItem";
 import { styles, lightStyles, darkStyles } from "../../styles/BitacoraStyles";
 
 export default function BitacoraScreen({ navigation }) {
-  const { text, setText, notes, handleSave, handleEdit, handleDelete } = useBitacora();
+  const { text, setText, notes, handleSave, handleEdit, handleDelete, loadNotes } = useBitacora();
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
+  const isFocused = useIsFocused();
   const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
 
   const getFontSizeStyle = (base = 16) =>
@@ -32,6 +34,14 @@ export default function BitacoraScreen({ navigation }) {
       : settings.fontSize === "large"
       ? { fontSize: base + 2 }
       : { fontSize: base };
+
+  useEffect(() => {
+    if (isFocused) loadNotes();
+  }, [isFocused]);
+
+  useEffect(() => {
+    loadNotes();
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

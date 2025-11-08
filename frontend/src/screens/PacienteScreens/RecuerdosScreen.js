@@ -15,10 +15,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useSettings } from "../context/SettingsContext";
-import { deleteMemory } from "../api/memoryService";
-import { getMemories } from "../api/memoryService";
-import { AuthContext } from "../auth/AuthContext";
+import { useSettings } from "../../context/SettingsContext";
+import { deleteMemory } from "../../api/memoryService";
+import { getMemories } from "../../api/memoryService";
+import { AuthContext } from "../../auth/AuthContext";
 
 const { width } = Dimensions.get("window");
 

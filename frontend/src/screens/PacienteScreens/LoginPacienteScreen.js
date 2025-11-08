@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform} from 'react-native';
-import { AuthContext } from '../auth/AuthContext';
+import { AuthContext } from '../../auth/AuthContext';
 
 export default function LoginCuidadorScreen({ navigation }) {
   const { login } = useContext(AuthContext);
@@ -24,7 +24,7 @@ return (
     behavior={Platform.OS === "ios" ? "padding" : undefined}
   >
     <Image
-      source={require("../assets/images/Logo.png")}
+      source={require("../../assets/images/Logo.png")}
       style={styles.logo}
       resizeMode="contain"
     />

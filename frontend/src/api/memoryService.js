@@ -20,10 +20,29 @@ export const getMemory = async (id) => {
 
 export const createMemory = async (data) => {
   try {
-    const res = await api.post("/api/memory/", data);
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+
+    if (data.image) {
+      formData.append("image", {
+        uri: data.image.uri,
+        name: data.image.name,
+        type: data.image.type,
+      });
+    }
+    const res = await api.post("/api/memory/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    console.log("Memory created:", res.data);
     return res.data;
+
   } catch (err) {
     console.error("Error creating memory:", err.response?.data || err);
+    throw err;
   }
 };
 

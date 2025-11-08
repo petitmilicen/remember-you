@@ -24,6 +24,7 @@ export const createMedicalLog = async (data) => {
     return res.data;
   } catch (err) {
     console.error("Error creating medical log:", err.response?.data || err);
+    return null;
   }
 };
 

@@ -16,15 +16,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useSettings } from "../context/SettingsContext";
-import { AuthContext } from "../auth/AuthContext";
-import { createMemory } from "../api/memoryService";
+import { useSettings } from "../../context/SettingsContext";
+import { AuthContext } from "../../auth/AuthContext";
+import { createMemory } from "../../api/memoryService";
 
 const { width } = Dimensions.get("window");
 const GUTTER = 20;
 
 export default function AddRecuerdosScreen({ navigation }) {
-
   const { user, logout } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(false);
@@ -63,63 +62,70 @@ export default function AddRecuerdosScreen({ navigation }) {
     }
   };
 
-
   const handleSave = async () => {
-  if (!title.trim() || !description.trim()) {
-    Alert.alert(
-      "Campos incompletos",
-      "Por favor completa el título y la descripción."
-    );
-    return;
-  }
+    if (!title.trim() || !description.trim()) {
+      Alert.alert(
+        "Campos incompletos",
+        "Por favor completa el título y la descripción."
+      );
+      return;
+    }
 
-  if (!image) {
-    Alert.alert("Falta imagen", "Debes seleccionar una imagen antes de guardar.");
-    return;
-  }
+    if (!image) {
+      Alert.alert(
+        "Falta imagen",
+        "Debes seleccionar una imagen antes de guardar."
+      );
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const fileName = image.split("/").pop();
-    const match = /\.(\w+)$/.exec(fileName ?? "");
-    const type = match ? `image/${match[1]}` : "image/jpeg";
+    try {
+      const fileName = image.split("/").pop();
+      const match = /\.(\w+)$/.exec(fileName ?? "");
+      const type = match ? `image/${match[1]}` : "image/jpeg";
 
-    const memoryData = {
-      title,
-      description,
-      image: {
-        uri: image,
-        name: fileName,
-        type,
-      },
-    };
+      const memoryData = {
+        title,
+        description,
+        image: {
+          uri: image,
+          name: fileName,
+          type,
+        },
+      };
 
-    const response = await createMemory(memoryData);
+      const response = await createMemory(memoryData);
 
-    console.log("Recuerdo creado:", response);
-    Alert.alert("Éxito", "Recuerdo añadido correctamente");
-    navigation.goBack();
+      console.log("Recuerdo creado:", response);
+      Alert.alert("Éxito", "Recuerdo añadido correctamente");
+      navigation.goBack();
 
-    setTitle("");
-    setDescription("");
-    setImage(null);
-
-  } catch (error) {
-    console.error("Error creando el recuerdo:", error.response?.data || error.message);
-    Alert.alert("Error", "No se pudo guardar el recuerdo.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setTitle("");
+      setDescription("");
+      setImage(null);
+    } catch (error) {
+      console.error(
+        "Error creando el recuerdo:",
+        error.response?.data || error.message
+      );
+      Alert.alert("Error", "No se pudo guardar el recuerdo.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const gradientColors =
     settings.theme === "dark" ? ["#101A50", "#202E8A"] : ["#1A2A80", "#3C4FCE"];
 
   return (
     <View style={[styles.container, themeStyles.container]}>
-      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
 
       {/* 🔹 Header */}
       <View style={styles.headerBleed}>
@@ -133,7 +139,11 @@ export default function AddRecuerdosScreen({ navigation }) {
 
           <View style={{ flex: 1 }}>
             <Text
-              style={[styles.headerTitle, { textAlign: "center" }, getFontSizeStyle(20)]}
+              style={[
+                styles.headerTitle,
+                { textAlign: "center" },
+                getFontSizeStyle(20),
+              ]}
             >
               Añadir Recuerdo
             </Text>
@@ -144,7 +154,12 @@ export default function AddRecuerdosScreen({ navigation }) {
 
       <ScrollView contentContainerStyle={styles.form}>
         <TextInput
-          style={[styles.input, themeStyles.card, themeStyles.text, getFontSizeStyle(16)]}
+          style={[
+            styles.input,
+            themeStyles.card,
+            themeStyles.text,
+            getFontSizeStyle(16),
+          ]}
           placeholder="Título"
           placeholderTextColor={settings.theme === "dark" ? "#AAA" : "#999"}
           value={title}
@@ -174,7 +189,13 @@ export default function AddRecuerdosScreen({ navigation }) {
           {image ? (
             <Image source={{ uri: image }} style={styles.previewImage} />
           ) : (
-            <Text style={[styles.imagePickerText, themeStyles.subtext, getFontSizeStyle(16)]}>
+            <Text
+              style={[
+                styles.imagePickerText,
+                themeStyles.subtext,
+                getFontSizeStyle(16),
+              ]}
+            >
               Seleccionar Imagen
             </Text>
           )}
@@ -184,7 +205,8 @@ export default function AddRecuerdosScreen({ navigation }) {
           style={[
             styles.saveButton,
             {
-              backgroundColor: settings.theme === "dark" ? "#2F3A9D" : "#1A2A80",
+              backgroundColor:
+                settings.theme === "dark" ? "#2F3A9D" : "#1A2A80",
             },
           ]}
           onPress={handleSave}

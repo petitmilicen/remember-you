@@ -7,16 +7,16 @@ class MemorySerializer(serializers.ModelSerializer):
         fields = (
             'memory_id',
             'title',
-            'user',
             'created_at',
             'description',
             'image',
+            'user',
         )
-        read_only_fields =  ('memory_id', 'created_at')
-    
+        read_only_fields =  ('memory_id', 'created_at', 'user',)
+
     def validate_title(self, value):
-        if len(value.strip()) <= 3:
+        if len(value.strip()) <= 2:
             raise serializers.ValidationError(
-                "The title must be longer than 3 characters."
+                "The title must be longer than 2 characters."
             )
-        return value 
+        return value

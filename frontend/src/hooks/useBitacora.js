@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { Alert } from "react-native";
+import { createMedicalLog, getMedicalLogs } from "../api/medicalLogService";
 
 function formatDate(date) {
-  const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+  const days = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
   const dayName = days[date.getDay()];
   const day = date.getDate();
   const month = date.toLocaleString("es-ES", { month: "long" });
@@ -15,20 +24,50 @@ export default function useBitacora() {
   const [notes, setNotes] = useState([]);
   const [editingNote, setEditingNote] = useState(null);
 
-  const handleSave = () => {
-    if (text.trim() === "") return;
-    if (editingNote) {
-      setNotes((prev) =>
-        prev.map((note) =>
-          note.id === editingNote.id ? { ...note, text } : note
-        )
-      );
-      setEditingNote(null);
-    } else {
-      const newNote = { id: Date.now(), text, date: formatDate(new Date()) };
-      setNotes((prev) => [newNote, ...prev]);
+  const loadNotes = async () => {
+    try {
+      const logs = await getMedicalLogs();
+
+      if (Array.isArray(logs)) {
+        const formatted = logs.map((log) => ({
+          id: log.medical_log_id,
+          text: log.description,
+          date: new Date(log.created_at).toLocaleString("es-ES"),
+        }));
+        setNotes(formatted);
+      } else {
+        setNotes([]);
+      }
+    } catch (error) {
+      console.error("Error al cargar las notas:", error);
+      Alert.alert("Error", "No se pudieron cargar las notas desde el servidor.");
     }
-    setText("");
+  };
+
+  const handleSave = async () => {
+    if (text.trim() === "") return;
+
+    try {
+      if (editingNote) {
+        setNotes((prev) =>
+          prev.map((note) =>
+            note.id === editingNote.id ? { ...note, text } : note
+          )
+        );
+        setEditingNote(null);
+      } else {
+        const newLog = {
+          description: text, 
+        };
+
+        const createdLog = await createMedicalLog(newLog);
+      }
+
+      setText("");
+    } catch (error) {
+      console.error("Error al guardar la bitácora:", error);
+      Alert.alert("Error", "No se pudo guardar la entrada en la bitácora.");
+    }
   };
 
   const handleEdit = (note) => {
@@ -53,5 +92,5 @@ export default function useBitacora() {
     ]);
   };
 
-  return { text, setText, notes, handleSave, handleEdit, handleDelete };
+  return { text, setText, notes, handleSave, handleEdit, handleDelete, loadNotes};
 }
