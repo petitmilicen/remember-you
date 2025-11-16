@@ -1,27 +1,36 @@
-import { useState, useEffect, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSettings } from "../context/SettingsContext";
+import { getUserProfile } from "../api/userService";
 
 export default function usePacienteHome() {
   const [fotoPerfil, setFotoPerfil] = useState(null);
   const [nombrePaciente, setNombrePaciente] = useState("Paciente");
+  const [loading, setLoading] = useState(true); // 👈 nuevo estado
   const { settings } = useSettings();
 
   useFocusEffect(
     useCallback(() => {
       const fetchPaciente = async () => {
         try {
-          const stored = await AsyncStorage.getItem("pacienteData");
-          if (stored) {
-            const data = JSON.parse(stored);
-            setFotoPerfil(data.FotoPerfil || null);
-            setNombrePaciente(data.NombreCompleto || "Paciente");
+          setLoading(true); // 👈 inicia la carga
+          const user = await getUserProfile();
+          if (user) {
+            setFotoPerfil(user.foto_perfil || null);
+            setNombrePaciente(user.nombre_completo || "Paciente");
+          } else {
+            setFotoPerfil(null);
+            setNombrePaciente("Paciente");
           }
         } catch (error) {
           console.error("Error al cargar datos del paciente:", error);
+          setFotoPerfil(null);
+          setNombrePaciente("Paciente");
+        } finally {
+          setLoading(false); // 👈 finaliza la carga
         }
       };
+
       fetchPaciente();
     }, [])
   );
@@ -37,5 +46,5 @@ export default function usePacienteHome() {
     }
   };
 
-  return { fotoPerfil, nombrePaciente, theme: settings.theme, getFontSize };
+  return { fotoPerfil, nombrePaciente, theme: settings.theme, getFontSize, loading };
 }

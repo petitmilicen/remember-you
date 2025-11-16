@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
+import { getUserProfile } from "../api/userService"; // ✅ importamos el servicio del backend
 
 export default function usePerfilPaciente() {
   const [paciente, setPaciente] = useState({
-    ID: "PACIENTE-001",
+    ID: "—",
     NombreCompleto: "Paciente sin nombre",
-    Genero: "Masculino",
+    Genero: "—",
     Edad: "—",
     ContactoEmergencia: "—",
     NivelAlzheimer: "Desconocido",
@@ -21,20 +21,39 @@ export default function usePerfilPaciente() {
   const [openGroup, setOpenGroup] = useState("Memorice");
 
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
       try {
-        const storedPaciente = await AsyncStorage.getItem("pacienteData");
-        const storedLogros = await AsyncStorage.getItem("logrosData");
-        const storedCuidador = await AsyncStorage.getItem("cuidadorData");
-        if (storedPaciente) setPaciente(JSON.parse(storedPaciente));
-        if (storedLogros) setLogros(JSON.parse(storedLogros));
-        if (storedCuidador) setCuidador(JSON.parse(storedCuidador));
+        const data = await getUserProfile();
+        console.log("Perfil del backend:", data);
+
+        if (data) {
+          setPaciente({
+            ID: data.id || "—",
+            NombreCompleto:
+              data.username || data.email || "Paciente sin nombre",
+            Genero: data.genero || "—",
+            Edad: data.edad || "—",
+            ContactoEmergencia: data.phone_number || "No registrado",
+            NivelAlzheimer: data.nivel_alzheimer || "Desconocido",
+            FotoPerfil: data.foto_perfil || null,
+          });
+
+          if (data.cuidador_principal) {
+            setCuidador({
+              Nombre: data.cuidador_principal.nombre || "Sin asignar",
+              Rol: "Cuidador principal",
+            });
+          }
+        }
       } catch (err) {
-        console.error("Error cargando datos:", err);
+        console.error("Error cargando datos del backend:", err);
       }
-    })();
+    };
+
+    fetchData();
   }, []);
 
+  // 🔹 Selección de imagen (solo visual, no sube al backend aún)
   const pickImage = async (source) => {
     try {
       let result;
@@ -44,9 +63,14 @@ export default function usePerfilPaciente() {
           Alert.alert("Permiso denegado", "Se necesita acceso a la cámara.");
           return;
         }
-        result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.8 });
+        result = await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.8,
+        });
       } else {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const permission =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permission.granted) {
           Alert.alert("Permiso requerido", "Se necesita acceso a la galería.");
           return;
@@ -62,7 +86,7 @@ export default function usePerfilPaciente() {
       if (!result.canceled) {
         const updated = { ...paciente, FotoPerfil: result.assets[0].uri };
         setPaciente(updated);
-        await AsyncStorage.setItem("pacienteData", JSON.stringify(updated));
+        Alert.alert("Imagen seleccionada", "La foto se actualizó localmente.");
       }
     } catch (error) {
       console.error("Error seleccionando imagen:", error);
@@ -72,21 +96,26 @@ export default function usePerfilPaciente() {
     }
   };
 
-  const removeImage = async () => {
-    Alert.alert("Eliminar foto", "¿Seguro que deseas eliminar la imagen de perfil?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: async () => {
-          const updated = { ...paciente, FotoPerfil: null };
-          setPaciente(updated);
-          await AsyncStorage.setItem("pacienteData", JSON.stringify(updated));
+  // 🔹 Eliminar imagen (solo visual)
+  const removeImage = () => {
+    Alert.alert(
+      "Eliminar foto",
+      "¿Seguro que deseas eliminar la imagen de perfil?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => {
+            const updated = { ...paciente, FotoPerfil: null };
+            setPaciente(updated);
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
+  // 🔹 Generar grupos de logros
   const groupByGame = (game) =>
     (logros || [])
       .filter((l) => (l.Juego || "").toLowerCase().includes(game.toLowerCase()))
@@ -95,7 +124,7 @@ export default function usePerfilPaciente() {
   const groups = [
     { key: "Memorice", title: "Memorice", data: groupByGame("memorice") },
     { key: "Puzzle", title: "Puzzle", data: groupByGame("puzzle") },
-    { key: "Lectura", title: "Sudoku", data: groupByGame("Sudoku") },
+    { key: "Lectura", title: "Lectura Guiada", data: groupByGame("lectura") },
     { key: "Camino", title: "Camino Correcto", data: groupByGame("camino") },
   ];
 

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useIsFocused } from "@react-navigation/native";
 import { View, Text, FlatList, TouchableOpacity, StatusBar } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -10,26 +11,47 @@ import { styles, lightStyles, darkStyles } from "../../styles/TarjetasStyles";
 
 export default function TarjetasScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { settings } = useSettings();
-  const { cards, handleDeleteCard } = useTarjetasPaciente(navigation);
+
+  // ← USAMOS SOLO EL HOOK
+  const { cards, loadCards, handleDeleteCard } = useTarjetasPaciente();
+
   const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
 
   const getFontSize = (base = 16) =>
-    settings.fontSize === "small" ? base - 2 :
-    settings.fontSize === "large" ? base + 2 : base;
+    settings.fontSize === "small"
+      ? base - 2
+      : settings.fontSize === "large"
+      ? base + 2
+      : base;
 
   const gradientColors =
-    settings.theme === "dark" ? ["#008366", "#00C897"] : ["#00C897", "#00E0AC"];
+    settings.theme === "dark"
+      ? ["#008366", "#00C897"]
+      : ["#00C897", "#00E0AC"];
+
+  useEffect(() => {
+    if (isFocused) loadCards(); // ← RECARGA CORRECTA
+  }, [isFocused]);
 
   return (
     <View style={[styles.container, themeStyles.container]}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <View style={styles.headerBleed}>
-        <LinearGradient colors={gradientColors} style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <LinearGradient
+          colors={gradientColors}
+          style={[styles.header, { paddingTop: insets.top + 12 }]}
+        >
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { flex: 1, textAlign: "center", fontSize: getFontSize(20) }]}>
+          <Text
+            style={[
+              styles.headerTitle,
+              { flex: 1, textAlign: "center", fontSize: getFontSize(20) },
+            ]}
+          >
             Tarjetas
           </Text>
           <View style={{ width: 28 }} />
@@ -37,7 +59,7 @@ export default function TarjetasScreen({ navigation }) {
       </View>
 
       <FlatList
-        data={cards}
+        data={cards}  // ← AHORA SÍ SE ACTUALIZA
         renderItem={({ item }) => (
           <TarjetaPacienteItem
             item={item}
@@ -47,7 +69,7 @@ export default function TarjetasScreen({ navigation }) {
             onDelete={handleDeleteCard}
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.card_id}
         numColumns={2}
         contentContainerStyle={
           cards.length === 0
@@ -55,7 +77,13 @@ export default function TarjetasScreen({ navigation }) {
             : { paddingBottom: 100 }
         }
         ListEmptyComponent={
-          <Text style={[styles.emptyText, themeStyles.subtext, { fontSize: getFontSize(16) }]}>
+          <Text
+            style={[
+              styles.emptyText,
+              themeStyles.subtext,
+              { fontSize: getFontSize(16) },
+            ]}
+          >
             No hay tarjetas todavía
           </Text>
         }
@@ -68,7 +96,9 @@ export default function TarjetasScreen({ navigation }) {
         ]}
         onPress={() => navigation.navigate("AddTarjetas")}
       >
-        <Text style={[styles.addButtonText, { fontSize: getFontSize(16) }]}>
+        <Text
+          style={[styles.addButtonText, { fontSize: getFontSize(16) }]}
+        >
           + Añadir Tarjeta
         </Text>
       </TouchableOpacity>

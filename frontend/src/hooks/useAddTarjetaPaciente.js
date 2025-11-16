@@ -1,6 +1,6 @@
 import { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { createCard } from "../api/cardService";
 
 export default function useAddTarjetaPaciente(navigation) {
   const [tipo, setTipo] = useState("");
@@ -12,26 +12,20 @@ export default function useAddTarjetaPaciente(navigation) {
       return;
     }
 
-    const nueva = {
-      id: Date.now().toString(),
-      tipo: tipo.trim(),
-      mensaje: mensaje.trim(),
-      date: new Date().toLocaleDateString(),
-      creadoPor: "paciente",
-    };
-
     try {
-      const stored = await AsyncStorage.getItem("memoryCards");
-      const prev = stored ? JSON.parse(stored) : [];
-      const updated = [nueva, ...prev];
-      await AsyncStorage.setItem("memoryCards", JSON.stringify(updated));
+      const nuevaTarjeta = {
+        card_type: tipo.trim(),
+        message: mensaje.trim(),
+      };
 
+      await createCard(nuevaTarjeta); // 🔹 envía al backend
       Alert.alert("✅ Tarjeta guardada", "La tarjeta se ha añadido correctamente.");
       navigation.goBack();
     } catch (error) {
       console.error("Error guardando tarjeta:", error);
+      Alert.alert("Error", "No se pudo guardar la tarjeta.");
     }
   };
 
-  return { tipo, setTipo, mensaje, ssetMensaje, guardarTarjeta };
+  return { tipo, setTipo, mensaje, setMensaje, guardarTarjeta };
 }

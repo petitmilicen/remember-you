@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Alert } from "react-native";
-import { createMedicalLog, getMedicalLogs } from "../api/medicalLogService";
+import {
+  createMedicalLog,
+  getMedicalLogs,
+  updateMedicalLog,
+  deleteMedicalLog,
+} from "../api/medicalLogService";
 
 function formatDate(date) {
   const days = [
@@ -40,7 +45,10 @@ export default function useBitacora() {
       }
     } catch (error) {
       console.error("Error al cargar las notas:", error);
-      Alert.alert("Error", "No se pudieron cargar las notas desde el servidor.");
+      Alert.alert(
+        "Error",
+        "No se pudieron cargar las notas desde el servidor."
+      );
     }
   };
 
@@ -49,27 +57,58 @@ export default function useBitacora() {
 
     try {
       if (editingNote) {
-        setNotes((prev) =>
-          prev.map((note) =>
-            note.id === editingNote.id ? { ...note, text } : note
-          )
-        );
+        console.log("✏️ Actualizando nota con ID:", editingNote.id);
+
+        // 🔸 Actualiza en el backend
+        const updated = await updateMedicalLog(editingNote.id, {
+          description: text,
+        });
+
+        if (updated) {
+          setNotes((prev) =>
+            prev.map((note) =>
+              note.id === editingNote.id
+                ? {
+                    ...note,
+                    text: updated.description,
+                    date: new Date(
+                      updated.updated_at || Date.now()
+                    ).toLocaleString("es-ES"),
+                  }
+                : note
+            )
+          );
+          console.log("✅ Nota actualizada en el backend:", updated);
+        }
+
         setEditingNote(null);
       } else {
-        const newLog = {
-          description: text, 
-        };
-
-        const createdLog = await createMedicalLog(newLog);
+        console.log("🟢 Creando nueva nota");
+        const created = await createMedicalLog({ description: text });
+        if (created) {
+          const formatted = {
+            id: created.medical_log_id,
+            text: created.description,
+            date: new Date(created.created_at).toLocaleString("es-ES"),
+          };
+          setNotes((prev) => [formatted, ...prev]);
+        }
       }
 
       setText("");
     } catch (error) {
-      console.error("Error al guardar la bitácora:", error);
-      Alert.alert("Error", "No se pudo guardar la entrada en la bitácora.");
+      console.error(
+        "Error al guardar/actualizar nota:",
+        error.response?.data || error.message
+      );
+      Alert.alert(
+        "Error",
+        "No se pudo guardar o actualizar la nota en el servidor."
+      );
     }
   };
 
+  // 🔹 Este solo carga el texto al campo de edición
   const handleEdit = (note) => {
     setText(note.text);
     setEditingNote(note);
@@ -81,16 +120,30 @@ export default function useBitacora() {
       {
         text: "Eliminar",
         style: "destructive",
-        onPress: () => {
-          setNotes((prev) => prev.filter((note) => note.id !== id));
-          if (editingNote?.id === id) {
-            setEditingNote(null);
-            setText("");
+        onPress: async () => {
+          try {
+            await deleteMedicalLog(id);
+            await loadNotes();
+            if (editingNote?.id === id) {
+              setEditingNote(null);
+              setText("");
+            }
+          } catch (error) {
+            console.error("Error al eliminar nota:", error);
+            Alert.alert("Error", "No se pudo eliminar la nota.");
           }
         },
       },
     ]);
   };
 
-  return { text, setText, notes, handleSave, handleEdit, handleDelete, loadNotes};
+  return {
+    text,
+    setText,
+    notes,
+    handleSave,
+    handleEdit,
+    handleDelete,
+    loadNotes,
+  };
 }

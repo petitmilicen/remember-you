@@ -1,4 +1,4 @@
-import api from './axiosInstance';
+import api from "./axiosInstance";
 
 export const getMedicalLogs = async () => {
   try {
@@ -28,16 +28,17 @@ export const createMedicalLog = async (data) => {
   }
 };
 
-export const updateMedicalLog = async (id, data) => {
+export const updateMedicalLog = async (id, payload) => {
   try {
-    const res = await api.put(`/api/medical log/${id}/`, data);
+    const res = await api.patch(`/api/medical-log/${id}/`, payload);
     return res.data;
   } catch (err) {
-    console.error("Error updating medical log:", err.response?.data || err);
+    console.error("Error al actualizar la nota:", err.response?.data || err);
+    throw err;
   }
 };
 
-export const deleteMedicalLog  = async (id) => {
+export const deleteMedicalLog = async (id) => {
   try {
     await api.delete(`/api/medical-log/${id}/`);
   } catch (err) {

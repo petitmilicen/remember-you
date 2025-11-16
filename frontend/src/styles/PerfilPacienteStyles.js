@@ -1,12 +1,11 @@
 import { StyleSheet, Dimensions } from "react-native";
 const { width } = Dimensions.get("window");
-const GUTTER = 20;
 
 export const styles = StyleSheet.create({
   container: { flex: 1 },
+
+  /* --- Encabezado --- */
   headerBleed: {
-    marginLeft: -GUTTER,
-    marginRight: -GUTTER,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     overflow: "hidden",
@@ -17,119 +16,153 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: GUTTER,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   headerTitle: { color: "#FFF", fontWeight: "bold" },
 
+  /* --- Perfil --- */
   profileCard: {
+    alignItems: "center",
     borderRadius: 20,
-    padding: 20,
-    elevation: 5,
-    alignItems: "center",
-    marginBottom: 20,
+    padding: 25,
+    elevation: 4,
+    marginBottom: 25,
   },
-  profileImageWrap: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  imageContainer: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
     overflow: "hidden",
-    marginBottom: 12,
     borderWidth: 2,
-    borderColor: "#6C63FF",
-    alignItems: "center",
+    borderColor: "#8A6DE9",
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#EEE8FF",
   },
-  profileImage: { width: "100%", height: "100%" },
-  profileName: { fontWeight: "bold", fontSize: 18, marginBottom: 4 },
-  profileSubtext: { color: "#888" },
+  profileImage: { width: "100%", height: "100%", resizeMode: "cover" },
+  overlayCamera: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "rgba(106,65,224,0.5)",
+    alignItems: "center",
+    paddingVertical: 6,
+  },
+  placeholder: { justifyContent: "center", alignItems: "center" },
+  placeholderText: { color: "#6F52D6", fontWeight: "500" },
+  deleteButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "#FF4E4E",
+    borderRadius: 20,
+    padding: 6,
+    elevation: 4,
+  },
+  profileName: { fontWeight: "bold", marginTop: 10 },
+  profileSubtitle: { marginBottom: 10 },
+  sectionTitle: { fontWeight: "bold", marginBottom: 10 },
+  infoSection: { marginBottom: 25 },
+  infoBox: {
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 10,
+    elevation: 2,
+  },
+  infoLabel: { fontWeight: "bold" },
+  emptyText: { textAlign: "center", marginTop: 12 },
 
+  /* --- Acordeón --- */
   groupHeader: {
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    elevation: 2,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 12,
-    borderRadius: 10,
-    elevation: 2,
   },
   groupTitle: {
-    fontWeight: "bold",
-    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 0.3,
   },
   groupBody: {
+    marginTop: 8,
+    borderRadius: 14,
     paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: "center",
+    paddingHorizontal: 10,
+    elevation: 3,
   },
-  groupBodyLight: { backgroundColor: "#F9F9F9" },
-  groupBodyDark: { backgroundColor: "#1E1E1E" },
+  groupBodyLight: { backgroundColor: "#FFFFFF" },
+  groupBodyDark: { backgroundColor: "#1E1E1E", borderWidth: 1, borderColor: "#2C2C2C" },
   hexRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-  },
-
-  hexTri: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 40,
-    borderRightWidth: 40,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-  },
-  hexMid: {
+    justifyContent: "space-evenly",
     alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderStyle: "solid",
   },
 
+  /* --- Partes del hexágono --- */
+  hexTri: { width: 0, height: 0 },
+  hexMid: {
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+  },
+
+  /* --- Modales --- */
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
+    alignItems: "center",
   },
-  modalCard: {
-    backgroundColor: "#FFF",
-    width: width * 0.8,
+  modalBox: {
     borderRadius: 16,
     padding: 20,
+    width: "80%",
     alignItems: "center",
   },
-  modalTitle: {
-    fontWeight: "bold",
-    fontSize: 18,
-    marginBottom: 20,
-    color: "#333",
+  modalQRBox: {
+    borderRadius: 20,
+    padding: 30,
+    width: "85%",
+    alignItems: "center",
+    elevation: 5,
   },
-  modalOption: {
+  modalTitle: { fontWeight: "bold", marginBottom: 15 },
+  modalButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    padding: 12,
     borderRadius: 10,
-    marginVertical: 6,
+    paddingVertical: 10,
+    marginVertical: 5,
   },
-  modalIcon: { marginRight: 10 },
-  modalOptionText: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "600",
-  },
+  modalButtonText: { color: "#FFF", marginLeft: 10, fontWeight: "bold" },
+  cancelButton: { marginTop: 10 },
+  cancelText: { color: "#8A6DE9", fontWeight: "bold" },
+  qrText: { marginTop: 10 },
 });
 
+/* 🌙 Estilos temáticos */
 export const lightStyles = StyleSheet.create({
-  container: { backgroundColor: "#F5F5F5" },
+  container: { backgroundColor: "#EDEDED" },
   card: { backgroundColor: "#FFF" },
-  text: { color: "#111" },
-  subtext: { color: "#555" },
+  text: { color: "#222" },
+  subtext: { color: "#666" },
+  sectionTitle: { color: "#8A6DE9" },
 });
 
 export const darkStyles = StyleSheet.create({
   container: { backgroundColor: "#121212" },
-  card: { backgroundColor: "#1E1E1E" },
+  card: { backgroundColor: "#1A1A1A", borderColor: "#2C2C2C", borderWidth: 1 },
   text: { color: "#FFF" },
   subtext: { color: "#AAA" },
+  sectionTitle: { color: "#A88BFF" },
 });

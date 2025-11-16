@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StatusBar } from "react-native";
+import { View, StatusBar, ActivityIndicator, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import usePacienteHome from "../../hooks/usePacienteHome";        
 import HeaderPaciente from "../../components/paciente/HeaderPaciente"; 
@@ -8,7 +8,7 @@ import { styles } from "../../styles/HomePacienteStyles";
 
 export default function HomeScreenPaciente({ navigation }) {
   const insets = useSafeAreaInsets();
-  const { fotoPerfil, nombrePaciente, theme, getFontSize } = usePacienteHome();
+  const { fotoPerfil, nombrePaciente, theme, getFontSize, loading } = usePacienteHome();
 
   return (
     <View
@@ -19,20 +19,29 @@ export default function HomeScreenPaciente({ navigation }) {
     >
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      <HeaderPaciente
-        navigation={navigation}
-        fotoPerfil={fotoPerfil}
-        nombrePaciente={nombrePaciente}
-        theme={theme}
-        getFontSize={getFontSize}
-        insets={insets}
-      />
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#FEBA17" />
+          <Text style={{ color: "#FEBA17", marginTop: 8 }}>Cargando perfil...</Text>
+        </View>
+      ) : (
+        <>
+          <HeaderPaciente
+            navigation={navigation}
+            fotoPerfil={fotoPerfil}
+            nombrePaciente={nombrePaciente}
+            theme={theme}
+            getFontSize={getFontSize}
+            insets={insets}
+          />
 
-      <GridMenuPaciente
-        navigation={navigation}
-        theme={theme}
-        getFontSize={getFontSize}
-      />
+          <GridMenuPaciente
+            navigation={navigation}
+            theme={theme}
+            getFontSize={getFontSize}
+          />
+        </>
+      )}
     </View>
   );
 }

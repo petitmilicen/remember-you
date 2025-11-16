@@ -33,20 +33,20 @@ export default function TarjetaPacienteItem({ item, themeStyles, settings, getFo
             {isCuidador ? "👨‍⚕️ Cuidador" : "🧠 Paciente"}
           </Text>
           <Text style={[styles.postItDate, themeStyles.subtext, { fontSize: getFontSize(12) }]}>
-            {item.date}
+            {item.created_at}
           </Text>
         </View>
 
         <Text style={[styles.postItMensaje, themeStyles.text, { fontSize: getFontSize(15) }]}>
-          {item.mensaje}
+          {item.message}
         </Text>
 
         <Text style={[styles.postItTipoSecundario, themeStyles.subtext, { fontSize: getFontSize(12) }]}>
-          {item.tipo}
+          {item.card_type}
         </Text>
       </View>
 
-      <TouchableOpacity style={[styles.deleteButton, themeStyles.card]} onPress={() => onDelete(item.id)}>
+      <TouchableOpacity style={[styles.deleteButton, themeStyles.card]} onPress={() => onDelete(item.card_id)}>
         <FontAwesome5 name="trash" size={14} color="red" />
       </TouchableOpacity>
     </TouchableOpacity>

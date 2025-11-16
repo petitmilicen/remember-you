@@ -7,8 +7,7 @@ class CardSerializer(serializers.ModelSerializer):
         fields = (
             'card_id',
             'card_type',
-            'user',
             'created_at',
             'message',
         )
-        read_only_fields =  ('card_id', 'created_at')
+        read_only_fields =  ('card_id','created_at', 'user')
