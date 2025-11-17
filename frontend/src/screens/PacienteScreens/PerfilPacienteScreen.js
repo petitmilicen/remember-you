@@ -52,7 +52,13 @@ export default function PerfilPacienteScreen({ navigation }) {
   const gradientColors = dark ? ["#5B3AB4", "#7D5FE5"] : ["#8A6DE9", "#A88BFF"];
 
   return (
-    <View style={[styles.container, themeStyles.container]}>
+    <View
+      style={[
+        styles.container,
+        themeStyles.container,
+        { paddingBottom: insets.bottom },
+      ]}
+    >
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -75,7 +81,10 @@ export default function PerfilPacienteScreen({ navigation }) {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: insets.bottom + 20,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* PERFIL */}
@@ -247,7 +256,7 @@ export default function PerfilPacienteScreen({ navigation }) {
           {[
             { key: "Memorice", title: "Memorice", data: groups[0].data },
             { key: "Puzzle", title: "Puzzle", data: groups[1].data },
-            { key: "Lectura", title: "Lectura Guiada", data: groups[2].data },
+            { key: "Sudoku", title: "Sudoku", data: groups[2].data },
             { key: "Camino", title: "Camino Correcto", data: groups[3].data },
           ].map((g) => (
             <GroupAccordion
@@ -264,14 +273,41 @@ export default function PerfilPacienteScreen({ navigation }) {
         </View>
       </ScrollView>
 
-      <Modal transparent visible={modalQR}></Modal>
+      {modalQR && (
+        <Modal transparent visible={modalQR} animationType="fade">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.6)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{ backgroundColor: "#FFF", padding: 20, borderRadius: 16 }}
+            >
+              <QRCode value={`ID:${paciente.ID}`} size={220} />
+              <TouchableOpacity
+                onPress={() => setModalQR(false)}
+                style={{ marginTop: 20, alignSelf: "center" }}
+              >
+                <Text style={{ color: "#8A6DE9", fontWeight: "bold" }}>
+                  Cerrar
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
 
-      <ModalSelectorImagen
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSelectCamera={() => pickImage("camera")}
-        onSelectGallery={() => pickImage("gallery")}
-      />
+<ModalSelectorImagen
+  visible={modalVisible}
+  onClose={() => setModalVisible(false)}
+  onSelectCamera={() => pickImage("camera")}
+  onSelectGallery={() => pickImage("gallery")}
+/>
+
+
     </View>
   );
 }

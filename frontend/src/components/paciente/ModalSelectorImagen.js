@@ -1,36 +1,87 @@
-import React, { memo } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import Hexagon from "./Hexagon";
-import { styles } from "../../styles/PerfilPacienteStyles";
+import React from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 
-export default memo(function GroupAccordion({ title, items = [], open = false, onToggle, dark }) {
-  const slots = Array.from({ length: 4 }).map((_, i) => items[i] || null);
+export default function ModalSelectorImagen({
+  visible,
+  onClose,
+  onSelectCamera,
+  onSelectGallery,
+}) {
+  if (!visible) return null;
 
   return (
-    <View style={{ marginBottom: 14 }}>
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={onToggle}
-        style={[styles.groupHeader, { backgroundColor: dark ? "#1A1A1A" : "#FFF" }]}
-      >
-        <Text style={[styles.groupTitle, { color: dark ? "#A88BFF" : "#8A6DE9" }]}>{title}</Text>
-        <Ionicons name={open ? "chevron-up" : "chevron-down"} size={20} color={dark ? "#DDD" : "#555"} />
-      </TouchableOpacity>
+    <Modal transparent visible={visible} animationType="fade">
+      <View style={styles.overlay}>
+        <View style={styles.box}>
 
-      {open && (
-        <View style={[styles.groupBody, dark ? styles.groupBodyDark : styles.groupBodyLight]}>
-          <View style={styles.hexRow}>
-            <Hexagon unlocked={!!slots[0]} label={slots[0]?.Nombre} dark={dark} size={78} />
-            <Hexagon unlocked={!!slots[1]} label={slots[1]?.Nombre} dark={dark} size={78} />
-          </View>
-          <View style={{ height: 10 }} />
-          <View style={styles.hexRow}>
-            <Hexagon unlocked={!!slots[2]} label={slots[2]?.Nombre} dark={dark} size={78} />
-            <Hexagon unlocked={!!slots[3]} label={slots[3]?.Nombre} dark={dark} size={78} />
-          </View>
+          <Text style={styles.title}>Seleccionar imagen</Text>
+
+          <TouchableOpacity style={styles.option} onPress={onSelectCamera}>
+            <FontAwesome5 name="camera" size={20} color="#6F52D6" />
+            <Text style={styles.optionText}>Tomar foto</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.option} onPress={onSelectGallery}>
+            <FontAwesome5 name="images" size={20} color="#6F52D6" />
+            <Text style={styles.optionText}>Elegir de la galería</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.cancel} onPress={onClose}>
+            <Text style={styles.cancelText}>Cancelar</Text>
+          </TouchableOpacity>
+
         </View>
-      )}
-    </View>
+      </View>
+    </Modal>
   );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  box: {
+    width: "80%",
+    backgroundColor: "#FFF",
+    borderRadius: 18,
+    padding: 20,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 15,
+    color: "#6F52D6",
+  },
+  option: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#EEE",
+  },
+  optionText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#333",
+  },
+  cancel: {
+    marginTop: 15,
+  },
+  cancelText: {
+    fontSize: 16,
+    color: "#6F52D6",
+    fontWeight: "bold",
+  },
 });

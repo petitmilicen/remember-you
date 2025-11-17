@@ -45,6 +45,76 @@ export default function usePerfilPaciente() {
             });
           }
         }
+
+        setLogros([
+          // MEMORICE
+          {
+            Juego: "memorice",
+            icon: require("../assets/images/Logros/memorice/1PrimerRecuerdo.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "memorice",
+            icon: require("../assets/images/Logros/memorice/2MemoriaRapida.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "memorice",
+            icon: require("../assets/images/Logros/memorice/3MaestrodelRecuerdo.png"),
+            unlocked: false,
+          },
+
+          // PUZZLE
+          {
+            Juego: "puzzle",
+            icon: require("../assets/images/Logros/rompecabezas/4PiezaensuLugar.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "puzzle",
+            icon: require("../assets/images/Logros/rompecabezas/5ConstrucciónPerfecta.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "puzzle",
+            icon: require("../assets/images/Logros/rompecabezas/6ArtesanodelPuzzle.png"),
+            unlocked: false,
+          },
+
+          // SUDOKU
+          {
+            Juego: "sudoku",
+            icon: require("../assets/images/Logros/sudoku/7PrimerNumero.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "sudoku",
+            icon: require("../assets/images/Logros/sudoku/8MenteLogica.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "sudoku",
+            icon: require("../assets/images/Logros/sudoku/9MaestrodelSudoku.png"),
+            unlocked: false,
+          },
+
+          // CAMINO CORRECTO
+          {
+            Juego: "camino",
+            icon: require("../assets/images/Logros/caminocorrecto/10PrimerCamino.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "camino",
+            icon: require("../assets/images/Logros/caminocorrecto/11SinPerderse.png"),
+            unlocked: false,
+          },
+          {
+            Juego: "camino",
+            icon: require("../assets/images/Logros/caminocorrecto/12ExploradorTotal.png"),
+            unlocked: false,
+          },
+        ]);
       } catch (err) {
         console.error("Error cargando datos del backend:", err);
       }
@@ -124,7 +194,7 @@ export default function usePerfilPaciente() {
   const groups = [
     { key: "Memorice", title: "Memorice", data: groupByGame("memorice") },
     { key: "Puzzle", title: "Puzzle", data: groupByGame("puzzle") },
-    { key: "Lectura", title: "Lectura Guiada", data: groupByGame("lectura") },
+    { key: "Sudoku", title: "Sudoku", data: groupByGame("sudoku") },
     { key: "Camino", title: "Camino Correcto", data: groupByGame("camino") },
   ];
 
