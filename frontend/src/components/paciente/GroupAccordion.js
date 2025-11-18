@@ -45,9 +45,18 @@ export default memo(function GroupAccordion({
           ]}
         >
           <View style={innerStyles.row}>
-            <AchievementBadge source={slots[0]?.icon} unlocked={!!slots[0]} />
-            <AchievementBadge source={slots[1]?.icon} unlocked={!!slots[1]} />
-            <AchievementBadge source={slots[2]?.icon} unlocked={!!slots[2]} />
+            <AchievementBadge
+              source={slots[0]?.icon}
+              unlocked={slots[0]?.unlocked ?? false}
+            />
+            <AchievementBadge
+              source={slots[1]?.icon}
+              unlocked={slots[1]?.unlocked ?? false}
+            />
+            <AchievementBadge
+              source={slots[2]?.icon}
+              unlocked={slots[2]?.unlocked ?? false}
+            />
           </View>
         </View>
       )}

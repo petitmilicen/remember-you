@@ -4,16 +4,18 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 export default function AchievementBadge({ source, unlocked }) {
   return (
-    <View style={styles.wrapper}>
+    <View style={styles.container}>
       <Image
         source={source}
-        style={[styles.image, !unlocked && styles.locked]}
+        style={[
+          styles.image,
+          !unlocked && styles.dimmed   // solo oscurece un poco
+        ]}
       />
 
-      {/* Candado si está bloqueado */}
       {!unlocked && (
         <View style={styles.lockOverlay}>
-          <FontAwesome5 name="lock" size={26} color="#FFF" />
+          <FontAwesome5 name="lock" size={30} color="#FFF" />
         </View>
       )}
     </View>
@@ -21,14 +23,14 @@ export default function AchievementBadge({ source, unlocked }) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  container: {
     width: 85,
     height: 85,
+    margin: 8,
     borderRadius: 50,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
-    margin: 8,
   },
 
   image: {
@@ -37,17 +39,20 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
 
-  locked: {
-    tintColor: "#808080",
-    opacity: 0.45,
+  // ⭐ Gris translúcido suave SIN perder textura del parche
+  dimmed: {
+    opacity: 0.55, // deja ver los colores, pero suavizados
   },
 
   lockOverlay: {
     position: "absolute",
-    justifyContent: "center",
-    alignItems: "center",
+    top: 0,
+    left: 0,
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0,0,0,0.18)", // ⭐ gris muy suave
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
   },
 });
