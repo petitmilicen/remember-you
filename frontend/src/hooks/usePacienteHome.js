@@ -6,18 +6,18 @@ import { getUserProfile } from "../api/userService";
 export default function usePacienteHome() {
   const [fotoPerfil, setFotoPerfil] = useState(null);
   const [nombrePaciente, setNombrePaciente] = useState("Paciente");
-  const [loading, setLoading] = useState(true); // 👈 nuevo estado
+  const [loading, setLoading] = useState(true);
   const { settings } = useSettings();
 
   useFocusEffect(
     useCallback(() => {
       const fetchPaciente = async () => {
         try {
-          setLoading(true); // 👈 inicia la carga
+          setLoading(true); 
           const user = await getUserProfile();
           if (user) {
-            setFotoPerfil(user.foto_perfil || null);
-            setNombrePaciente(user.nombre_completo || "Paciente");
+            setFotoPerfil(user.profile_picture || null);
+            setNombrePaciente(user.full_name || "Paciente");
           } else {
             setFotoPerfil(null);
             setNombrePaciente("Paciente");
@@ -27,7 +27,7 @@ export default function usePacienteHome() {
           setFotoPerfil(null);
           setNombrePaciente("Paciente");
         } finally {
-          setLoading(false); // 👈 finaliza la carga
+          setLoading(false);
         }
       };
 

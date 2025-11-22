@@ -7,21 +7,25 @@ class User(AbstractUser):
         CAREGIVER = 'Caregiver'
         PATIENT = 'Patient'
 
-    email = models.EmailField(unique=True)
-    user_type = models.CharField(
-        max_length=20,
-        choices=UserType.choices,
-        null=True
-    )    
-    phone_number = models.CharField(max_length=255, null=True)
-    patient = models.ForeignKey(
-    'self',
-    on_delete=models.SET_NULL,
-    null=True,
-    blank=True,
-    related_name='caregivers'
-    )
+    class GenderChoices(models.TextChoices):
+        MALE = 'Male'
+        FEMALE = 'Female'
 
+    class alzheimerLevelChoices(models.TextChoices):
+        NONE = 'Ninguno'
+        MILD = 'Leve'
+        MODERATE = 'Moderado'
+        SEVERE = 'Severo'
+
+    email = models.EmailField(unique=True)
+    user_type = models.CharField(max_length=20, choices=UserType.choices, null=True)    
+    phone_number = models.CharField(max_length=255, null=True)
+    patient = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='caregivers')
+    profile_picture = models.ImageField(upload_to="src/imgs/", null=True, blank=True)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=GenderChoices.choices, null=True, blank=True)
+    alzheimer_level = models.CharField(max_length=10, choices=alzheimerLevelChoices.choices, null=True, blank=True)
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

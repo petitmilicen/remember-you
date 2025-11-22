@@ -30,17 +30,17 @@ export default function usePerfilPaciente() {
           setPaciente({
             ID: data.id || "—",
             NombreCompleto:
-              data.username || data.email || "Paciente sin nombre",
-            Genero: data.genero || "—",
-            Edad: data.edad || "—",
+              data.full_name || "Paciente sin nombre",
+            Genero: data.gender || "—",
+            Edad: data.age || "—",
             ContactoEmergencia: data.phone_number || "No registrado",
-            NivelAlzheimer: data.nivel_alzheimer || "Desconocido",
-            FotoPerfil: data.foto_perfil || null,
+            NivelAlzheimer: data.alzheimer_level || "Desconocido",
+            FotoPerfil: data.profile_picture || null,
           });
 
-          if (data.cuidador_principal) {
+          if (data.main_caregiver) {
             setCuidador({
-              Nombre: data.cuidador_principal.nombre || "Sin asignar",
+              Nombre: data.main_caregiver.full_name || "Sin asignar",
               Rol: "Cuidador principal",
             });
           }

@@ -2,14 +2,8 @@ from rest_framework import serializers
 from ..user.models import User
 
 class UserDataSerializer(serializers.ModelSerializer):
-    # Campos adicionales (no necesariamente en el modelo)
-    nombre_completo = serializers.SerializerMethodField()
-    genero = serializers.SerializerMethodField()
-    edad = serializers.SerializerMethodField()
-    contacto_emergencia = serializers.SerializerMethodField()
-    nivel_alzheimer = serializers.SerializerMethodField()
-    foto_perfil = serializers.SerializerMethodField()
-    cuidador_principal = serializers.SerializerMethodField()
+    full_name = serializers.SerializerMethodField()
+    main_caregiver = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -19,39 +13,25 @@ class UserDataSerializer(serializers.ModelSerializer):
             'username',
             'phone_number',
             'user_type',
-            'nombre_completo',
-            'genero',
-            'edad',
-            'contacto_emergencia',
-            'nivel_alzheimer',
-            'foto_perfil',
-            'cuidador_principal',
+            'full_name',
+            'gender',
+            'age',
+            'alzheimer_level',
+            'main_caregiver',
+            'profile_picture',
         )
 
-    def get_nombre_completo(self, obj):
-        return getattr(obj, "username", None) or getattr(obj, "email", "Sin nombre")
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or "Sin nombre"
 
-    def get_genero(self, obj):
-        return getattr(obj, "genero", "—")
-
-    def get_edad(self, obj):
-        return getattr(obj, "edad", "—")
-
-    def get_contacto_emergencia(self, obj):
-        return getattr(obj, "phone_number", "No registrado")
-
-    def get_nivel_alzheimer(self, obj):
-        return getattr(obj, "nivel_alzheimer", "Desconocido")
-
-    def get_foto_perfil(self, obj):
-        # Si tu modelo tiene un campo ImageField llamado "foto"
-        if hasattr(obj, "foto") and obj.foto:
-            return obj.foto.url
-        return None
-
-    def get_cuidador_principal(self, obj):
-        # Si el usuario tiene un cuidador asignado mediante una relación
-        cuidador = getattr(obj, "cuidador_principal", None)
-        if cuidador:
-            return {"nombre": getattr(cuidador, "username", "Sin asignar")}
+    def get_main_caregiver(self, obj):
+        if obj.user_type == User.UserType.PATIENT:
+            caregiver = obj.caregivers.first()
+            if caregiver:
+                return {
+                    "id": caregiver.id,
+                    "full_name": f"{caregiver.first_name} {caregiver.last_name}".strip() or "Sin nombre",
+                    "email": caregiver.email,
+                    "phone_number": caregiver.phone_number or "No registrado",
+                }
         return None
