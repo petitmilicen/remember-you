@@ -4,9 +4,12 @@ from rest_framework import serializers
 from .models import User
 
 class UserCreateSerializer(BaseUserCreateSerializer):
-
-    phone_number = serializers.CharField(required=True)
-    user_type = serializers.ChoiceField(choices=User.UserType,required=True)
+    phone_number = serializers.CharField(required=False)
+    user_type = serializers.ChoiceField(choices=User.UserType.choices, required=True)
+    age = serializers.IntegerField(required=False)
+    gender = serializers.ChoiceField(choices=User.GenderChoices.choices, required=False)
+    alzheimer_level = serializers.ChoiceField(choices=User.alzheimerLevelChoices.choices, required=False)
+    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, allow_null=True)
 
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
@@ -17,6 +20,12 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             'password',
             'phone_number',
             'user_type',
+            'age',
+            'gender',
+            'alzheimer_level',
+            'patient',
+            'first_name',
+            'last_name',
         )
         read_only_fields = ('id',)
 

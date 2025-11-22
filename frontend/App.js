@@ -31,6 +31,7 @@ import CitasMedicasScreen from "./src/screens/CuidadorScreens/CitasMedicasScreen
 import RedApoyoScreen from "./src/screens/CuidadorScreens/RedApoyoScreen";
 import { SettingsProvider } from './src/context/SettingsContext'; 
 import { AuthProvider } from "./src/auth/AuthContext";
+import RootNavigator from "./src/screens/RootNavigator";
 
 const Stack = createStackNavigator();
 

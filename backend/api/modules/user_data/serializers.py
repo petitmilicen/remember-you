@@ -17,8 +17,8 @@ class UserDataSerializer(serializers.ModelSerializer):
             'gender',
             'age',
             'alzheimer_level',
-            'main_caregiver',
             'profile_picture',
+            'main_caregiver',
         )
 
     def get_full_name(self, obj):

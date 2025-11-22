@@ -8,8 +8,8 @@ class User(AbstractUser):
         PATIENT = 'Patient'
 
     class GenderChoices(models.TextChoices):
-        MALE = 'Male'
-        FEMALE = 'Female'
+        MALE = 'Hombre'
+        FEMALE = 'Mujer'
 
     class alzheimerLevelChoices(models.TextChoices):
         NONE = 'Ninguno'
