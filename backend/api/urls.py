@@ -7,4 +7,6 @@ urlpatterns = [
     #path('safe-zone/', include('api.modules.safe_zone.urls')),
     path('card/', include('api.modules.card.urls')),
     path('user-data/', include('api.modules.user_data.urls')),
+    path('achievement/', include('api.modules.achievements.urls')),
+    path('activities/', include('api.modules.activities.urls')),
 ]
