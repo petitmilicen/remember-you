@@ -1,16 +1,34 @@
 import { useState } from "react";
 import { Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { login, register } from "../auth/authService";
 
 export default function useRegisterPaciente(navigation) {
-  const [nombre, setNombre] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [edad, setEdad] = useState("");
   const [contacto, setContacto] = useState("");
-  const [nivel, setNivel] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [gender, setGender] = useState("");
+  const [alzheimerLevel, setAlzheimerLevel] = useState("");
 
-  const handleRegister = async () => {
-    if (!nombre.trim() || !edad.trim() || !contacto.trim() || !nivel.trim()) {
+  const [loading, setLoading] = useState(false);
+  const base = `${firstName}${lastName}`.toLowerCase().replace(/\s+/g, "");
+  const username = `${base}_${Math.floor(Math.random() * 10000)}`;
+
+  const handleRegister = async (extraFields = {}) => {
+    const { gender, alzheimerLevel } = extraFields;
+
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !edad.trim() ||
+      !contacto.trim() ||
+      !gender?.trim() ||
+      !alzheimerLevel?.trim()
+    ) {
       Alert.alert("Campos incompletos", "Por favor completa todos los campos.");
       return;
     }
@@ -18,39 +36,51 @@ export default function useRegisterPaciente(navigation) {
     try {
       setLoading(true);
 
-      const newPaciente = {
-        id: Date.now().toString(),
-        nombre,
-        edad,
-        contacto,
-        nivel,
-        metodo: "Reconocimiento Facial",
+      const payload = {
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: contacto,
+        user_type: "Patient",
+        age: Number(edad),
+        gender,
+        alzheimer_level: alzheimerLevel,
+        username: username, 
       };
 
-      const stored = await AsyncStorage.getItem("pacientes");
-      const list = stored ? JSON.parse(stored) : [];
-      list.push(newPaciente);
-      await AsyncStorage.setItem("pacientes", JSON.stringify(list));
+      console.log("Payload registro:", payload);
+
+      await register(payload);
+      await login(email, password);
+      navigation.navigate("Home");
 
       Alert.alert("Registro exitoso", "Tu cuenta ha sido creada correctamente.");
-      navigation.replace("LoginPaciente");
+
     } catch (error) {
-      console.error("Error al registrar:", error);
-      Alert.alert("Error", "No se pudo completar el registro.");
+      console.log("Error al registrar:", error.response?.data || error);
+
+      Alert.alert(
+        "Error",
+        error.response?.data?.email?.[0] ||
+          error.response?.data?.password?.[0] ||
+          error.response?.data?.detail ||
+          "No se pudo completar el registro."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return {
-    nombre,
-    setNombre,
-    edad,
-    setEdad,
-    contacto,
-    setContacto,
-    nivel,
-    setNivel,
+    firstName, setFirstName,
+    lastName, setLastName,
+    email, setEmail,
+    edad, setEdad,
+    contacto, setContacto,
+    password, setPassword,
+    gender, setGender,
+    alzheimerLevel, setAlzheimerLevel,
     loading,
     handleRegister,
   };

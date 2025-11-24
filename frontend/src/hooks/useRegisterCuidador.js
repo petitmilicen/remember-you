@@ -1,48 +1,87 @@
 import { useState } from "react";
 import { Alert } from "react-native";
+import { login, register } from "../auth/authService";
 
-export default function useRegisterCuidador(navigation) {
-  const [nombre, setNombre] = useState("");
-  const [relacion, setRelacion] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [correo, setCorreo] = useState("");
+export default function useRegisterPaciente(navigation) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [edad, setEdad] = useState("");
+  const [contacto, setContacto] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [gender, setGender] = useState("");
+  const [alzheimerLevel, setAlzheimerLevel] = useState("");
 
-  const handleRegister = () => {
-    if (!nombre || !relacion || !telefono || !correo || !password || !confirmPassword) {
+  const [loading, setLoading] = useState(false);
+  const base = `${firstName}${lastName}`.toLowerCase().replace(/\s+/g, "");
+  const username = `${base}_${Math.floor(Math.random() * 10000)}`;
+
+  const handleRegister = async (extraFields = {}) => {
+    const { gender, alzheimerLevel } = extraFields;
+
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !edad.trim() ||
+      !contacto.trim() ||
+      !gender?.trim() ||
+      !alzheimerLevel?.trim()
+    ) {
       Alert.alert("Campos incompletos", "Por favor completa todos los campos.");
       return;
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Las contraseñas no coinciden.");
-      return;
-    }
+    try {
+      setLoading(true);
 
-    setLoading(true);
-    setTimeout(() => {
+      const payload = {
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: contacto,
+        user_type: "Caregiver",
+        age: Number(edad),
+        gender,
+        alzheimer_level: alzheimerLevel,
+        username: username, 
+      };
+
+      console.log("Payload registro:", payload);
+
+      await register(payload);
+      await login(email, password);
+      navigation.navigate("Home");
+
+      Alert.alert("Registro exitoso", "Tu cuenta ha sido creada correctamente.");
+
+    } catch (error) {
+      console.log("Error al registrar:", error.response?.data || error);
+
+      Alert.alert(
+        "Error",
+        error.response?.data?.email?.[0] ||
+          error.response?.data?.password?.[0] ||
+          error.response?.data?.detail ||
+          "No se pudo completar el registro."
+      );
+    } finally {
       setLoading(false);
-      Alert.alert("Registro exitoso", `Bienvenido, ${nombre}.`);
-      navigation.navigate("LoginCuidador");
-    }, 1500);
+    }
   };
 
   return {
-    nombre,
-    setNombre,
-    relacion,
-    setRelacion,
-    telefono,
-    setTelefono,
-    correo,
-    setCorreo,
-    password,
-    setPassword,
-    confirmPassword,
-    setConfirmPassword,
-    handleRegister,
+    firstName, setFirstName,
+    lastName, setLastName,
+    email, setEmail,
+    edad, setEdad,
+    contacto, setContacto,
+    password, setPassword,
+    gender, setGender,
+    alzheimerLevel, setAlzheimerLevel,
     loading,
+    handleRegister,
   };
 }

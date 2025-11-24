@@ -1,6 +1,16 @@
 import api from '../api/axiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export const register = async (userData) => {
+  try {
+    const response = await api.post("auth/users/", userData);
+    return response.data;
+  } catch (error) {
+    console.error("Error en register:", error.response?.data || error);
+    throw error;
+  }
+};
+
 export const login = async (email, password) => {
   const response = await api.post('auth/jwt/create/', { email, password });
 

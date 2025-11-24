@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useRegisterPaciente from "../../hooks/useRegisterPaciente";
 import { styles } from "../../styles/RegisterPacienteStyles";
@@ -18,18 +19,45 @@ import { styles } from "../../styles/RegisterPacienteStyles";
 export default function RegisterPacienteScreen({ navigation }) {
   const insets = useSafeAreaInsets();
 
+  // Opciones del backend
+  const genderOptions = [
+    { label: "Hombre", value: "Hombre" },
+    { label: "Mujer", value: "Mujer" },
+  ];
+
+  const alzheimerOptions = [
+    { label: "Ninguno", value: "Ninguno" },
+    { label: "Leve", value: "Leve" },
+    { label: "Moderado", value: "Moderado" },
+    { label: "Severo", value: "Severo" },
+  ];
+
+  const [gender, setGender] = useState("");
+  const [alzheimerLevel, setAlzheimerLevel] = useState("");
+
   const {
-    nombre,
-    setNombre,
     edad,
     setEdad,
     contacto,
     setContacto,
-    nivel,
-    setNivel,
+    password,
+    setPassword,
     loading,
-    handleRegister,
+    handleRegister: registerHook,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
+    email,
+    setEmail
   } = useRegisterPaciente(navigation);
+
+  const handleRegister = () => {
+    registerHook({
+      gender,
+      alzheimerLevel,
+    });
+  };
 
   return (
     <KeyboardAvoidingView
@@ -38,29 +66,43 @@ export default function RegisterPacienteScreen({ navigation }) {
     >
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Logo centrado */}
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         <Image
           source={require("../../assets/images/Logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
 
-        {/* Tarjeta de registro */}
         <View style={styles.formCard}>
-          <Text style={styles.welcomeText}>
-            Bienvenido, por favor ingresa tus datos.
-          </Text>
+          <Text style={styles.welcomeText}>Bienvenido, por favor ingresa tus datos.</Text>
 
+          {/* ➕ first_name */}
           <TextInput
             style={styles.input}
-            placeholder="Nombre completo"
+            placeholder="Nombre"
             placeholderTextColor="#777"
-            value={nombre}
-            onChangeText={setNombre}
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+
+          {/* ➕ last_name */}
+          <TextInput
+            style={styles.input}
+            placeholder="Apellido"
+            placeholderTextColor="#777"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+
+          {/* ➕ email */}
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            placeholderTextColor="#777"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
           />
 
           <TextInput
@@ -74,24 +116,47 @@ export default function RegisterPacienteScreen({ navigation }) {
 
           <TextInput
             style={styles.input}
-            placeholder="Contacto de emergencia"
+            placeholder="Contacto"
             placeholderTextColor="#777"
             keyboardType="phone-pad"
             value={contacto}
             onChangeText={setContacto}
           />
 
+          {/* Picker del género */}
+          <Text style={styles.label}>Género</Text>
+          <Picker
+            style={styles.picker}
+            selectedValue={gender}
+            onValueChange={setGender}
+          >
+            <Picker.Item label="Seleccione género..." value="" />
+            {genderOptions.map(opt => (
+              <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+            ))}
+          </Picker>
+
+          {/* Picker nivel Alzheimer */}
+          <Text style={styles.label}>Nivel de Alzheimer</Text>
+          <Picker
+            style={styles.picker}
+            selectedValue={alzheimerLevel}
+            onValueChange={setAlzheimerLevel}
+          >
+            <Picker.Item label="Seleccione nivel..." value="" />
+            {alzheimerOptions.map(opt => (
+              <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+            ))}
+          </Picker>
+
           <TextInput
             style={styles.input}
-            placeholder="Nivel de Alzheimer"
+            placeholder="Contraseña"
             placeholderTextColor="#777"
-            value={nivel}
-            onChangeText={setNivel}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
           />
-
-          <TouchableOpacity style={styles.faceButton}>
-            <Text style={{ color: "#000", fontWeight: "500" }}>Escanear rostro</Text>
-          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.button}
