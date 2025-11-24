@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../../auth/AuthContext';
 import {
   View,
   Text,
@@ -11,13 +12,25 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import useLoginCuidador from "../../hooks/useLoginCuidador";
 import { styles } from "../../styles/LoginCuidadorStyles";
 
 export default function LoginCuidadorScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const { email, setEmail, password, setPassword, loading, handleLogin } =
-    useLoginCuidador(navigation);
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+const handleLogin = async () => {
+  try {
+    await login(email, password);
+    navigation.navigate("HomeCuidador");
+  } catch (err) {
+
+    setError('Correo o contraseña incorrectos');
+  }
+};
 
   return (
     <KeyboardAvoidingView
@@ -56,8 +69,7 @@ export default function LoginCuidadorScreen({ navigation }) {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("HomeCuidador")}
-          //onPress={handleLogin}
+          onPress={handleLogin}
           disabled={loading}
         >
           {loading ? (

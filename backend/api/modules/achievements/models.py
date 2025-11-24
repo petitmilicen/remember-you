@@ -2,7 +2,6 @@ import uuid
 from django.db import models
 from ..user.models import User  
 
-
 class Achievement(models.Model):
 
     ACHIEVEMENT_GAMES = [
@@ -22,3 +21,4 @@ class Achievement(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.user.username}"
+

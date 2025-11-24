@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
-import { getUserProfile } from "../api/userService"; // ✅ importamos el servicio del backend
+import { getUserProfile } from "../api/userService";
 
 export default function usePerfilPaciente() {
   const [paciente, setPaciente] = useState({
