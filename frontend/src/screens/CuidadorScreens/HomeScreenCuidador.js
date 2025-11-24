@@ -1,3 +1,4 @@
+// src/screens/CuidadorScreens/HomeScreenCuidador.js
 import React from "react";
 import {
   View,
@@ -13,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import usePaciente from "../../hooks/usePaciente.js";
 import useZonaSegura from "../../hooks/useZonaSegura.js";
 import useTarjetas from "../../hooks/useTarjetas.js";
+import usePacienteHome from "../../hooks/usePacienteHome.js";
 import PacientePanel from "../../components/cuidador/PacientePanel.js";
 import ZonaSeguraPanel from "../../components/cuidador/ZonaSeguraPanel.js";
 import AlertasPanel from "../../components/cuidador/AlertasPanel.js";
@@ -25,10 +27,10 @@ import { ACCENT } from "../../utils/constants.js";
 const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
 export default function HomeScreenCuidador({ navigation }) {
-  const cuidador = { nombre: "María Pérez", rol: "Cuidadora principal" };
-  const { paciente } = usePaciente(); 
-  const zona = useZonaSegura(paciente); 
+  const { paciente } = usePaciente();
+  const zona = useZonaSegura(paciente);
   const tarjetas = useTarjetas(); 
+  const { fotoPerfil, nombrePaciente, theme, getFontSize, loading } = usePacienteHome();
 
   const cerrarSesion = async () => {
     Alert.alert("Cerrar sesión", "¿Deseas cerrar tu sesión actual?", [
@@ -52,8 +54,8 @@ export default function HomeScreenCuidador({ navigation }) {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
-          <Text style={styles.headerName}>{cuidador.nombre}</Text>
-          <Text style={styles.headerRole}>{cuidador.rol}</Text>
+          <Text style={styles.headerName}>{nombrePaciente}</Text>
+          <Text style={styles.headerRole}>Cuidador</Text>
         </View>
 
         <PacientePanel paciente={paciente} navigation={navigation} />
@@ -94,6 +96,7 @@ export default function HomeScreenCuidador({ navigation }) {
         onSave={tarjetas.agregarTarjeta}
         accentColor={ACCENT}
       />
+      
     </View>
   );
 }

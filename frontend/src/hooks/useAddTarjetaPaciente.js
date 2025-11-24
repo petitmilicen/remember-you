@@ -18,8 +18,8 @@ export default function useAddTarjetaPaciente(navigation) {
         message: mensaje.trim(),
       };
 
-      await createCard(nuevaTarjeta); // 🔹 envía al backend
-      Alert.alert("✅ Tarjeta guardada", "La tarjeta se ha añadido correctamente.");
+      await createCard(nuevaTarjeta); 
+      Alert.alert("Tarjeta guardada", "La tarjeta se ha añadido correctamente.");
       navigation.goBack();
     } catch (error) {
       console.error("Error guardando tarjeta:", error);

@@ -2,6 +2,7 @@ from rest_framework import generics
 from .models import Card
 from .serializers import CardSerializer
 from rest_framework.permissions import IsAuthenticated
+from .models import User
 
 class CardListCreateView(generics.ListCreateAPIView):
     queryset = Card.objects.all()
@@ -12,7 +13,18 @@ class CardListCreateView(generics.ListCreateAPIView):
         return Card.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user = self.request.user
+
+        if user.user_type == User.UserType.PATIENT:
+            serializer.save(user=user)
+            return
+
+        if user.user_type == User.UserType.CAREGIVER:
+            serializer.save(user=user.patient)
+            return
+
+        serializer.save(user=user)
+
 
 class CardRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Card.objects.all()

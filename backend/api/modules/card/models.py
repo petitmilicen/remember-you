@@ -6,6 +6,7 @@ class Card(models.Model):
     class CardType(models.TextChoices):
         MESSAGE = 'Message'
         OTHER = 'Other'
+        EMERGENCY = 'Emergency'
 
     card_type = models.CharField(
         max_length=20,
