@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import {
+  getCaregiverLogs,
+  createCaregiverLog,
+  updateCaregiverLog,
+  deleteCaregiverLog,
+} from "../api/caregiverLogService";
 
 export default function useBitacoraCuidador() {
   const [bitacora, setBitacora] = useState([]);
@@ -8,44 +13,66 @@ export default function useBitacoraCuidador() {
   const [nuevoEvento, setNuevoEvento] = useState("");
   const [categoria, setCategoria] = useState("");
   const [editando, setEditando] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const stored = await AsyncStorage.getItem("bitacoraCuidador");
-        if (stored) setBitacora(JSON.parse(stored));
-      } catch (error) {
-        console.error("Error cargando bitácora:", error);
-      }
-    })();
+    cargarBitacora();
   }, []);
 
-  const guardarBitacora = async (datos) => {
+  const cargarBitacora = async () => {
     try {
-      await AsyncStorage.setItem("bitacoraCuidador", JSON.stringify(datos));
-      setBitacora(datos);
+      setLoading(true);
+      const data = await getCaregiverLogs();
+      if (data) {
+        const transformedData = data.map((item) => ({
+          id: item.log_id,
+          categoria: item.category,
+          descripcion: item.description,
+          fecha: new Date(item.created_at).toLocaleDateString(),
+          hora: new Date(item.created_at).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          created_at: item.created_at,
+        }));
+        setBitacora(transformedData);
+      }
     } catch (error) {
-      console.error("Error guardando bitácora:", error);
+      console.error("Error cargando bitácora:", error);
+      Alert.alert("Error", "No se pudo cargar la bitácora");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const agregarRegistro = () => {
+  const agregarRegistro = async () => {
     if (!categoria.trim() || !nuevoEvento.trim()) {
-      Alert.alert("Campos vacíos", "Por favor completa la categoría y descripción.");
+      Alert.alert(
+        "Campos vacíos",
+        "Por favor completa la categoría y descripción."
+      );
       return;
     }
 
-    const nuevo = {
-      id: Date.now().toString(),
-      categoria,
-      descripcion: nuevoEvento,
-      fecha: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
+    try {
+      setLoading(true);
+      const payload = {
+        category: categoria,
+        description: nuevoEvento,
+      };
 
-    const actualizada = [nuevo, ...bitacora];
-    guardarBitacora(actualizada);
-    cerrarModal();
+      const nuevoRegistro = await createCaregiverLog(payload);
+
+      if (nuevoRegistro) {
+        await cargarBitacora();
+        cerrarModal();
+      }
+    } catch (error) {
+      console.error("Error agregando registro:", error);
+      Alert.alert("Error", "No se pudo crear el registro");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const editarRegistro = (item) => {
@@ -55,12 +82,31 @@ export default function useBitacoraCuidador() {
     setModalVisible(true);
   };
 
-  const guardarEdicion = () => {
-    const actualizada = bitacora.map((item) =>
-      item.id === editando.id ? { ...item, categoria, descripcion: nuevoEvento } : item
-    );
-    guardarBitacora(actualizada);
-    cerrarModal();
+  const guardarEdicion = async () => {
+    if (!categoria.trim() || !nuevoEvento.trim()) {
+      Alert.alert(
+        "Campos vacíos",
+        "Por favor completa la categoría y descripción."
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const payload = {
+        category: categoria,
+        description: nuevoEvento,
+      };
+
+      await updateCaregiverLog(editando.id, payload);
+      await cargarBitacora();
+      cerrarModal();
+    } catch (error) {
+      console.error("Error editando registro:", error);
+      Alert.alert("Error", "No se pudo actualizar el registro");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const eliminarRegistro = (id) => {
@@ -69,9 +115,17 @@ export default function useBitacoraCuidador() {
       {
         text: "Eliminar",
         style: "destructive",
-        onPress: () => {
-          const actualizada = bitacora.filter((item) => item.id !== id);
-          guardarBitacora(actualizada);
+        onPress: async () => {
+          try {
+            setLoading(true);
+            await deleteCaregiverLog(id);
+            await cargarBitacora();
+          } catch (error) {
+            console.error("Error eliminando registro:", error);
+            Alert.alert("Error", "No se pudo eliminar el registro");
+          } finally {
+            setLoading(false);
+          }
         },
       },
     ]);
@@ -84,8 +138,19 @@ export default function useBitacoraCuidador() {
         text: "Vaciar",
         style: "destructive",
         onPress: async () => {
-          await AsyncStorage.removeItem("bitacoraCuidador");
-          setBitacora([]);
+          try {
+            setLoading(true);
+            const promesas = bitacora.map((item) =>
+              deleteCaregiverLog(item.id)
+            );
+            await Promise.all(promesas);
+            await cargarBitacora();
+          } catch (error) {
+            console.error("Error limpiando bitácora:", error);
+            Alert.alert("Error", "No se pudo vaciar la bitácora");
+          } finally {
+            setLoading(false);
+          }
         },
       },
     ]);
@@ -113,5 +178,7 @@ export default function useBitacoraCuidador() {
     eliminarRegistro,
     limpiarBitacora,
     cerrarModal,
+    loading,
+    refrescar: cargarBitacora,
   };
 }

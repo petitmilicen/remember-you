@@ -9,4 +9,5 @@ urlpatterns = [
     path('user-data/', include('api.modules.user_data.urls')),
     path('achievement/', include('api.modules.achievements.urls')),
     path('activities/', include('api.modules.activities.urls')),
+    path('caregiver-log/', include('api.modules.caregiver_log.urls')),
 ]
