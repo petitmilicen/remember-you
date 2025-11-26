@@ -3,17 +3,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { refreshAccessToken } from '../auth/authService';
 
 const api = axios.create({
-    baseURL: 'http://192.168.1.84:8000/',
-    timeout: 5000,
-    headers: {"Content-Type": "application/json"}
+  baseURL: 'http://192.168.0.101:8000/',
+  timeout: 5000,
+  headers: { "Content-Type": "application/json" }
 });
 
 api.interceptors.request.use(async (config) => {
-    const accessToken = await AsyncStorage.getItem('access');
-    if (accessToken) {
-        config.headers.Authorization = `JWT ${accessToken}`;
-    }
-    return config;
+  const accessToken = await AsyncStorage.getItem('access');
+  if (accessToken) {
+    config.headers.Authorization = `JWT ${accessToken}`;
+  }
+  return config;
 });
 
 api.interceptors.response.use(

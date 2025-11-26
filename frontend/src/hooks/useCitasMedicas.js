@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import {
+  getMedicalAppointments,
+  createMedicalAppointment,
+  updateMedicalAppointment,
+  deleteMedicalAppointment,
+} from "../api/medicalAppointmentService";
 
 export default function useCitasMedicas() {
   const [citas, setCitas] = useState([]);
@@ -9,45 +14,74 @@ export default function useCitasMedicas() {
   const [doctor, setDoctor] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState(new Date());
+  const [status, setStatus] = useState("Scheduled");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const stored = await AsyncStorage.getItem("citasMedicas");
-        if (stored) setCitas(JSON.parse(stored));
-      } catch (error) {
-        console.error("Error cargando citas:", error);
-      }
-    })();
+    cargarCitas();
   }, []);
 
-  const guardarCitas = async (data) => {
+  const cargarCitas = async () => {
     try {
-      await AsyncStorage.setItem("citasMedicas", JSON.stringify(data));
-      setCitas(data);
+      setLoading(true);
+      const data = await getMedicalAppointments();
+      if (data) {
+        const transformedData = data.map((item) => {
+          const appointmentDate = new Date(item.date);
+          return {
+            id: item.medical_appointment_id,
+            doctor: item.doctor,
+            descripcion: item.reason || "",
+            fecha: appointmentDate.toLocaleDateString(),
+            hora: appointmentDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            timestamp: appointmentDate.getTime(),
+            status: item.status_type || "Scheduled",
+          };
+        });
+        const sorted = transformedData.sort((a, b) => a.timestamp - b.timestamp);
+        setCitas(sorted);
+      }
     } catch (error) {
-      console.error("Error guardando citas:", error);
+      console.error("Error cargando citas:", error);
+      Alert.alert("Error", "No se pudo cargar las citas médicas");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const agregarCita = () => {
+  const agregarCita = async () => {
     if (!doctor.trim() || !descripcion.trim()) {
       Alert.alert("Campos vacíos", "Por favor completa todos los campos.");
       return;
     }
 
-    const nueva = {
-      id: Date.now().toString(),
-      doctor,
-      descripcion,
-      fecha: fecha.toLocaleDateString(),
-      hora: fecha.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      timestamp: fecha.getTime(),
-    };
+    try {
+      setLoading(true);
+      const payload = {
+        doctor: doctor,
+        date: fecha.toISOString(),
+        reason: descripcion,
+        status_type: status,
+      };
 
-    const actualizadas = [...citas, nueva].sort((a, b) => a.timestamp - b.timestamp);
-    guardarCitas(actualizadas);
-    cerrarModal();
+      console.log("Creando cita con payload:", payload);
+      const nuevaCita = await createMedicalAppointment(payload);
+      console.log("Cita creada exitosamente:", nuevaCita);
+
+      if (nuevaCita) {
+        await cargarCitas();
+        cerrarModal();
+      }
+    } catch (error) {
+      console.error("Error agregando cita:", error);
+      console.error("Detalles del error:", error.response?.data);
+      Alert.alert("Error", `No se pudo crear la cita médica: ${error.response?.data?.detail || error.message || "Error desconocido"}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const editarCita = (item) => {
@@ -55,27 +89,34 @@ export default function useCitasMedicas() {
     setDoctor(item.doctor);
     setDescripcion(item.descripcion);
     setFecha(new Date(item.timestamp));
+    setStatus(item.status || "Scheduled");
     setModalVisible(true);
   };
 
-  const guardarEdicion = () => {
-    const actualizadas = citas
-      .map((c) =>
-        c.id === editando.id
-          ? {
-              ...c,
-              doctor,
-              descripcion,
-              fecha: fecha.toLocaleDateString(),
-              hora: fecha.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              timestamp: fecha.getTime(),
-            }
-          : c
-      )
-      .sort((a, b) => a.timestamp - b.timestamp);
+  const guardarEdicion = async () => {
+    if (!doctor.trim() || !descripcion.trim()) {
+      Alert.alert("Campos vacíos", "Por favor completa todos los campos.");
+      return;
+    }
 
-    guardarCitas(actualizadas);
-    cerrarModal();
+    try {
+      setLoading(true);
+      const payload = {
+        doctor: doctor,
+        date: fecha.toISOString(),
+        reason: descripcion,
+        status_type: status,
+      };
+
+      await updateMedicalAppointment(editando.id, payload);
+      await cargarCitas();
+      cerrarModal();
+    } catch (error) {
+      console.error("Error editando cita:", error);
+      Alert.alert("Error", "No se pudo actualizar la cita médica");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const eliminarCita = (id) => {
@@ -84,9 +125,17 @@ export default function useCitasMedicas() {
       {
         text: "Eliminar",
         style: "destructive",
-        onPress: () => {
-          const actualizadas = citas.filter((c) => c.id !== id);
-          guardarCitas(actualizadas);
+        onPress: async () => {
+          try {
+            setLoading(true);
+            await deleteMedicalAppointment(id);
+            await cargarCitas();
+          } catch (error) {
+            console.error("Error eliminando cita:", error);
+            Alert.alert("Error", "No se pudo eliminar la cita médica");
+          } finally {
+            setLoading(false);
+          }
         },
       },
     ]);
@@ -99,8 +148,19 @@ export default function useCitasMedicas() {
         text: "Vaciar",
         style: "destructive",
         onPress: async () => {
-          await AsyncStorage.removeItem("citasMedicas");
-          setCitas([]);
+          try {
+            setLoading(true);
+            const promesas = citas.map((cita) =>
+              deleteMedicalAppointment(cita.id)
+            );
+            await Promise.all(promesas);
+            await cargarCitas();
+          } catch (error) {
+            console.error("Error limpiando citas:", error);
+            Alert.alert("Error", "No se pudo vaciar la agenda");
+          } finally {
+            setLoading(false);
+          }
         },
       },
     ]);
@@ -112,6 +172,7 @@ export default function useCitasMedicas() {
     setDoctor("");
     setDescripcion("");
     setFecha(new Date());
+    setStatus("Scheduled");
   };
 
   return {
@@ -125,11 +186,15 @@ export default function useCitasMedicas() {
     setDescripcion,
     fecha,
     setFecha,
+    status,
+    setStatus,
     agregarCita,
     editarCita,
     guardarEdicion,
     eliminarCita,
     limpiarCitas,
     cerrarModal,
+    loading,
+    refrescar: cargarCitas,
   };
 }

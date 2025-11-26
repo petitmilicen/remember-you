@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
+  Platform,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,9 +21,45 @@ export default function ModalCita({
   setDescripcion,
   fecha,
   setFecha,
-  editando,
+  status,
+  setStatus,
+  editando = false,
 }) {
   const [mostrarPicker, setMostrarPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState("date");
+  const [tempDate, setTempDate] = useState(fecha);
+
+  const handleDateChange = (event, selectedDate) => {
+    if (Platform.OS === 'android') {
+      setMostrarPicker(false);
+
+      if (event.type === "set" && selectedDate) {
+        if (pickerMode === "date") {
+          setTempDate(selectedDate);
+          setPickerMode("time");
+          setMostrarPicker(true);
+        } else {
+          const finalDate = new Date(tempDate);
+          finalDate.setHours(selectedDate.getHours());
+          finalDate.setMinutes(selectedDate.getMinutes());
+          setFecha(finalDate);
+        }
+      }
+    } else {
+      if (event.type === "set" && selectedDate) {
+        setFecha(selectedDate);
+      }
+      setMostrarPicker(false);
+    }
+  };
+
+  const openPicker = () => {
+    setTempDate(fecha);
+    if (Platform.OS === 'android') {
+      setPickerMode("date");
+    }
+    setMostrarPicker(true);
+  };
 
   return (
     <Modal transparent animationType="fade" visible={visible}>
@@ -49,7 +86,7 @@ export default function ModalCita({
 
           <TouchableOpacity
             style={styles.dateBtn}
-            onPress={() => setMostrarPicker(true)}
+            onPress={openPicker}
           >
             <Ionicons name="calendar" size={18} color="#1976D2" />
             <Text style={styles.dateBtnText}>
@@ -58,15 +95,71 @@ export default function ModalCita({
             </Text>
           </TouchableOpacity>
 
+          <View style={styles.statusContainer}>
+            <Text style={styles.statusLabel}>Estado:</Text>
+            <View style={styles.statusOptions}>
+              <TouchableOpacity
+                style={[
+                  styles.statusOption,
+                  status === 'Scheduled' && styles.statusOptionActive,
+                  { borderColor: '#2196F3' },
+                ]}
+                onPress={() => setStatus('Scheduled')}
+              >
+                <Text
+                  style={[
+                    styles.statusOptionText,
+                    status === 'Scheduled' && { color: '#2196F3', fontWeight: 'bold' },
+                  ]}
+                >
+                  Programada
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.statusOption,
+                  status === 'Completed' && styles.statusOptionActive,
+                  { borderColor: '#4CAF50' },
+                ]}
+                onPress={() => setStatus('Completed')}
+              >
+                <Text
+                  style={[
+                    styles.statusOptionText,
+                    status === 'Completed' && { color: '#4CAF50', fontWeight: 'bold' },
+                  ]}
+                >
+                  Completada
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.statusOption,
+                  status === 'Cancelled' && styles.statusOptionActive,
+                  { borderColor: '#F44336' },
+                ]}
+                onPress={() => setStatus('Cancelled')}
+              >
+                <Text
+                  style={[
+                    styles.statusOptionText,
+                    status === 'Cancelled' && { color: '#F44336', fontWeight: 'bold' },
+                  ]}
+                >
+                  Cancelada
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {mostrarPicker && (
             <DateTimePicker
-              value={fecha}
-              mode="datetime"
+              value={Platform.OS === 'android' && pickerMode === 'time' ? tempDate : fecha}
+              mode={Platform.OS === 'android' ? pickerMode : "datetime"}
               display="default"
-              onChange={(event, selectedDate) => {
-                setMostrarPicker(false);
-                if (selectedDate) setFecha(selectedDate);
-              }}
+              onChange={handleDateChange}
             />
           )}
 

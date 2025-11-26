@@ -47,7 +47,6 @@ export default function RecuerdosScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
   const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
-  // ✅ Ajuste de tamaño de texto global
   const getFontSizeStyle = (baseSize = 16) => {
     switch (settings.fontSize) {
       case "small":
@@ -67,7 +66,7 @@ export default function RecuerdosScreen({ navigation }) {
     try {
       const data = await getMemories();
       console.log('MEMORIES', data);
-      
+
       setMemories(data);
     } catch (error) {
       console.error("Error cargando recuerdos:", error);
@@ -97,14 +96,13 @@ export default function RecuerdosScreen({ navigation }) {
   const renderMemory = ({ item }) => (
     <MemoryCard
       memory={item}
-      //onPress={() => navigation.navigate("DetalleRecuerdos", { memory: item })}
+      onPress={() => navigation.navigate("DetalleRecuerdos", { memory: item })}
       onLongPress={() => handleDeleteMemory(item.memory_id)}
       themeStyles={themeStyles}
       getFontSizeStyle={getFontSizeStyle}
     />
   );
 
-  // 🎨 Gradiente según tema
   const gradientColors =
     settings.theme === "dark"
       ? ["#101A50", "#202E8A"]
@@ -141,12 +139,11 @@ export default function RecuerdosScreen({ navigation }) {
         </LinearGradient>
       </View>
 
-      {/* 📷 Lista de recuerdos */}
       <View style={styles.content}>
         <FlatList
           data={memories}
           renderItem={renderMemory}
-          //keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.memory_id}
           numColumns={2}
           contentContainerStyle={
             memories.length === 0
@@ -162,7 +159,6 @@ export default function RecuerdosScreen({ navigation }) {
           }
         />
 
-        {/* ➕ Botón Añadir */}
         <TouchableOpacity
           style={[
             styles.addButton,
@@ -179,7 +175,6 @@ export default function RecuerdosScreen({ navigation }) {
   );
 }
 
-/* 🎨 Estilos base */
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerBleed: {
@@ -232,7 +227,6 @@ const styles = StyleSheet.create({
   emptyText: { textAlign: "center" },
 });
 
-/* 🌞 / 🌙 Estilos por tema */
 const lightStyles = StyleSheet.create({
   container: { backgroundColor: "#EDEDED" },
   card: { backgroundColor: "#FFF" },

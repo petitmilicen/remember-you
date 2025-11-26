@@ -148,4 +148,50 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 15,
   },
+
+  // Status Badge in CitaItem
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+  statusText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  // Status Picker in Modal
+  statusContainer: {
+    marginBottom: 12,
+  },
+  statusLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#263238",
+    marginBottom: 8,
+  },
+  statusOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  statusOption: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: "center",
+    backgroundColor: "#FAFAFA",
+  },
+  statusOptionActive: {
+    backgroundColor: "#F5F5F5",
+  },
+  statusOptionText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#757575",
+  },
 });

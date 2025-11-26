@@ -18,6 +18,8 @@ export default function CitasMedicasScreen() {
     setDescripcion,
     fecha,
     setFecha,
+    status,
+    setStatus,
     agregarCita,
     editarCita,
     guardarEdicion,
@@ -76,6 +78,8 @@ export default function CitasMedicasScreen() {
         setDescripcion={setDescripcion}
         fecha={fecha}
         setFecha={setFecha}
+        status={status}
+        setStatus={setStatus}
         editando={!!editando}
       />
     </View>

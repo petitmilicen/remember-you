@@ -1,5 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { deleteMemory } from "../api/memoryService";
 
 export default function useDetalleRecuerdo(navigation, memory) {
   const handleDelete = () => {
@@ -10,14 +10,11 @@ export default function useDetalleRecuerdo(navigation, memory) {
         style: "destructive",
         onPress: async () => {
           try {
-            const stored = await AsyncStorage.getItem("imageMemories");
-            const updated = stored
-              ? JSON.parse(stored).filter((m) => m.id !== memory.id)
-              : [];
-            await AsyncStorage.setItem("imageMemories", JSON.stringify(updated));
+            await deleteMemory(memory.memory_id);
             navigation.goBack();
           } catch (error) {
             console.error("Error eliminando recuerdo:", error);
+            Alert.alert("Error", "No se pudo eliminar el recuerdo");
           }
         },
       },

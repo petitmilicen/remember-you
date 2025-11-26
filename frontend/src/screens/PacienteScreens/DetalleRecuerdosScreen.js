@@ -17,7 +17,7 @@ export default function DetalleRecuerdosScreen({ route, navigation }) {
 
   const getFontSize = (base = 16) =>
     settings.fontSize === "small" ? base - 2 :
-    settings.fontSize === "large" ? base + 2 : base;
+      settings.fontSize === "large" ? base + 2 : base;
 
   const gradientColors =
     settings.theme === "dark" ? ["#101A50", "#202E8A"] : ["#1A2A80", "#3C4FCE"];
@@ -26,7 +26,6 @@ export default function DetalleRecuerdosScreen({ route, navigation }) {
     <View style={[styles.container, themeStyles.container]}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      {/* Header */}
       <LinearGradient colors={gradientColors} style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
@@ -37,7 +36,6 @@ export default function DetalleRecuerdosScreen({ route, navigation }) {
         <View style={{ width: 28 }} />
       </LinearGradient>
 
-      {/* Contenido */}
       <View style={styles.content}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {memory.image && <Image source={{ uri: memory.image }} style={styles.image} />}

@@ -6,6 +6,30 @@ import { styles } from "../../styles/CitasMedicasStyles";
 export default function CitaItem({ item, onEdit, onDelete }) {
   const futura = item.timestamp > Date.now();
 
+  const getStatusColor = () => {
+    switch (item.status) {
+      case 'Completed':
+        return '#4CAF50';
+      case 'Cancelled':
+        return '#F44336';
+      case 'Scheduled':
+      default:
+        return '#2196F3';
+    }
+  };
+
+  const getStatusText = () => {
+    switch (item.status) {
+      case 'Completed':
+        return 'Completada';
+      case 'Cancelled':
+        return 'Cancelada';
+      case 'Scheduled':
+      default:
+        return 'Programada';
+    }
+  };
+
   return (
     <View
       style={[
@@ -14,14 +38,19 @@ export default function CitaItem({ item, onEdit, onDelete }) {
       ]}
     >
       <View style={styles.cardHeader}>
-        <Text
-          style={[
-            styles.cardTitle,
-            { color: futura ? "#0D47A1" : "#757575" },
-          ]}
-        >
-          {item.doctor}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <Text
+            style={[
+              styles.cardTitle,
+              { color: futura ? "#0D47A1" : "#757575", flex: 1 },
+            ]}
+          >
+            {item.doctor}
+          </Text>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
+            <Text style={styles.statusText}>{getStatusText()}</Text>
+          </View>
+        </View>
         <View style={styles.cardActions}>
           <TouchableOpacity onPress={() => onEdit(item)}>
             <Ionicons name="create-outline" size={18} color="#1976D2" />
