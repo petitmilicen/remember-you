@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
-import { getUserProfile } from "../api/userService";
+import { getUserProfile, uploadProfilePicture, deleteProfilePicture } from "../api/userService";
 
 export default function usePerfilPaciente() {
   const [paciente, setPaciente] = useState({
@@ -19,6 +19,7 @@ export default function usePerfilPaciente() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalQR, setModalQR] = useState(false);
   const [openGroup, setOpenGroup] = useState("Memorice");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,7 +124,6 @@ export default function usePerfilPaciente() {
     fetchData();
   }, []);
 
-  // 🔹 Selección de imagen (solo visual, no sube al backend aún)
   const pickImage = async (source) => {
     try {
       let result;
@@ -154,19 +154,39 @@ export default function usePerfilPaciente() {
       }
 
       if (!result.canceled) {
-        const updated = { ...paciente, FotoPerfil: result.assets[0].uri };
-        setPaciente(updated);
-        Alert.alert("Imagen seleccionada", "La foto se actualizó localmente.");
+        const imageUri = result.assets[0].uri;
+
+        setUploading(true);
+        setModalVisible(false);
+
+        try {
+          const response = await uploadProfilePicture(imageUri);
+
+          setPaciente(prev => ({
+            ...prev,
+            FotoPerfil: response.profile_picture
+          }));
+
+          Alert.alert("¡Éxito!", "Tu foto de perfil se actualizó correctamente.");
+        } catch (uploadError) {
+          console.error("Error subiendo imagen:", uploadError);
+          Alert.alert(
+            "Error de conexión",
+            "No se pudo subir la imagen al servidor. Verifica tu conexión e intenta de nuevo."
+          );
+        } finally {
+          setUploading(false);
+        }
+      } else {
+        setModalVisible(false);
       }
     } catch (error) {
       console.error("Error seleccionando imagen:", error);
       Alert.alert("Error", "No se pudo seleccionar la imagen.");
-    } finally {
       setModalVisible(false);
     }
   };
 
-  // 🔹 Eliminar imagen (solo visual)
   const removeImage = () => {
     Alert.alert(
       "Eliminar foto",
@@ -176,16 +196,33 @@ export default function usePerfilPaciente() {
         {
           text: "Eliminar",
           style: "destructive",
-          onPress: () => {
-            const updated = { ...paciente, FotoPerfil: null };
-            setPaciente(updated);
+          onPress: async () => {
+            try {
+              setUploading(true);
+              await deleteProfilePicture();
+
+              // Update local state
+              setPaciente(prev => ({
+                ...prev,
+                FotoPerfil: null
+              }));
+
+              Alert.alert("Eliminada", "Tu foto de perfil fue eliminada.");
+            } catch (error) {
+              console.error("Error eliminando imagen:", error);
+              Alert.alert(
+                "Error",
+                "No se pudo eliminar la imagen. Verifica tu conexión e intenta de nuevo."
+              );
+            } finally {
+              setUploading(false);
+            }
           },
         },
       ]
     );
   };
 
-  // 🔹 Generar grupos de logros
   const groupByGame = (game) =>
     (logros || [])
       .filter((l) => (l.Juego || "").toLowerCase().includes(game.toLowerCase()))
@@ -210,5 +247,6 @@ export default function usePerfilPaciente() {
     pickImage,
     removeImage,
     groups,
+    uploading,
   };
 }

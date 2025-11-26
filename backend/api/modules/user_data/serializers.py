@@ -1,6 +1,22 @@
 from rest_framework import serializers
 from ..user.models import User
 
+
+class ProfilePictureSerializer(serializers.Serializer):
+    profile_picture = serializers.ImageField(required=True)
+    
+    def validate_profile_picture(self, value):
+        max_size = 5 * 1024 * 1024  
+        if value.size > max_size:
+            raise serializers.ValidationError("El tamaño de la imagen no puede exceder 5MB.")
+        
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+        if value.content_type not in allowed_types:
+            raise serializers.ValidationError("Solo se permiten imágenes JPG, PNG o WebP.")
+        
+        return value
+
+
 class UserDataSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     main_caregiver = serializers.SerializerMethodField()

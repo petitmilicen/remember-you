@@ -14,3 +14,42 @@ export const updateUserProfile = async (data) => {
   const response = await api.put('/api/user-data/', data);
   return response.data;
 };
+
+export const uploadProfilePicture = async (imageUri) => {
+  try {
+    const formData = new FormData();
+    const filename = imageUri.split('/').pop();
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+    formData.append('profile_picture', {
+      uri: imageUri,
+      name: filename,
+      type: type,
+    });
+
+    const response = await api.post('/api/user-data/profile-picture/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    console.log('Foto subida exitosamente:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error subiendo foto de perfil:', error.response?.data || error);
+    throw error;
+  }
+};
+
+export const deleteProfilePicture = async () => {
+  try {
+    const response = await api.delete('/api/user-data/profile-picture/');
+    console.log('Foto eliminada exitosamente:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error eliminando foto de perfil:', error.response?.data || error);
+    throw error;
+  }
+};
+

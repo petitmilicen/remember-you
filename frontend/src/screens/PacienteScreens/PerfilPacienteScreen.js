@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -35,6 +36,7 @@ export default function PerfilPacienteScreen({ navigation }) {
     pickImage,
     removeImage,
     groups,
+    uploading,
   } = usePerfilPaciente();
 
   const insets = useSafeAreaInsets();
@@ -46,8 +48,8 @@ export default function PerfilPacienteScreen({ navigation }) {
     settings.fontSize === "small"
       ? { fontSize: base - 2 }
       : settings.fontSize === "large"
-      ? { fontSize: base + 2 }
-      : { fontSize: base };
+        ? { fontSize: base + 2 }
+        : { fontSize: base };
 
   const gradientColors = dark ? ["#5B3AB4", "#7D5FE5"] : ["#8A6DE9", "#A88BFF"];
 
@@ -91,8 +93,9 @@ export default function PerfilPacienteScreen({ navigation }) {
         <View style={[styles.profileCard, themeStyles.card]}>
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => setModalVisible(true)}
+            onPress={() => !uploading && setModalVisible(true)}
             style={styles.imageContainer}
+            disabled={uploading}
           >
             {paciente.FotoPerfil ? (
               <>
@@ -100,9 +103,11 @@ export default function PerfilPacienteScreen({ navigation }) {
                   source={{ uri: paciente.FotoPerfil }}
                   style={styles.profileImage}
                 />
-                <View style={styles.overlayCamera}>
-                  <FontAwesome5 name="camera" size={16} color="#FFF" />
-                </View>
+                {!uploading && (
+                  <View style={styles.overlayCamera}>
+                    <FontAwesome5 name="camera" size={16} color="#FFF" />
+                  </View>
+                )}
               </>
             ) : (
               <View style={styles.placeholder}>
@@ -112,9 +117,28 @@ export default function PerfilPacienteScreen({ navigation }) {
                 </Text>
               </View>
             )}
+
+            {uploading && (
+              <View style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                borderRadius: 60,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+                <ActivityIndicator size="large" color="#FEBA17" />
+                <Text style={{ color: '#FFF', marginTop: 8, fontSize: 12 }}>
+                  Subiendo...
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
 
-          {paciente.FotoPerfil && (
+          {paciente.FotoPerfil && !uploading && (
             <TouchableOpacity onPress={removeImage} style={styles.deleteButton}>
               <FontAwesome5 name="trash-alt" size={14} color="#FFF" />
             </TouchableOpacity>
@@ -136,7 +160,6 @@ export default function PerfilPacienteScreen({ navigation }) {
           </Text>
         </View>
 
-        {/* DATOS PERSONALES */}
         <View style={styles.infoSection}>
           <Text
             style={[
@@ -197,7 +220,6 @@ export default function PerfilPacienteScreen({ navigation }) {
           </View>
         </View>
 
-        {/* CUIDADOR */}
         <View style={styles.infoSection}>
           <Text
             style={[
@@ -242,7 +264,6 @@ export default function PerfilPacienteScreen({ navigation }) {
           </View>
         </View>
 
-        {/* EXPOSITOR DE LOGROS */}
         <View style={styles.infoSection}>
           <Text
             style={[
@@ -300,12 +321,12 @@ export default function PerfilPacienteScreen({ navigation }) {
         </Modal>
       )}
 
-<ModalSelectorImagen
-  visible={modalVisible}
-  onClose={() => setModalVisible(false)}
-  onSelectCamera={() => pickImage("camera")}
-  onSelectGallery={() => pickImage("gallery")}
-/>
+      <ModalSelectorImagen
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSelectCamera={() => pickImage("camera")}
+        onSelectGallery={() => pickImage("gallery")}
+      />
 
 
     </View>
