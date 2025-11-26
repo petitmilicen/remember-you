@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 15,
-    marginBottom: 10,
+    paddingHorizontal: 24,
   },
   textContainer: { flex: 1, marginLeft: 15 },
   optionText: { fontWeight: "500" },
@@ -62,16 +62,23 @@ export const styles = StyleSheet.create({
   sizeLetter: { fontWeight: "bold", fontSize: 16 },
   sizeLetterSmall: { fontSize: 13 },
   sizeLetterLarge: { fontSize: 20 },
+  groupContainer: {
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
 });
 
 export const lightStyles = StyleSheet.create({
   container: { backgroundColor: "#FFFFFF" },
   text: { color: "#000000" },
   subtext: { color: "#666666" },
+  groupContainer: { backgroundColor: "#F5F5F5" },
 });
 
 export const darkStyles = StyleSheet.create({
   container: { backgroundColor: "#121212" },
   text: { color: "#FFFFFF" },
   subtext: { color: "#AAAAAA" },
+  groupContainer: { backgroundColor: "#1E1E1E" },
 });

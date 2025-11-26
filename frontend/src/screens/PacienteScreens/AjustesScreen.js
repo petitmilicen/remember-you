@@ -58,7 +58,7 @@ export default function AjustesScreen({ navigation }) {
               />
             }
             title={`Modo ${settings.theme === "dark" ? "Oscuro" : "Claro"}`}
-            subtitle={settings.theme === "dark" ? "Activado" : "Desactivado"}
+            subtitle="Activado"
             onPress={toggleTheme}
             themeStyles={themeStyles}
             getFontSizeStyle={getFontSizeStyle}
@@ -85,62 +85,64 @@ export default function AjustesScreen({ navigation }) {
             Tamaño de Texto
           </Text>
 
-          {["small", "medium", "large"].map((size) => (
-            <AjusteOpcion
-              key={size}
-              icon={
-                <View
-                  style={[
-                    styles.sizeCircle,
-                    { backgroundColor: circleBg, borderColor: circleBorder },
-                    settings.fontSize === size && {
-                      backgroundColor: activeColor,
-                      shadowColor: activeColor,
-                      shadowOpacity: 0.4,
-                      shadowRadius: 8,
-                      borderWidth: 0,
-                      elevation: 5,
-                    },
-                  ]}
-                >
-                  <Text
+          <View style={[styles.groupContainer, themeStyles.groupContainer]}>
+            {["small", "medium", "large"].map((size) => (
+              <AjusteOpcion
+                key={size}
+                icon={
+                  <View
                     style={[
-                      styles.sizeLetter,
-                      settings.fontSize === size
-                        ? { color: "#FFF", transform: [{ scale: 1.1 }] }
-                        : { color: themeStyles.text.color },
-                      size === "small" && styles.sizeLetterSmall,
-                      size === "large" && styles.sizeLetterLarge,
+                      styles.sizeCircle,
+                      { backgroundColor: circleBg, borderColor: circleBorder },
+                      settings.fontSize === size && {
+                        backgroundColor: activeColor,
+                        shadowColor: activeColor,
+                        shadowOpacity: 0.4,
+                        shadowRadius: 8,
+                        borderWidth: 0,
+                        elevation: 5,
+                      },
                     ]}
                   >
-                    A
-                  </Text>
-                </View>
-              }
-              title={
-                size === "small"
-                  ? "Pequeño"
-                  : size === "medium"
-                  ? "Mediano"
-                  : "Grande"
-              }
-              subtitle={
-                size === "small"
-                  ? "Texto compacto"
-                  : size === "medium"
-                  ? "Tamaño estándar"
-                  : "Texto más legible"
-              }
-              onPress={() => changeFontSize(size)}
-              themeStyles={themeStyles}
-              getFontSizeStyle={getFontSizeStyle}
-              right={
-                settings.fontSize === size && (
-                  <Ionicons name="checkmark" size={22} color={activeColor} />
-                )
-              }
-            />
-          ))}
+                    <Text
+                      style={[
+                        styles.sizeLetter,
+                        settings.fontSize === size
+                          ? { color: "#FFF", transform: [{ scale: 1.1 }] }
+                          : { color: themeStyles.text.color },
+                        size === "small" && styles.sizeLetterSmall,
+                        size === "large" && styles.sizeLetterLarge,
+                      ]}
+                    >
+                      A
+                    </Text>
+                  </View>
+                }
+                title={
+                  size === "small"
+                    ? "Pequeño"
+                    : size === "medium"
+                      ? "Mediano"
+                      : "Grande"
+                }
+                subtitle={
+                  size === "small"
+                    ? "Texto compacto"
+                    : size === "medium"
+                      ? "Tamaño estándar"
+                      : "Texto más legible"
+                }
+                onPress={() => changeFontSize(size)}
+                themeStyles={themeStyles}
+                getFontSizeStyle={getFontSizeStyle}
+                right={
+                  settings.fontSize === size && (
+                    <Ionicons name="checkmark" size={22} color={activeColor} />
+                  )
+                }
+              />
+            ))}
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>
