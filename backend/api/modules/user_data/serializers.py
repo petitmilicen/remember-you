@@ -35,6 +35,7 @@ class UserDataSerializer(serializers.ModelSerializer):
             'alzheimer_level',
             'profile_picture',
             'main_caregiver',
+            'patient',
         )
 
     def get_full_name(self, obj):
@@ -50,4 +51,29 @@ class UserDataSerializer(serializers.ModelSerializer):
                     "email": caregiver.email,
                     "phone_number": caregiver.phone_number or "No registrado",
                 }
+        return None
+
+
+class PatientInfoSerializer(serializers.ModelSerializer):
+    """Serializer for patient information to be shared via QR code"""
+    full_name = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'full_name', 'age', 'gender',
+            'alzheimer_level', 'phone_number', 'profile_picture'
+        ]
+        read_only_fields = fields
+    
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or obj.username
+    
+    def get_profile_picture(self, obj):
+        if obj.profile_picture and hasattr(obj.profile_picture, 'url'):
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.profile_picture.url)
+            return obj.profile_picture.url
         return None

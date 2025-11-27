@@ -307,7 +307,7 @@ export default function PerfilPacienteScreen({ navigation }) {
             <View
               style={{ backgroundColor: "#FFF", padding: 20, borderRadius: 16 }}
             >
-              <QRCode value={`ID:${paciente.ID}`} size={220} />
+              <QRCode value={JSON.stringify({ patientId: paciente.ID })} size={220} />
               <TouchableOpacity
                 onPress={() => setModalQR(false)}
                 style={{ marginTop: 20, alignSelf: "center" }}

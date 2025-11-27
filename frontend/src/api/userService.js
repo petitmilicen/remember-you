@@ -53,3 +53,37 @@ export const deleteProfilePicture = async () => {
   }
 };
 
+export const getPatientById = async (patientId) => {
+  try {
+    const response = await api.get(`/api/user-data/patient/${patientId}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error obteniendo paciente:', error.response?.data || error);
+    throw error;
+  }
+};
+
+export const assignPatientToCaregiver = async (patientId) => {
+  try {
+    const response = await api.post('/api/user-data/assign-patient/', {
+      patient_id: patientId
+    });
+    console.log('Paciente asignado:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error asignando paciente:', error.response?.data || error);
+    throw error;
+  }
+};
+
+export const unassignPatient = async () => {
+  try {
+    const response = await api.post('/api/user-data/unassign-patient/');
+    console.log('Paciente desvinculado:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error desvinculando paciente:', error.response?.data || error);
+    throw error;
+  }
+};
+
