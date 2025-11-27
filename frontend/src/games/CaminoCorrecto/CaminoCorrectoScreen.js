@@ -8,6 +8,7 @@ import {
   Platform,
   ScrollView,
   Vibration,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -270,6 +271,24 @@ export default function CaminoCorrectoScreen({ navigation }) {
     if (nextOrbs.every((o) => o.taken) && nr === portal.r && nc === portal.c) {
       setWon(true);
       setScore((s) => s + 50);
+
+      // Unlock achievement
+      const difficultyLevel = difficulty === "FACIL" ? 1 : difficulty === "NORMAL" ? 2 : 3;
+      const difficultyText = difficulty === "FACIL" ? "Fácil" : difficulty === "NORMAL" ? "Normal" : "Difícil";
+
+      import("../../api/achievementService").then(({ unlockAchievement }) => {
+        unlockAchievement("camino", difficultyLevel)
+          .then(() => {
+            setTimeout(() => {
+              Alert.alert(
+                "🏆 ¡Logro Desbloqueado!",
+                `Has completado Camino Correcto en dificultad ${difficultyText}`,
+                [{ text: "¡Genial!" }]
+              );
+            }, 1000); // Más delay para que no interfiera con el overlay de victoria
+          })
+          .catch(err => console.error("Failed to unlock achievement:", err));
+      });
     }
   }
 

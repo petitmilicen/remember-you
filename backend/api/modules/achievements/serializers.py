@@ -5,9 +5,12 @@ class AchievementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achievement
         fields = (
+            'id',
             'category',
+            'level',
             'title',
             'description',
+            'unlocked',
             'unlocked_at'
         )
-        read_only_fields =  ('achievment_id', 'created_at', 'user')
+        read_only_fields = ('id', 'created_at', 'user')

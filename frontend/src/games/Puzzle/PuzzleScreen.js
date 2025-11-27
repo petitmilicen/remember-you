@@ -95,6 +95,24 @@ export default function PuzzleScreen({ navigation }) {
     const emptyCorrect = newEmptyPos === total - 1;
 
     if (allCorrect && emptyCorrect) {
+      // Unlock achievement
+      const difficultyLevel = difficulty === "easy" ? 1 : difficulty === "normal" ? 2 : 3;
+      const difficultyText = difficulty === "easy" ? "Fácil" : difficulty === "normal" ? "Normal" : "Difícil";
+
+      import("../../api/achievementService").then(({ unlockAchievement }) => {
+        unlockAchievement("puzzle", difficultyLevel)
+          .then(() => {
+            setTimeout(() => {
+              Alert.alert(
+                "🏆 ¡Logro Desbloqueado!",
+                `Has completado el Rompecabezas en dificultad ${difficultyText}`,
+                [{ text: "¡Genial!" }]
+              );
+            }, 500);
+          })
+          .catch(err => console.error("Failed to unlock achievement:", err));
+      });
+
       Alert.alert(
         "🎉 ¡Excelente!",
         `Completaste el rompecabezas en ${moveCount} movimientos.`,
@@ -167,8 +185,8 @@ export default function PuzzleScreen({ navigation }) {
                       backgroundColor: isEmpty
                         ? "transparent"
                         : piece.currentPosition === piece.correctPosition
-                        ? "#C8E6C9"
-                        : "#FFF4E0",
+                          ? "#C8E6C9"
+                          : "#FFF4E0",
                       borderColor: "#999",
                       borderWidth: isEmpty ? 0 : 1,
                     },

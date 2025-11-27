@@ -47,75 +47,47 @@ export default function usePerfilPaciente() {
           }
         }
 
-        setLogros([
-          // MEMORICE
-          {
-            Juego: "memorice",
-            icon: require("../assets/images/Logros/memorice/1PrimerRecuerdo.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "memorice",
-            icon: require("../assets/images/Logros/memorice/2MemoriaRapida.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "memorice",
-            icon: require("../assets/images/Logros/memorice/3MaestrodelRecuerdo.png"),
-            unlocked: false,
-          },
+        // Fetch achievements from API
+        const { getAchievements } = await import("../api/achievementService");
+        const achievementsData = await getAchievements();
 
-          // PUZZLE
-          {
-            Juego: "puzzle",
-            icon: require("../assets/images/Logros/rompecabezas/4PiezaensuLugar.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "puzzle",
-            icon: require("../assets/images/Logros/rompecabezas/5ConstrucciónPerfecta.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "puzzle",
-            icon: require("../assets/images/Logros/rompecabezas/6ArtesanodelPuzzle.png"),
-            unlocked: false,
-          },
+        // Map achievements with their corresponding icons
+        const achievementIcons = {
+          memorice_1: require("../assets/images/Logros/memorice/1PrimerRecuerdo.png"),
+          memorice_2: require("../assets/images/Logros/memorice/2MemoriaRapida.png"),
+          memorice_3: require("../assets/images/Logros/memorice/3MaestrodelRecuerdo.png"),
+          puzzle_1: require("../assets/images/Logros/rompecabezas/4PiezaensuLugar.png"),
+          puzzle_2: require("../assets/images/Logros/rompecabezas/5ConstrucciónPerfecta.png"),
+          puzzle_3: require("../assets/images/Logros/rompecabezas/6ArtesanodelPuzzle.png"),
+          sudoku_1: require("../assets/images/Logros/sudoku/7PrimerNumero.png"),
+          sudoku_2: require("../assets/images/Logros/sudoku/8MenteLogica.png"),
+          sudoku_3: require("../assets/images/Logros/sudoku/9MaestrodelSudoku.png"),
+          camino_1: require("../assets/images/Logros/caminocorrecto/10PrimerCamino.png"),
+          camino_2: require("../assets/images/Logros/caminocorrecto/11SinPerderse.png"),
+          camino_3: require("../assets/images/Logros/caminocorrecto/12ExploradorTotal.png"),
+        };
 
-          // SUDOKU
-          {
-            Juego: "sudoku",
-            icon: require("../assets/images/Logros/sudoku/7PrimerNumero.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "sudoku",
-            icon: require("../assets/images/Logros/sudoku/8MenteLogica.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "sudoku",
-            icon: require("../assets/images/Logros/sudoku/9MaestrodelSudoku.png"),
-            unlocked: false,
-          },
+        const mappedAchievements = achievementsData.map(achievement => ({
+          Juego: achievement.category,
+          icon: achievementIcons[`${achievement.category}_${achievement.level}`],
+          unlocked: !!achievement.unlocked,
+          title: achievement.title,
+          description: achievement.description,
+        }));
 
-          // CAMINO CORRECTO
-          {
-            Juego: "camino",
-            icon: require("../assets/images/Logros/caminocorrecto/10PrimerCamino.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "camino",
-            icon: require("../assets/images/Logros/caminocorrecto/11SinPerderse.png"),
-            unlocked: false,
-          },
-          {
-            Juego: "camino",
-            icon: require("../assets/images/Logros/caminocorrecto/12ExploradorTotal.png"),
-            unlocked: false,
-          },
-        ]);
+        // Sort achievements: first by game category order, then by level
+        const gameOrder = { memorice: 1, puzzle: 2, sudoku: 3, camino: 4 };
+        const sortedAchievements = mappedAchievements.sort((a, b) => {
+          const gameComparison = gameOrder[a.Juego] - gameOrder[b.Juego];
+          if (gameComparison !== 0) return gameComparison;
+
+          // If same game, sort by level (extract from icon path or title)
+          const levelA = achievementsData.find(ach => ach.category === a.Juego && ach.title === a.title)?.level || 0;
+          const levelB = achievementsData.find(ach => ach.category === b.Juego && ach.title === b.title)?.level || 0;
+          return levelA - levelB;
+        });
+
+        setLogros(sortedAchievements);
       } catch (err) {
         console.error("Error cargando datos del backend:", err);
       }

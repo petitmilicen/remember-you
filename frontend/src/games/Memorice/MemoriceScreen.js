@@ -110,7 +110,7 @@ export default function MemoriceScreen({ navigation }) {
             .then((st) => {
               if (st?.isLoaded) sound.unloadAsync();
             })
-            .catch(() => {});
+            .catch(() => { });
         }
       });
     };
@@ -125,7 +125,7 @@ export default function MemoriceScreen({ navigation }) {
       } else {
         await bgMusic.current?.pauseAsync();
       }
-    } catch {}
+    } catch { }
   };
 
   const initGame = () => {
@@ -149,7 +149,7 @@ export default function MemoriceScreen({ navigation }) {
     if (flipped.length === 2 || flipped.includes(id) || matched.includes(id)) return;
     try {
       await flipSound.current?.replayAsync();
-    } catch {}
+    } catch { }
     const newFlipped = [...flipped, id];
     setFlipped(newFlipped);
     if (newFlipped.length === 2) {
@@ -158,7 +158,7 @@ export default function MemoriceScreen({ navigation }) {
       if (first.emoji === second.emoji) {
         try {
           await matchSound.current?.replayAsync();
-        } catch {}
+        } catch { }
         showMessage(messages[Math.floor(Math.random() * messages.length)]);
         setMatched((m) => [...m, first.id, second.id]);
         setFlipped([]);
@@ -175,6 +175,26 @@ export default function MemoriceScreen({ navigation }) {
       setShowConfetti(true);
       showMessage("¡Increíble! 🏆 Completaste el juego 🎉");
       victorySound.current?.replayAsync();
+
+      // Unlock achievement based on difficulty
+      const difficultyLevel = difficulty === "easy" ? 1 : difficulty === "normal" ? 2 : 3;
+      const difficultyText = difficulty === "easy" ? "Fácil" : difficulty === "normal" ? "Normal" : "Difícil";
+
+      import("../../api/achievementService").then(({ unlockAchievement }) => {
+        unlockAchievement("memorice", difficultyLevel)
+          .then(() => {
+            // Notificación de logro desbloqueado
+            setTimeout(() => {
+              Alert.alert(
+                "🏆 ¡Logro Desbloqueado!",
+                `Has completado Memorice en dificultad ${difficultyText}`,
+                [{ text: "¡Genial!" }]
+              );
+            }, 500);
+          })
+          .catch(err => console.error("Failed to unlock achievement:", err));
+      });
+
       setTimeout(() => {
         Alert.alert(
           "🏆 ¡Victoria!",
@@ -248,7 +268,7 @@ export default function MemoriceScreen({ navigation }) {
     </View>
   );
 
- 
+
   const renderMenu = () => (
     <View style={styles.diffContainer}>
       <Text style={styles.diffTitle}>Selecciona la dificultad</Text>

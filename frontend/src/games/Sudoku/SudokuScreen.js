@@ -108,6 +108,24 @@ export default function SudokuScreen({ navigation }) {
       newBoard[r][c] = num;
       setBoard(newBoard);
       if (isComplete(newBoard)) {
+        // Unlock achievement
+        const difficultyLevel = difficulty === "easy" ? 1 : difficulty === "normal" ? 2 : 3;
+        const difficultyText = difficulty === "easy" ? "Fácil" : difficulty === "normal" ? "Normal" : "Difícil";
+
+        import("../../api/achievementService").then(({ unlockAchievement }) => {
+          unlockAchievement("sudoku", difficultyLevel)
+            .then(() => {
+              setTimeout(() => {
+                Alert.alert(
+                  "🏆 ¡Logro Desbloqueado!",
+                  `Has completado Sudoku en dificultad ${difficultyText}`,
+                  [{ text: "¡Genial!" }]
+                );
+              }, 500);
+            })
+            .catch(err => console.error("Failed to unlock achievement:", err));
+        });
+
         Alert.alert(
           "🎉 ¡Felicidades!",
           `Completaste el Sudoku en ${formatTime(timer)}.`,
@@ -128,8 +146,7 @@ export default function SudokuScreen({ navigation }) {
       } else {
         Alert.alert(
           "Incorrecto",
-          `Te quedan ${
-            difficultySettings[difficulty].maxMistakes - newMistakes
+          `Te quedan ${difficultySettings[difficulty].maxMistakes - newMistakes
           } intentos.`
         );
       }
@@ -174,10 +191,10 @@ export default function SudokuScreen({ navigation }) {
             backgroundColor: sel
               ? "#FFF4E0"
               : wrong
-              ? "#FFD1D1"
-              : init
-              ? "#F5F5F5"
-              : "#FFFFFF",
+                ? "#FFD1D1"
+                : init
+                  ? "#F5F5F5"
+                  : "#FFFFFF",
           },
         ]}
         onPress={() => handleCellPress(r, c)}
@@ -283,8 +300,8 @@ export default function SudokuScreen({ navigation }) {
             {lvl === "easy"
               ? "Fácil"
               : lvl === "normal"
-              ? "Normal"
-              : "Difícil"}
+                ? "Normal"
+                : "Difícil"}
           </Text>
         </TouchableOpacity>
       ))}

@@ -48,14 +48,20 @@ export default memo(function GroupAccordion({
             <AchievementBadge
               source={slots[0]?.icon}
               unlocked={slots[0]?.unlocked ?? false}
+              title={slots[0]?.title || "Logro Bloqueado"}
+              description={slots[0]?.description || "Completa actividades para desbloquear"}
             />
             <AchievementBadge
               source={slots[1]?.icon}
               unlocked={slots[1]?.unlocked ?? false}
+              title={slots[1]?.title || "Logro Bloqueado"}
+              description={slots[1]?.description || "Completa actividades para desbloquear"}
             />
             <AchievementBadge
               source={slots[2]?.icon}
               unlocked={slots[2]?.unlocked ?? false}
+              title={slots[2]?.title || "Logro Bloqueado"}
+              description={slots[2]?.description || "Completa actividades para desbloquear"}
             />
           </View>
         </View>
