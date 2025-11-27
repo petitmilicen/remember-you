@@ -164,7 +164,7 @@ export const styles = StyleSheet.create({
   },
 
   alertBox: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#F5F5F5",
     borderRadius: 10,
     borderLeftWidth: 5,
     borderLeftColor: "#C0CA33",
@@ -172,8 +172,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginTop: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   alertMessage: {
     flex: 1,

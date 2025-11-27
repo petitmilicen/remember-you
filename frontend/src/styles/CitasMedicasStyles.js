@@ -175,23 +175,25 @@ export const styles = StyleSheet.create({
   statusOptions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 8,
+    gap: 4,
   },
   statusOption: {
     flex: 1,
     paddingVertical: 8,
-    paddingHorizontal: 8,
+    paddingHorizontal: 2,
     borderRadius: 10,
     borderWidth: 2,
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#FAFAFA",
   },
   statusOptionActive: {
     backgroundColor: "#F5F5F5",
   },
   statusOptionText: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 11,
+    fontWeight: "600",
     color: "#757575",
+    textAlign: "center",
   },
 });

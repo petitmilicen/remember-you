@@ -29,7 +29,7 @@ const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 export default function HomeScreenCuidador({ navigation }) {
   const { paciente } = usePaciente();
   const zona = useZonaSegura(paciente);
-  const tarjetas = useTarjetas(); 
+  const tarjetas = useTarjetas();
   const { fotoPerfil, nombrePaciente, theme, getFontSize, loading } = usePacienteHome();
 
   const cerrarSesion = async () => {
@@ -70,7 +70,7 @@ export default function HomeScreenCuidador({ navigation }) {
           navigation={navigation}
         />
 
-        <AlertasPanel alertas={zona.alertas} />
+        <AlertasPanel alertas={zona.alertas} onClear={zona.limpiarAlertas} />
 
         <TarjetasPanel
           tarjetas={tarjetas.tarjetas}
@@ -96,7 +96,7 @@ export default function HomeScreenCuidador({ navigation }) {
         onSave={tarjetas.agregarTarjeta}
         accentColor={ACCENT}
       />
-      
+
     </View>
   );
 }
