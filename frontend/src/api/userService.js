@@ -87,3 +87,14 @@ export const unassignPatient = async () => {
   }
 };
 
+export const deleteAccount = async () => {
+  try {
+    const response = await api.delete('/api/user-data/delete-account/');
+    console.log('Cuenta eliminada:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error eliminando cuenta:', error.response?.data || error);
+    throw error;
+  }
+};
+

@@ -1,17 +1,32 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import CuidadorCard from "./CuidadorCard";
 import { styles } from "../../styles/RedApoyoStyles";
+
+const ESTADO_COLORS = {
+  "En espera": "#FFA726",
+  "Asignada": "#42A5F5",
+  "En curso": "#66BB6A",
+  "Finalizada": "#9E9E9E",
+  "Cancelada": "#EF5350",
+};
 
 export default function SolicitudCard({
   s,
   ESTADOS,
+  cuidadores,
   onAsignar,
   onCancelar,
   onIniciar,
   onFinalizar,
   onEliminar,
 }) {
+  // Obtener cuidadores postulados
+  const postulantes = s.postulaciones
+    ? cuidadores.filter(c => s.postulaciones.includes(c.id))
+    : [];
+
   return (
     <View
       style={[
@@ -24,31 +39,72 @@ export default function SolicitudCard({
     >
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{s.motivo}</Text>
-        <Text style={[styles.badge, { backgroundColor: "#FFCC80" }]}>
-          {s.estado}
-        </Text>
+        <View
+          style={[
+            styles.badge,
+            { backgroundColor: ESTADO_COLORS[s.estado] || "#FFCC80" }
+          ]}
+        >
+          <Text style={styles.badgeText}>{s.estado}</Text>
+        </View>
       </View>
 
-      <Text style={styles.cardText}>Desde: {s.desde}</Text>
-      <Text style={styles.cardText}>Hasta: {s.hasta}</Text>
-      {s.suplente && <Text style={styles.cardText}>Suplente: {s.suplente}</Text>}
-      {s.fechaInicio && (
-        <Text style={styles.cardText}>Inicio real: {s.fechaInicio}</Text>
+      <View style={styles.cardDatesRow}>
+        <View style={styles.cardDateItem}>
+          <Ionicons name="calendar-outline" size={14} color="#607D8B" />
+          <Text style={styles.cardText}> Desde: {s.desde}</Text>
+        </View>
+        <View style={styles.cardDateItem}>
+          <Ionicons name="calendar" size={14} color="#607D8B" />
+          <Text style={styles.cardText}> Hasta: {s.hasta}</Text>
+        </View>
+      </View>
+
+      {s.suplente && (
+        <View style={styles.suplementRow}>
+          <Ionicons name="person-circle" size={16} color="#1976D2" />
+          <Text style={styles.suplementText}> Suplente: {s.suplente}</Text>
+        </View>
       )}
-      {s.fechaFin && <Text style={styles.cardText}>Fin real: {s.fechaFin}</Text>}
-      {s.nota && <Text style={styles.cardNote}>Nota: {s.nota}</Text>}
+
+      {s.fechaInicio && (
+        <Text style={styles.cardTextSecondary}>
+          ⏱️ Inicio real: {s.fechaInicio}
+        </Text>
+      )}
+      {s.fechaFin && (
+        <Text style={styles.cardTextSecondary}>
+          ✅ Fin real: {s.fechaFin}
+        </Text>
+      )}
+      {s.nota && (
+        <View style={styles.notaContainer}>
+          <Ionicons name="document-text-outline" size={14} color="#607D8B" />
+          <Text style={styles.cardNote}> {s.nota}</Text>
+        </View>
+      )}
+
+      {/* Mostrar postulaciones cuando está en espera */}
+      {s.estado === ESTADOS.ESPERA && postulantes.length > 0 && (
+        <View style={styles.postulacionesContainer}>
+          <Text style={styles.postulacionesTitle}>
+            👥 {postulantes.length} Postulaciones:
+          </Text>
+          {postulantes.map((cuidador) => (
+            <CuidadorCard
+              key={cuidador.id}
+              cuidador={cuidador}
+              compact={false}
+              showButton={true}
+              onSelect={() => onAsignar(s.id, cuidador.id)}
+            />
+          ))}
+        </View>
+      )}
 
       <View style={styles.actionsRow}>
         {s.estado === ESTADOS.ESPERA && (
           <>
-            <TouchableOpacity
-              style={[styles.btn, { backgroundColor: "#64B5F6" }]}
-              onPress={() => onAsignar(s.id)}
-            >
-              <Ionicons name="person-add" size={16} color="#FFF" />
-              <Text style={styles.btnText}>Asignar</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: "#E57373" }]}
               onPress={() => onCancelar(s.id)}
@@ -81,14 +137,14 @@ export default function SolicitudCard({
 
         {(s.estado === ESTADOS.FINALIZADA ||
           s.estado === ESTADOS.CANCELADA) && (
-          <TouchableOpacity
-            style={[styles.btn, { backgroundColor: "#B0BEC5" }]}
-            onPress={() => onEliminar(s.id)}
-          >
-            <Ionicons name="trash" size={16} color="#FFF" />
-            <Text style={styles.btnText}>Eliminar</Text>
-          </TouchableOpacity>
-        )}
+            <TouchableOpacity
+              style={[styles.btn, { backgroundColor: "#B0BEC5" }]}
+              onPress={() => onEliminar(s.id)}
+            >
+              <Ionicons name="trash" size={16} color="#FFF" />
+              <Text style={styles.btnText}>Eliminar</Text>
+            </TouchableOpacity>
+          )}
       </View>
     </View>
   );

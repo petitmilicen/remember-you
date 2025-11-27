@@ -25,6 +25,7 @@ class User(AbstractUser):
     age = models.PositiveIntegerField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=GenderChoices.choices, null=True, blank=True)
     alzheimer_level = models.CharField(max_length=10, choices=alzheimerLevelChoices.choices, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

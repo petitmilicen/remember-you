@@ -30,13 +30,21 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         read_only_fields = ('id',)
 
 class UserSerializer(BaseUserSerializer):
+    full_name = serializers.SerializerMethodField()
+    
     class Meta(BaseUserSerializer.Meta):
         model = User
         fields = (
             'id',
             'email',
             'username',
+            'full_name',
             'phone_number',
             'user_type',
+            'profile_picture',
+            'created_at',
         )
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'created_at')
+    
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() if obj.first_name or obj.last_name else obj.username

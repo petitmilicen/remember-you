@@ -8,6 +8,8 @@ import {
   StatusBar,
   Platform,
   Alert,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -25,6 +27,27 @@ import { styles } from "../../styles/HomeCuidadorStyles.js";
 import { ACCENT } from "../../utils/constants.js";
 
 const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
+
+// Loading Skeleton Component
+const LoadingSkeleton = () => (
+  <View style={styles.skeletonContainer}>
+    <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
+      <View style={styles.headerLeft}>
+        <View style={[styles.skeletonText, { width: 150, height: 26 }]} />
+        <View style={[styles.skeletonText, { width: 80, height: 24, marginTop: 6 }]} />
+      </View>
+      <View style={styles.skeletonAvatar} />
+    </View>
+
+    <View style={styles.skeletonPanel} />
+    <View style={styles.skeletonPanel} />
+    <View style={styles.skeletonPanel} />
+
+    <View style={{ alignItems: "center", marginTop: 20 }}>
+      <ActivityIndicator size="large" color={ACCENT} />
+    </View>
+  </View>
+);
 
 export default function HomeScreenCuidador({ navigation }) {
   const { paciente } = usePaciente();
@@ -50,12 +73,31 @@ export default function HomeScreenCuidador({ navigation }) {
     ]);
   };
 
+  // Show loading skeleton while data loads
+  if (loading) {
+    return <LoadingSkeleton />;
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
-          <Text style={styles.headerName}>{nombrePaciente}</Text>
-          <Text style={styles.headerRole}>Cuidador</Text>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerName}>{nombrePaciente}</Text>
+            <View style={styles.roleBadge}>
+              <Text style={styles.headerRole}>Cuidador</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Perfil')}
+            activeOpacity={0.7}
+          >
+            {fotoPerfil ? (
+              <Image source={{ uri: fotoPerfil }} style={styles.avatarCircle} />
+            ) : (
+              <FontAwesome5 name="user-circle" size={52} color={ACCENT} />
+            )}
+          </TouchableOpacity>
         </View>
 
         <PacientePanel paciente={paciente} navigation={navigation} />

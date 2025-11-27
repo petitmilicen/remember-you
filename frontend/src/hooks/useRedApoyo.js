@@ -35,16 +35,53 @@ export default function useRedApoyo() {
     const randomAround = (v) => v + (Math.random() - 0.5) * 0.008;
     const base = pacienteUbicacion;
     const simulados = [
-      { nombre: "Ana Torres", rating: 4.8 },
-      { nombre: "Pedro Silva", rating: 4.7 },
-      { nombre: "Laura Díaz", rating: 4.9 },
-      { nombre: "José López", rating: 4.6 },
+      {
+        id: "1",
+        nombre: "Ana Torres",
+        rating: 4.8,
+        avatar: "AT",
+        especialidad: "Alzheimer",
+        experiencia: "5 años",
+        disponible: true
+      },
+      {
+        id: "2",
+        nombre: "Pedro Silva",
+        rating: 4.7,
+        avatar: "PS",
+        especialidad: "Demencia",
+        experiencia: "3 años",
+        disponible: true
+      },
+      {
+        id: "3",
+        nombre: "Laura Díaz",
+        rating: 4.9,
+        avatar: "LD",
+        especialidad: "Alzheimer",
+        experiencia: "7 años",
+        disponible: true
+      },
+      {
+        id: "4",
+        nombre: "José López",
+        rating: 4.6,
+        avatar: "JL",
+        especialidad: "Cuidados generales",
+        experiencia: "2 años",
+        disponible: Math.random() > 0.3 // 70% disponible
+      },
     ].map((c) => {
       const lat = randomAround(base.latitude);
       const lon = randomAround(base.longitude);
       const distKm = Math.hypot((lat - base.latitude) * 111, (lon - base.longitude) * 111);
       const eta = Math.max(3, Math.round(distKm * 5 + Math.random() * 4));
-      return { ...c, distancia: distKm.toFixed(1), eta, coord: { latitude: lat, longitude: lon } };
+      return {
+        ...c,
+        distancia: distKm.toFixed(1),
+        eta,
+        coord: { latitude: lat, longitude: lon }
+      };
     });
     setCuidadores(simulados);
   };
@@ -60,6 +97,14 @@ export default function useRedApoyo() {
       return;
     }
 
+    // Simular postulaciones automáticas (1-3 cuidadores disponibles)
+    const disponibles = cuidadores.filter(c => c.disponible);
+    const numPostulaciones = Math.min(disponibles.length, Math.floor(Math.random() * 3) + 1);
+    const postulantes = disponibles
+      .sort(() => Math.random() - 0.5)
+      .slice(0, numPostulaciones)
+      .map(c => c.id);
+
     const nueva = {
       id: Date.now().toString(),
       motivo,
@@ -68,6 +113,8 @@ export default function useRedApoyo() {
       nota,
       estado: ESTADOS.ESPERA,
       suplente: null,
+      suplenteId: null,
+      postulaciones: postulantes,
       fechaInicio: null,
       fechaFin: null,
     };
@@ -79,15 +126,21 @@ export default function useRedApoyo() {
     setNota("");
     setFechaDesde("");
     setFechaHasta("");
+
+    Alert.alert("Solicitud creada", `${postulantes.length} cuidador(es) han mostrado interés.`);
   };
 
-  const asignarCercano = (id) => {
-    const mejor = cuidadores.sort((a, b) => a.eta - b.eta)[0];
+  const asignarCuidador = (solicitudId, cuidadorId) => {
+    const cuidador = cuidadores.find(c => c.id === cuidadorId);
+    if (!cuidador) return;
+
     const actualizadas = solicitudes.map((s) =>
-      s.id === id ? { ...s, estado: ESTADOS.ASIGNADA, suplente: mejor.nombre } : s
+      s.id === solicitudId
+        ? { ...s, estado: ESTADOS.ASIGNADA, suplente: cuidador.nombre, suplenteId: cuidadorId }
+        : s
     );
     guardar(actualizadas);
-    Alert.alert("Apoyo asignado", `${mejor.nombre} cubrirá este turno.`);
+    Alert.alert("Apoyo asignado", `${cuidador.nombre} cubrirá este turno.`);
   };
 
   const iniciarApoyo = (id) => {
@@ -153,7 +206,7 @@ export default function useRedApoyo() {
     pacienteUbicacion,
     cuidadores,
     crearSolicitud,
-    asignarCercano,
+    asignarCuidador,
     iniciarApoyo,
     finalizarApoyo,
     cancelarApoyo,

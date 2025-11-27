@@ -6,22 +6,75 @@ const { width } = Dimensions.get("window");
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#F5F5F5",
   },
 
+  // Header with Profile Photo
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 16,
+  },
+  headerLeft: {
+    flex: 1,
   },
   headerName: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "700",
     color: "#212121",
   },
+  roleBadge: {
+    backgroundColor: "#E3F2FD",
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 6,
+  },
   headerRole: {
-    fontSize: 14,
-    color: "#757575",
-    marginTop: 2,
+    fontSize: 12,
+    color: "#1976D2",
+    fontWeight: "600",
+  },
+  avatarCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 3,
+    borderColor: ACCENT,
+  },
+
+  // Loading Skeleton
+  skeletonContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  skeletonHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  skeletonAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#E0E0E0",
+  },
+  skeletonText: {
+    backgroundColor: "#E0E0E0",
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  skeletonPanel: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginTop: 14,
+    padding: 16,
+    height: 120,
   },
 
   panel: {
@@ -32,8 +85,8 @@ export const styles = StyleSheet.create({
     marginTop: 14,
     padding: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
   panelTitle: {
@@ -232,8 +285,8 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 14,
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
   menuItem: {

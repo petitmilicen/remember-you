@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, Platform, StatusBar } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import useRedApoyo from "../../hooks/useRedApoyo";
 import SolicitudCard from "../../components/cuidador/SolicitudCard";
+import CuidadorCard from "../../components/cuidador/CuidadorCard";
 import ModalNuevaSolicitud from "../../components/cuidador/ModalNuevaSolicitud";
 import { styles } from "../../styles/RedApoyoStyles";
 
@@ -23,10 +23,9 @@ export default function RedApoyoScreen() {
     setFechaHasta,
     nota,
     setNota,
-    pacienteUbicacion,
     cuidadores,
     crearSolicitud,
-    asignarCercano,
+    asignarCuidador,
     iniciarApoyo,
     finalizarApoyo,
     cancelarApoyo,
@@ -34,6 +33,8 @@ export default function RedApoyoScreen() {
     filtroActivo,
     ESTADOS,
   } = useRedApoyo();
+
+  const cuidadoresDisponibles = cuidadores.filter(c => c.disponible);
 
   return (
     <View style={styles.container}>
@@ -45,49 +46,59 @@ export default function RedApoyoScreen() {
       </View>
 
       <View style={styles.summaryBox}>
-        <Text style={styles.summaryText}>
-          Solicitudes activas: <Text style={styles.summaryStrong}>{filtroActivo.length}</Text>
-        </Text>
-        <Text style={styles.summaryText}>
-          Cuidadores cercanos: <Text style={styles.summaryStrong}>{cuidadores.length}</Text>
-        </Text>
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryLabel}>Solicitudes activas</Text>
+          <Text style={styles.summaryValue}>{filtroActivo.length}</Text>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryLabel}>Cuidadores en red</Text>
+          <Text style={styles.summaryValue}>{cuidadores.length}</Text>
+        </View>
       </View>
 
-      <View style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: pacienteUbicacion.latitude,
-            longitude: pacienteUbicacion.longitude,
-            latitudeDelta: 0.012,
-            longitudeDelta: 0.012,
-          }}
+      {/* Sección de Cuidadores Disponibles */}
+      <View style={styles.cuidadoresSection}>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="people" size={18} color="#1976D2" />
+          <Text style={styles.sectionTitle}>Cuidadores Disponibles</Text>
+          <View style={styles.disponibleBadge}>
+            <Text style={styles.disponibleBadgeText}>{cuidadoresDisponibles.length}</Text>
+          </View>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.cuidadoresScroll}
         >
-          <Marker coordinate={pacienteUbicacion} pinColor="#1976D2" title="Paciente" />
-          {cuidadores.map((c, i) => (
-            <Marker
-              key={i}
-              coordinate={c.coord}
-              pinColor="#43A047"
-              title={c.nombre}
-              description={`★${c.rating} - ${c.eta} min`}
-            />
+          {cuidadores.map((c) => (
+            <CuidadorCard key={c.id} cuidador={c} compact={true} />
           ))}
-        </MapView>
-        <Text style={styles.mapLabel}>Ubicación del paciente y cuidadores disponibles</Text>
+        </ScrollView>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <Text style={styles.sectionTitle}>Solicitudes de apoyo</Text>
+        <View style={styles.sectionHeaderSolicitudes}>
+          <Ionicons name="document-text" size={18} color="#FF7043" />
+          <Text style={styles.sectionTitle}>Mis Solicitudes</Text>
+        </View>
         {solicitudes.length === 0 ? (
-          <Text style={styles.muted}>No hay solicitudes aún.</Text>
+          <View style={styles.emptyState}>
+            <Ionicons name="calendar-outline" size={48} color="#BDBDBD" />
+            <Text style={styles.emptyStateText}>No hay solicitudes aún</Text>
+            <Text style={styles.emptyStateSubtext}>
+              Presiona el botón + para crear una nueva solicitud de apoyo
+            </Text>
+          </View>
         ) : (
           solicitudes.map((s) => (
             <SolicitudCard
               key={s.id}
               s={s}
               ESTADOS={ESTADOS}
-              onAsignar={asignarCercano}
+              cuidadores={cuidadores}
+              onAsignar={asignarCuidador}
               onCancelar={cancelarApoyo}
               onIniciar={iniciarApoyo}
               onFinalizar={finalizarApoyo}

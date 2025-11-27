@@ -36,7 +36,9 @@ class UserDataSerializer(serializers.ModelSerializer):
             'profile_picture',
             'main_caregiver',
             'patient',
+            'created_at',
         )
+        read_only_fields = ('id', 'created_at')
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip() or "Sin nombre"

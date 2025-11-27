@@ -139,3 +139,23 @@ class UnassignPatientView(APIView):
         return Response({
             'message': 'Paciente desvinculado exitosamente.'
         }, status=status.HTTP_200_OK)
+
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request):
+        user = request.user
+        
+        # Delete profile picture if exists
+        if user.profile_picture:
+            picture_path = user.profile_picture.path
+            if os.path.exists(picture_path):
+                os.remove(picture_path)
+        
+        # Delete the user account
+        user.delete()
+        
+        return Response({
+            'message': 'Cuenta eliminada exitosamente.'
+        }, status=status.HTTP_200_OK)

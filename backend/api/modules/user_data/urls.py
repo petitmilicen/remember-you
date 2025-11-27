@@ -8,4 +8,5 @@ urlpatterns = [
     path('patient/<int:patient_id>/', views.GetPatientByIdView.as_view(), name='get-patient-by-id'),
     path('assign-patient/', views.AssignCaregiverToPatientView.as_view(), name='assign-caregiver-to-patient'),
     path('unassign-patient/', views.UnassignPatientView.as_view(), name='unassign-patient'),
+    path('delete-account/', views.DeleteAccountView.as_view(), name='delete-account'),
 ]
