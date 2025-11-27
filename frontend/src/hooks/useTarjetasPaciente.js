@@ -10,7 +10,12 @@ export default function useTarjetasPaciente() {
   const loadCards = async () => {
     try {
       const data = await getCards();
-      setCards(data);
+
+      const cardsWithCreator = data.map(card => ({
+        ...card,
+        created_by: card.created_by || 'paciente'
+      }));
+      setCards(cardsWithCreator);
     } catch (error) {
       console.error("Error cargando tarjetas:", error);
     }
@@ -26,7 +31,7 @@ export default function useTarjetasPaciente() {
           try {
             console.log("Eliminando tarjeta con id:", id);
             await deleteCard(id);
-            await loadCards(); // recarga la lista
+            await loadCards();
           } catch (err) {
             console.error("Error eliminando tarjeta:", err);
           }

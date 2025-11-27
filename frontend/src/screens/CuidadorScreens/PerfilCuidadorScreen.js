@@ -232,7 +232,6 @@ export default function PerfilCuidadorScreen({ navigation }) {
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                {/* ID Card */}
                 <View style={styles.idCardContainer}>
                     <LinearGradient
                         colors={['#1976D2', '#1565C0', '#0D47A1']}
@@ -240,20 +239,15 @@ export default function PerfilCuidadorScreen({ navigation }) {
                         end={{ x: 1, y: 1 }}
                         style={styles.idCard}
                     >
-                        {/* Hologram Effect */}
                         <View style={styles.hologram}>
                             <FontAwesome5 name="shield-alt" size={20} color="rgba(255,255,255,0.3)" />
                         </View>
-
-                        {/* Logo/Brand */}
                         <View style={styles.cardBrand}>
                             <FontAwesome5 name="heart" size={16} color="rgba(255,255,255,0.9)" />
                             <Text style={styles.brandText}>REMEMBER YOU</Text>
                         </View>
 
-                        {/* Main Content */}
                         <View style={styles.cardContent}>
-                            {/* Photo Section */}
                             <View style={styles.photoSection}>
                                 <View style={styles.photoFrame}>
                                     {userData?.profile_picture ? (
@@ -281,7 +275,6 @@ export default function PerfilCuidadorScreen({ navigation }) {
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Info Section */}
                             <View style={styles.infoSection}>
                                 <Text style={styles.cardName}>{userData?.full_name?.toUpperCase() || "USUARIO"}</Text>
                                 <Text style={styles.cardRole}>CUIDADOR PROFESIONAL</Text>
@@ -307,7 +300,6 @@ export default function PerfilCuidadorScreen({ navigation }) {
                     </LinearGradient>
                 </View>
 
-                {/* Additional Info Card */}
                 <View style={styles.additionalInfo}>
                     <Text style={styles.sectionTitle}>Información de Contacto</Text>
 
@@ -342,13 +334,11 @@ export default function PerfilCuidadorScreen({ navigation }) {
                     </View>
                 </View>
 
-                {/* Logout Button */}
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                     <FontAwesome5 name="sign-out-alt" size={16} color="#FFF" />
                     <Text style={styles.logoutText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
 
-                {/* Delete Account Button */}
                 <TouchableOpacity
                     style={styles.deleteAccountButton}
                     onPress={handleDeleteAccount}

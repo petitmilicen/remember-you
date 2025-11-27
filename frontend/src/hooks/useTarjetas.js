@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { getCards, createCard, deleteCard } from "../api/cardService";
+
 export default function useTarjetas() {
   const [tarjetas, setTarjetas] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -8,20 +9,26 @@ export default function useTarjetas() {
   const [nuevoMensaje, setNuevoMensaje] = useState("");
 
   useEffect(() => {
-    const cargarTarjetas = async () => {
-      try {
-        const stored = await AsyncStorage.getItem("memoryCards");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          parsed.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-          setTarjetas(parsed);
-        }
-      } catch (error) {
-        console.error("Error cargando tarjetas:", error);
-      }
-    };
     cargarTarjetas();
   }, []);
+
+  const cargarTarjetas = async () => {
+    try {
+      const data = await getCards();
+      if (data) {
+        const formatted = data.map((card) => ({
+          id: card.card_id,
+          tipo: card.card_type || "Message",
+          mensaje: card.message,
+          date: new Date(card.created_at).toLocaleDateString(),
+          creadoPor: card.created_by || "paciente",
+        }));
+        setTarjetas(formatted);
+      }
+    } catch (error) {
+      console.error("Error cargando tarjetas:", error);
+    }
+  };
 
   const agregarTarjeta = async () => {
     if (!nuevoTipo.trim() || !nuevoMensaje.trim()) {
@@ -29,27 +36,22 @@ export default function useTarjetas() {
       return;
     }
 
-    const nuevaTarjeta = {
-      id: Date.now().toString(),
-      tipo: nuevoTipo.trim(),
-      mensaje: nuevoMensaje.trim(),
-      date: new Date().toLocaleDateString(),
-      creadoPor: "cuidador",
-    };
-
     try {
-      const stored = await AsyncStorage.getItem("memoryCards");
-      const prev = stored ? JSON.parse(stored) : [];
-      const updated = [nuevaTarjeta, ...prev];
-      await AsyncStorage.setItem("memoryCards", JSON.stringify(updated));
-      setTarjetas(updated);
+      const cardData = {
+        card_type: nuevoTipo.trim(),
+        message: nuevoMensaje.trim(),
+      };
+
+      await createCard(cardData);
+      await cargarTarjetas();
+
+      setModalVisible(false);
+      setNuevoTipo("");
+      setNuevoMensaje("");
     } catch (error) {
       console.error("Error guardando tarjeta:", error);
+      Alert.alert("Error", "No se pudo guardar la tarjeta.");
     }
-
-    setModalVisible(false);
-    setNuevoTipo("");
-    setNuevoMensaje("");
   };
 
   const eliminarTarjeta = async (id) => {
@@ -60,11 +62,11 @@ export default function useTarjetas() {
         style: "destructive",
         onPress: async () => {
           try {
-            const updated = tarjetas.filter((t) => t.id !== id);
-            setTarjetas(updated);
-            await AsyncStorage.setItem("memoryCards", JSON.stringify(updated));
+            await deleteCard(id);
+            await cargarTarjetas();
           } catch (error) {
             console.error("Error eliminando tarjeta:", error);
+            Alert.alert("Error", "No se pudo eliminar la tarjeta.");
           }
         },
       },
@@ -81,5 +83,6 @@ export default function useTarjetas() {
     setNuevoMensaje,
     agregarTarjeta,
     eliminarTarjeta,
+    recargarTarjetas: cargarTarjetas,
   };
 }

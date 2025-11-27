@@ -16,8 +16,9 @@ class Card(models.Model):
 
     card_id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_cards')
     created_at = models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"Card {self.card_type} by {self.user.username}" 
+        return f"Card {self.card_type} by {self.created_by_user.username if self.created_by_user else 'Unknown'}"

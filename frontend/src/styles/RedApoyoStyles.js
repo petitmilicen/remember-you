@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F5F5" },
 
-  // Header
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -13,7 +12,6 @@ export const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 24, fontWeight: "700", color: "#212121" },
 
-  // Summary Box
   summaryBox: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -34,7 +32,6 @@ export const styles = StyleSheet.create({
   summaryValue: { fontSize: 24, color: "#1976D2", fontWeight: "700", marginTop: 4 },
   summaryDivider: { width: 1, height: 40, backgroundColor: "#E0E0E0" },
 
-  // Cuidadores Section
   cuidadoresSection: {
     marginTop: 16,
     backgroundColor: "#FFF",
@@ -64,7 +61,6 @@ export const styles = StyleSheet.create({
 
   cuidadoresScroll: { paddingRight: 16, gap: 12 },
 
-  // CuidadorCard - Compact
   cuidadorCardCompact: {
     backgroundColor: "#F9F9F9",
     borderRadius: 12,
@@ -100,7 +96,6 @@ export const styles = StyleSheet.create({
   },
   noDisponibleText: { color: "#FFF", fontSize: 9, fontWeight: "700" },
 
-  // CuidadorCard - Expanded
   cuidadorCardExpanded: {
     flexDirection: "row",
     backgroundColor: "#FAFAFA",
@@ -137,7 +132,6 @@ export const styles = StyleSheet.create({
   },
   seleccionarBtnText: { color: "#FFF", fontSize: 13, fontWeight: "700" },
 
-  // Solicitudes Section
   sectionHeaderSolicitudes: {
     flexDirection: "row",
     alignItems: "center",
@@ -167,7 +161,6 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Solicitud Card
   card: {
     backgroundColor: "#FFF",
     marginHorizontal: 16,
@@ -254,7 +247,6 @@ export const styles = StyleSheet.create({
   },
   btnText: { color: "#FFF", fontWeight: "700", fontSize: 13 },
 
-  // Modal
   modalOverlay: {
     flex: 1,
     justifyContent: "center",

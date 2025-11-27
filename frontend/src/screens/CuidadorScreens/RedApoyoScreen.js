@@ -57,7 +57,6 @@ export default function RedApoyoScreen() {
         </View>
       </View>
 
-      {/* Sección de Cuidadores Disponibles */}
       <View style={styles.cuidadoresSection}>
         <View style={styles.sectionHeader}>
           <Ionicons name="people" size={18} color="#1976D2" />

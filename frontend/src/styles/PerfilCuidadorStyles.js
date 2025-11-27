@@ -3,7 +3,7 @@ import { ACCENT } from "../utils/constants";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width - 40;
-const CARD_HEIGHT = (CARD_WIDTH * 0.63); // Credit card ratio
+const CARD_HEIGHT = (CARD_WIDTH * 0.63);
 
 export const styles = StyleSheet.create({
     container: {
@@ -11,7 +11,6 @@ export const styles = StyleSheet.create({
         backgroundColor: "#F5F5F5",
     },
 
-    // Header
     header: {
         paddingHorizontal: 20,
         paddingBottom: 10,
@@ -27,7 +26,6 @@ export const styles = StyleSheet.create({
         fontWeight: "600",
     },
 
-    // Loading
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
@@ -40,12 +38,10 @@ export const styles = StyleSheet.create({
         color: "#757575",
     },
 
-    // Scroll Content
     scrollContent: {
         paddingBottom: 40,
     },
 
-    // ID Card Container
     idCardContainer: {
         marginHorizontal: 20,
         marginTop: 10,
@@ -58,7 +54,6 @@ export const styles = StyleSheet.create({
         shadowRadius: 10,
     },
 
-    // ID Card (Gradient Background)
     idCard: {
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
@@ -68,7 +63,6 @@ export const styles = StyleSheet.create({
         overflow: "hidden",
     },
 
-    // Hologram Effect (security feature) - TOP LEFT
     hologram: {
         position: "absolute",
         top: 20,
@@ -76,7 +70,6 @@ export const styles = StyleSheet.create({
         opacity: 0.3,
     },
 
-    // Brand/Logo
     cardBrand: {
         position: "absolute",
         top: 20,
@@ -92,15 +85,12 @@ export const styles = StyleSheet.create({
         letterSpacing: 1,
     },
 
-    // Main Card Content
     cardContent: {
         flex: 1,
         flexDirection: "row",
         marginTop: 50,
         gap: 16,
     },
-
-    // Photo Section
     photoSection: {
         position: "relative",
     },
@@ -151,7 +141,6 @@ export const styles = StyleSheet.create({
         alignItems: "center",
     },
 
-    // Info Section on Card
     infoSection: {
         flex: 1,
         justifyContent: "space-between",
@@ -190,7 +179,6 @@ export const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
 
-    // Additional Info Section
     additionalInfo: {
         marginHorizontal: 20,
         marginBottom: 16,
@@ -237,7 +225,6 @@ export const styles = StyleSheet.create({
         marginVertical: 12,
     },
 
-    // Logout Button
     logoutButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -260,7 +247,6 @@ export const styles = StyleSheet.create({
         fontWeight: "700",
     },
 
-    // Delete Account Button
     deleteAccountButton: {
         flexDirection: "row",
         alignItems: "center",

@@ -4,22 +4,22 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { styles } from "../../styles/TarjetasStyles";
 
 export default function TarjetaPacienteItem({ item, themeStyles, settings, getFontSize, onDelete }) {
-  const isCuidador = item.creadoPor === "cuidador";
+  const isCuidador = item.created_by === "cuidador";
   const fondo = isCuidador
     ? settings.theme === "dark"
       ? "#3C3A1E"
       : "#FFF3CD"
     : settings.theme === "dark"
-    ? "#2E3D2E"
-    : "#D0F0C0";
+      ? "#2E3D2E"
+      : "#D0F0C0";
 
   const borde = isCuidador
     ? settings.theme === "dark"
       ? "#C9A13C"
       : "#FFB74D"
     : settings.theme === "dark"
-    ? "#5FA77A"
-    : "#81C784";
+      ? "#5FA77A"
+      : "#81C784";
 
   return (
     <TouchableOpacity
@@ -46,9 +46,11 @@ export default function TarjetaPacienteItem({ item, themeStyles, settings, getFo
         </Text>
       </View>
 
-      <TouchableOpacity style={[styles.deleteButton, themeStyles.card]} onPress={() => onDelete(item.card_id)}>
-        <FontAwesome5 name="trash" size={14} color="red" />
-      </TouchableOpacity>
+      {!isCuidador && (
+        <TouchableOpacity style={[styles.deleteButton, themeStyles.card]} onPress={() => onDelete(item.card_id)}>
+          <FontAwesome5 name="trash" size={14} color="red" />
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 }
