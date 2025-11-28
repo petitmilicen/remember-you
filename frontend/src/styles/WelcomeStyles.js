@@ -1,46 +1,51 @@
 import { StyleSheet, Dimensions } from "react-native";
+
 const { width } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EDEDED",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
   },
-
   logo: {
-    width: width * 0.55,
-    height: width * 0.55,
-    marginBottom: 40,
+    width: width * 0.6,
+    height: width * 0.6,
+    marginBottom: 50,
     alignSelf: "center",
   },
-
   button: {
-    width: "80%",
-    backgroundColor: "#000000",
-    paddingVertical: 14,
-    borderRadius: 25,
+    width: "85%",
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 16,
+    borderRadius: 30,
     alignItems: "center",
-    marginVertical: 8,
-    elevation: 4,
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   buttonText: {
     fontWeight: "bold",
-    color: "#FFFFFF",
-    fontSize: 16,
+    color: "#6A5ACD",
+    fontSize: 18,
+    letterSpacing: 0.5,
   },
-
   footerText: {
-    marginTop: 30,
+    marginTop: 40,
     textAlign: "center",
-    color: "#333",
-    fontSize: 14,
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "500",
   },
   linkText: {
     fontWeight: "bold",
-    textDecorationLine: "underline",
-    color: "#000",
+    color: "#FFD700",
   },
 });

@@ -3,7 +3,6 @@ import api from './axiosInstance';
 export const getUserProfile = async () => {
   try {
     const res = await api.get("/api/user-data/");
-    console.log("Usuario:", res.data);
     return res.data
   } catch (err) {
     console.error("Error al obtener usuario:", err.response?.data || err);
@@ -34,7 +33,6 @@ export const uploadProfilePicture = async (imageUri) => {
       },
     });
 
-    console.log('Foto subida exitosamente:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error subiendo foto de perfil:', error.response?.data || error);
@@ -45,7 +43,6 @@ export const uploadProfilePicture = async (imageUri) => {
 export const deleteProfilePicture = async () => {
   try {
     const response = await api.delete('/api/user-data/profile-picture/');
-    console.log('Foto eliminada exitosamente:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error eliminando foto de perfil:', error.response?.data || error);
@@ -68,7 +65,6 @@ export const assignPatientToCaregiver = async (patientId) => {
     const response = await api.post('/api/user-data/assign-patient/', {
       patient_id: patientId
     });
-    console.log('Paciente asignado:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error asignando paciente:', error.response?.data || error);
@@ -79,7 +75,6 @@ export const assignPatientToCaregiver = async (patientId) => {
 export const unassignPatient = async () => {
   try {
     const response = await api.post('/api/user-data/unassign-patient/');
-    console.log('Paciente desvinculado:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error desvinculando paciente:', error.response?.data || error);
@@ -90,7 +85,6 @@ export const unassignPatient = async () => {
 export const deleteAccount = async () => {
   try {
     const response = await api.delete('/api/user-data/delete-account/');
-    console.log('Cuenta eliminada:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error eliminando cuenta:', error.response?.data || error);
@@ -101,7 +95,6 @@ export const deleteAccount = async () => {
 export const getAvailableCaregivers = async () => {
   try {
     const response = await api.get('/api/user-data/available-caregivers/');
-    console.log('Cuidadores disponibles:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error obteniendo cuidadores disponibles:', error.response?.data || error);

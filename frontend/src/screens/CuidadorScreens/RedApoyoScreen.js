@@ -79,7 +79,6 @@ export default function RedApoyoScreen() {
         </ScrollView>
       </View>
 
-      {/* Show Available Requests ONLY if user has no patient assigned */}
       {!tienePacienteAsignado && (
         <View style={styles.cuidadoresSection}>
           <View style={styles.sectionHeader}>
@@ -111,7 +110,7 @@ export default function RedApoyoScreen() {
                   onIniciar={iniciarApoyo}
                   onFinalizar={finalizarApoyo}
                   onEliminar={eliminarApoyo}
-                  isAvailableRequest={true} // New prop to indicate this is an available request
+                  isAvailableRequest={true}
                 />
               ))}
             </ScrollView>

@@ -1,138 +1,213 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, StatusBar, Dimensions, ScrollView } from 'react-native';
 import { AuthContext } from '../../auth/AuthContext';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import Icon from 'react-native-vector-icons/FontAwesome6';
 
-export default function LoginCuidadorScreen({ navigation }) {
+const { width } = Dimensions.get('window');
+
+export default function LoginPacienteScreen({ navigation }) {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-const handleLogin = async () => {
-  try {
-    await login(email, password);
-    navigation.navigate("Home");
-  } catch (err) {
+  const handleLogin = async () => {
+    try {
+      await login(email, password);
+      navigation.navigate("Home");
+    } catch (err) {
+      setError('Correo o contraseña incorrectos');
+    }
+  };
 
-    setError('Correo o contraseña incorrectos');
-  }
-};
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        bounces={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.container}>
+          <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-return (
-  <KeyboardAvoidingView
-    style={styles.container}
-    behavior={Platform.OS === "ios" ? "padding" : undefined}
-  >
-    <Image
-      source={require("../../assets/images/Logo.png")}
-      style={styles.logo}
-      resizeMode="contain"
-    />
+          {/* Header Gradient */}
+          <LinearGradient
+            colors={["#6A5ACD", "#48D1CC"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.header}
+          >
+            <Image
+              source={require("../../assets/images/logo2.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.headerTitle}>Bienvenido de nuevo</Text>
+            <Text style={styles.headerSubtitle}>Ingresa a tu cuenta</Text>
+          </LinearGradient>
 
-    <View style={styles.formContainer}>
+          {/* Form Container */}
+          <Animated.View
+            entering={FadeInUp.delay(300).duration(800)}
+            style={styles.formContainer}
+          >
+            <View style={styles.inputContainer}>
+              <Icon name="envelope" size={20} color="#6A5ACD" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Correo electrónico"
+                placeholderTextColor="#999"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Correo electrónico"
-        placeholderTextColor="#999"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+            <View style={styles.inputContainer}>
+              <Icon name="lock" size={20} color="#6A5ACD" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Contraseña"
+                placeholderTextColor="#999"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!isPasswordVisible}
+              />
+              <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                <Icon name={isPasswordVisible ? "eye" : "eye-slash"} size={20} color="#999" />
+              </TouchableOpacity>
+            </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor="#999"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Iniciar sesión</Text>
-      </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleLogin} activeOpacity={0.8}>
+              <LinearGradient
+                colors={["#6A5ACD", "#48D1CC"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.buttonGradient}
+              >
+                <Text style={styles.buttonText}>Iniciar sesión</Text>
+              </LinearGradient>
+            </TouchableOpacity>
 
-      <Text style={styles.footerText}>
-        ¿No tienes una cuenta?{" "}
-        <Text
-          style={styles.linkText}
-          onPress={() => navigation.navigate("RegisterCuidador")}
-        >
-          Ingresa aquí.
-        </Text>
-      </Text>
-
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-    </View>
-  </KeyboardAvoidingView>
-);
+            <Text style={styles.footerText}>
+              ¿No tienes una cuenta?{" "}
+              <Text
+                style={styles.linkText}
+                onPress={() => navigation.navigate("RegisterPaciente")}
+              >
+                Regístrate aquí.
+              </Text>
+            </Text>
+          </Animated.View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EDEDED",
-    alignItems: "center",  
-    justifyContent: "center",
-    paddingHorizontal: 20,   
+    backgroundColor: "#F5F5F5",
+    minHeight: Dimensions.get('window').height,
+  },
+  header: {
+    height: Dimensions.get('window').height * 0.4,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 80,
+    paddingTop: 40,
   },
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginBottom: 5,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: "#E0E0E0",
   },
   formContainer: {
     backgroundColor: "#FFF",
-    width: "100%",           
+    marginHorizontal: 20,
+    marginTop: -50,
     borderRadius: 20,
-    padding: 25,
+    padding: 30,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
+    marginBottom: 30,
   },
-  welcomeText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 20,
-    textAlign: "center",
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+    marginBottom: 25,
+    paddingVertical: 5,
+  },
+  inputIcon: {
+    marginRight: 15,
+    width: 25,
+    textAlign: 'center',
   },
   input: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    marginBottom: 20,
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
     paddingVertical: 8,
-    fontSize: 14,
-    color: "#000",
   },
   button: {
-    backgroundColor: "#000",
-    paddingVertical: 14,
+    marginTop: 20,
     borderRadius: 30,
-    marginVertical: 10,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
+    overflow: 'hidden',
+    shadowColor: "#6A5ACD",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  buttonGradient: {
+    paddingVertical: 15,
+    alignItems: "center",
   },
   buttonText: {
     color: "#FFF",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
   },
   footerText: {
-    marginTop: 10,
+    marginTop: 25,
     fontSize: 14,
-    color: "#333",
+    color: "#666",
     textAlign: "center",
   },
   linkText: {
     fontWeight: "bold",
+    color: "#6A5ACD",
+  },
+  errorText: {
+    color: "#FF4444",
+    textAlign: "center",
+    marginBottom: 15,
   },
 });

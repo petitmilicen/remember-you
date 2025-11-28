@@ -21,9 +21,8 @@ export default function SolicitudCard({
   onIniciar,
   onFinalizar,
   onEliminar,
-  isAvailableRequest = false, // Default to false
+  isAvailableRequest = false,
 }) {
-  // Obtener cuidadores postulados
   const postulantes = s.postulaciones
     ? cuidadores.filter(c => s.postulaciones.includes(c.id))
     : [];
@@ -85,7 +84,6 @@ export default function SolicitudCard({
         </View>
       )}
 
-      {/* Mostrar postulaciones cuando está en espera */}
       {s.estado === ESTADOS.ESPERA && postulantes.length > 0 && (
         <View style={styles.postulacionesContainer}>
           <Text style={styles.postulacionesTitle}>
@@ -104,7 +102,6 @@ export default function SolicitudCard({
       )}
 
       <View style={styles.actionsRow}>
-        {/* Button to take request (for available requests list) */}
         {isAvailableRequest && (
           <TouchableOpacity
             style={[styles.btn, { backgroundColor: "#4CAF50", flex: 1 }]}
