@@ -261,18 +261,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
     marginBottom: 20,
-    paddingVertical: 5,
-  },
-  inputIcon: {
-    marginRight: 10,
-    width: 20,
-    textAlign: 'center',
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    color: "#333",
-    paddingVertical: 8,
+    textAlign: 'left',
   },
   button: {
     marginTop: 20,

@@ -302,18 +302,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  inputIcon: {
-    marginRight: 10,
-    width: 20,
-    textAlign: 'center',
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    color: "#333",
-    paddingVertical: 8,
+    textAlign: 'left',
   },
   label: {
     fontSize: 14,

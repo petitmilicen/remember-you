@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, KeyboardAvo
 import { AuthContext } from '../../auth/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import Icon from 'react-native-vector-icons/FontAwesome6';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -36,7 +36,6 @@ export default function LoginPacienteScreen({ navigation }) {
         <View style={styles.container}>
           <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-          {/* Header Gradient */}
           <LinearGradient
             colors={["#6A5ACD", "#48D1CC"]}
             start={{ x: 0, y: 0 }}
@@ -52,13 +51,12 @@ export default function LoginPacienteScreen({ navigation }) {
             <Text style={styles.headerSubtitle}>Ingresa a tu cuenta</Text>
           </LinearGradient>
 
-          {/* Form Container */}
           <Animated.View
             entering={FadeInUp.delay(300).duration(800)}
             style={styles.formContainer}
           >
             <View style={styles.inputContainer}>
-              <Icon name="envelope" size={20} color="#6A5ACD" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
@@ -71,7 +69,7 @@ export default function LoginPacienteScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="lock" size={20} color="#6A5ACD" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
@@ -81,7 +79,7 @@ export default function LoginPacienteScreen({ navigation }) {
                 secureTextEntry={!isPasswordVisible}
               />
               <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                <Icon name={isPasswordVisible ? "eye" : "eye-slash"} size={20} color="#999" />
+                <Ionicons name={isPasswordVisible ? "eye-outline" : "eye-off-outline"} size={20} color="#999" />
               </TouchableOpacity>
             </View>
 
@@ -166,15 +164,15 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   inputIcon: {
-    marginRight: 15,
-    width: 25,
-    textAlign: 'center',
+    marginRight: 10,
+    width: 20,
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     color: "#333",
     paddingVertical: 8,
+    textAlign: 'left',
   },
   button: {
     marginTop: 20,
