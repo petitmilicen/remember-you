@@ -21,6 +21,7 @@ export default function SolicitudCard({
   onIniciar,
   onFinalizar,
   onEliminar,
+  isAvailableRequest = false, // Default to false
 }) {
   // Obtener cuidadores postulados
   const postulantes = s.postulaciones
@@ -103,7 +104,18 @@ export default function SolicitudCard({
       )}
 
       <View style={styles.actionsRow}>
-        {s.estado === ESTADOS.ESPERA && (
+        {/* Button to take request (for available requests list) */}
+        {isAvailableRequest && (
+          <TouchableOpacity
+            style={[styles.btn, { backgroundColor: "#4CAF50", flex: 1 }]}
+            onPress={() => onAsignar(s.id, null)}
+          >
+            <Ionicons name="hand-left" size={16} color="#FFF" />
+            <Text style={styles.btnText}>Tomar Solicitud</Text>
+          </TouchableOpacity>
+        )}
+
+        {!isAvailableRequest && s.estado === ESTADOS.ESPERA && (
           <>
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: "#E57373" }]}
@@ -115,7 +127,7 @@ export default function SolicitudCard({
           </>
         )}
 
-        {s.estado === ESTADOS.ASIGNADA && (
+        {!isAvailableRequest && s.estado === ESTADOS.ASIGNADA && (
           <TouchableOpacity
             style={[styles.btn, { backgroundColor: "#1565C0" }]}
             onPress={() => onIniciar(s.id)}
@@ -125,7 +137,7 @@ export default function SolicitudCard({
           </TouchableOpacity>
         )}
 
-        {s.estado === ESTADOS.CURSO && (
+        {!isAvailableRequest && s.estado === ESTADOS.CURSO && (
           <TouchableOpacity
             style={[styles.btn, { backgroundColor: "#2E7D32" }]}
             onPress={() => onFinalizar(s.id)}
@@ -135,7 +147,7 @@ export default function SolicitudCard({
           </TouchableOpacity>
         )}
 
-        {(s.estado === ESTADOS.FINALIZADA ||
+        {!isAvailableRequest && (s.estado === ESTADOS.FINALIZADA ||
           s.estado === ESTADOS.CANCELADA) && (
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: "#B0BEC5" }]}

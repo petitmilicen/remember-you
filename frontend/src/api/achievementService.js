@@ -5,7 +5,7 @@ import axiosInstance from './axiosInstance';
  */
 export const getAchievements = async () => {
     try {
-        const response = await axiosInstance.get('/api/achievement/');
+        const response = await axiosInstance.get('/api/achievements/');
         return response.data;
     } catch (error) {
         console.error('Error fetching achievements:', error);
@@ -20,7 +20,7 @@ export const getAchievements = async () => {
  */
 export const unlockAchievement = async (category, level) => {
     try {
-        const response = await axiosInstance.post('/api/achievement/unlock/', {
+        const response = await axiosInstance.post('/api/achievements/unlock/', {
             category,
             level
         });

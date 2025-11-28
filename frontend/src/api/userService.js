@@ -98,3 +98,15 @@ export const deleteAccount = async () => {
   }
 };
 
+export const getAvailableCaregivers = async () => {
+  try {
+    const response = await api.get('/api/user-data/available-caregivers/');
+    console.log('Cuidadores disponibles:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error obteniendo cuidadores disponibles:', error.response?.data || error);
+    throw error;
+  }
+};
+
+

@@ -14,14 +14,11 @@ export default function CuidadorCard({ cuidador, onSelect, compact = false, show
                 <Text style={styles.cuidadorNombre} numberOfLines={1}>
                     {cuidador.nombre}
                 </Text>
-                <View style={styles.ratingRow}>
-                    <Ionicons name="star" size={12} color="#FFB300" />
-                    <Text style={styles.ratingText}>{cuidador.rating}</Text>
-                </View>
-                <Text style={styles.etaText}>
-                    <Ionicons name="location" size={10} color="#607D8B" /> {cuidador.distancia} km
-                </Text>
-                <Text style={styles.etaText}>⏱️ {cuidador.eta} min</Text>
+                {cuidador.email && (
+                    <Text style={styles.etaText} numberOfLines={1}>
+                        <Ionicons name="mail" size={10} color="#607D8B" /> {cuidador.email}
+                    </Text>
+                )}
                 {!cuidador.disponible && (
                     <View style={styles.noDisponibleBadge}>
                         <Text style={styles.noDisponibleText}>No disp.</Text>
@@ -42,17 +39,16 @@ export default function CuidadorCard({ cuidador, onSelect, compact = false, show
 
             <View style={styles.cuidadorCardCenter}>
                 <Text style={styles.cuidadorNombreLarge}>{cuidador.nombre}</Text>
-                <View style={styles.ratingRowLarge}>
-                    <Ionicons name="star" size={14} color="#FFB300" />
-                    <Text style={styles.ratingTextLarge}>{cuidador.rating}</Text>
-                    <Text style={styles.experienciaText}>• {cuidador.experiencia}</Text>
-                </View>
-                <Text style={styles.especialidadText}>
-                    <Ionicons name="medical" size={12} color="#42A5F5" /> {cuidador.especialidad}
-                </Text>
-                <Text style={styles.distanciaText}>
-                    📍 {cuidador.distancia} km • ⏱️ {cuidador.eta} min
-                </Text>
+                {cuidador.email && (
+                    <Text style={styles.especialidadText}>
+                        <Ionicons name="mail" size={12} color="#42A5F5" /> {cuidador.email}
+                    </Text>
+                )}
+                {cuidador.telefono && (
+                    <Text style={styles.especialidadText}>
+                        <Ionicons name="call" size={12} color="#42A5F5" /> {cuidador.telefono}
+                    </Text>
+                )}
             </View>
 
             {showButton && (

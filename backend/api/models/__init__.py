@@ -4,3 +4,4 @@ from api.modules.medical_log.models import *
 from api.modules.memory.models import *
 from api.modules.safe_zone.models import *
 from api.modules.user.models import *
+from api.modules.support_request.models import *

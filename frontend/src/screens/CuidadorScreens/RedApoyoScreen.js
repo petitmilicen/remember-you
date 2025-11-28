@@ -32,6 +32,8 @@ export default function RedApoyoScreen() {
     eliminarApoyo,
     filtroActivo,
     ESTADOS,
+    tienePacienteAsignado,
+    solicitudesDisponibles,
   } = useRedApoyo();
 
   const cuidadoresDisponibles = cuidadores.filter(c => c.disponible);
@@ -76,6 +78,46 @@ export default function RedApoyoScreen() {
           ))}
         </ScrollView>
       </View>
+
+      {/* Show Available Requests ONLY if user has no patient assigned */}
+      {!tienePacienteAsignado && (
+        <View style={styles.cuidadoresSection}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="hand-left" size={18} color="#4CAF50" />
+            <Text style={styles.sectionTitle}>Solicitudes Disponibles</Text>
+            <View style={[styles.disponibleBadge, { backgroundColor: "#4CAF50" }]}>
+              <Text style={styles.disponibleBadgeText}>{solicitudesDisponibles.length}</Text>
+            </View>
+          </View>
+
+          {solicitudesDisponibles.length === 0 ? (
+            <Text style={{ textAlign: "center", color: "#757575", marginTop: 10, fontStyle: "italic" }}>
+              No hay solicitudes disponibles para tomar.
+            </Text>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.cuidadoresScroll}
+            >
+              {solicitudesDisponibles.map((s) => (
+                <SolicitudCard
+                  key={s.id}
+                  s={s}
+                  ESTADOS={ESTADOS}
+                  cuidadores={cuidadores}
+                  onAsignar={asignarCuidador}
+                  onCancelar={cancelarApoyo}
+                  onIniciar={iniciarApoyo}
+                  onFinalizar={finalizarApoyo}
+                  onEliminar={eliminarApoyo}
+                  isAvailableRequest={true} // New prop to indicate this is an available request
+                />
+              ))}
+            </ScrollView>
+          )}
+        </View>
+      )}
 
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={styles.sectionHeaderSolicitudes}>

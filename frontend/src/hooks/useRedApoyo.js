@@ -1,19 +1,28 @@
 import { useState, useEffect, useMemo } from "react";
 import { Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  getSupportRequests,
+  createSupportRequest,
+  deleteSupportRequest,
+  assignCaregiverToRequest,
+  updateRequestStatus,
+  getAvailableSupportRequests
+} from "../api/supportRequestService";
+import { getAvailableCaregivers, getUserProfile } from "../api/userService";
+import eventEmitter, { EVENTS } from "../utils/eventEmitter";
 
 export default function useRedApoyo() {
   const [solicitudes, setSolicitudes] = useState([]);
+  const [solicitudesDisponibles, setSolicitudesDisponibles] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
   const [nota, setNota] = useState("");
-  const [pacienteUbicacion] = useState({
-    latitude: -33.45694,
-    longitude: -70.64827,
-  });
   const [cuidadores, setCuidadores] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [tienePacienteAsignado, setTienePacienteAsignado] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const ESTADOS = {
     ESPERA: "En espera",
@@ -24,166 +33,287 @@ export default function useRedApoyo() {
   };
 
   useEffect(() => {
-    (async () => {
-      const stored = await AsyncStorage.getItem("solicitudesApoyo");
-      if (stored) setSolicitudes(JSON.parse(stored));
-      generarCuidadoresCercanos();
-    })();
+    cargarDatos();
   }, []);
 
-  const generarCuidadoresCercanos = () => {
-    const randomAround = (v) => v + (Math.random() - 0.5) * 0.008;
-    const base = pacienteUbicacion;
-    const simulados = [
-      {
-        id: "1",
-        nombre: "Ana Torres",
-        rating: 4.8,
-        avatar: "AT",
-        especialidad: "Alzheimer",
-        experiencia: "5 años",
-        disponible: true
-      },
-      {
-        id: "2",
-        nombre: "Pedro Silva",
-        rating: 4.7,
-        avatar: "PS",
-        especialidad: "Demencia",
-        experiencia: "3 años",
-        disponible: true
-      },
-      {
-        id: "3",
-        nombre: "Laura Díaz",
-        rating: 4.9,
-        avatar: "LD",
-        especialidad: "Alzheimer",
-        experiencia: "7 años",
-        disponible: true
-      },
-      {
-        id: "4",
-        nombre: "José López",
-        rating: 4.6,
-        avatar: "JL",
-        especialidad: "Cuidados generales",
-        experiencia: "2 años",
-        disponible: Math.random() > 0.3 // 70% disponible
-      },
-    ].map((c) => {
-      const lat = randomAround(base.latitude);
-      const lon = randomAround(base.longitude);
-      const distKm = Math.hypot((lat - base.latitude) * 111, (lon - base.longitude) * 111);
-      const eta = Math.max(3, Math.round(distKm * 5 + Math.random() * 4));
-      return {
-        ...c,
-        distancia: distKm.toFixed(1),
-        eta,
-        coord: { latitude: lat, longitude: lon }
-      };
-    });
-    setCuidadores(simulados);
+  const cargarDatos = async () => {
+    await Promise.all([
+      cargarPerfilUsuario(),
+      cargarCuidadores(),
+      cargarSolicitudes(),
+      cargarSolicitudesDisponibles()
+    ]);
   };
 
-  const guardar = async (data) => {
-    setSolicitudes(data);
-    await AsyncStorage.setItem("solicitudesApoyo", JSON.stringify(data));
+  const cargarPerfilUsuario = async () => {
+    try {
+      const perfil = await getUserProfile();
+      setTienePacienteAsignado(perfil.patient !== null);
+      setCurrentUserId(perfil.id);
+    } catch (error) {
+      console.error('Error cargando perfil:', error);
+    }
   };
 
-  const crearSolicitud = () => {
-    if (!motivo.trim() || !fechaDesde.trim() || !fechaHasta.trim()) {
+  const cargarCuidadores = async () => {
+    try {
+      const data = await getAvailableCaregivers();
+
+      const cuidadoresTransformados = data.caregivers.map((c) => ({
+        id: c.id.toString(),
+        nombre: c.full_name,
+        avatar: c.avatar,
+        disponible: c.disponible,
+        email: c.email,
+        telefono: c.phone_number || 'No registrado'
+      }));
+
+      setCuidadores(cuidadoresTransformados);
+    } catch (error) {
+      console.error('Error cargando cuidadores:', error);
+      Alert.alert('Error', 'No se pudieron cargar los cuidadores disponibles.');
+    }
+  };
+
+  const cargarSolicitudes = async () => {
+    try {
+      setLoading(true);
+      const data = await getSupportRequests();
+
+      const solicitudesTransformadas = data.map((s) => ({
+        id: s.id,
+        motivo: s.reason,
+        desde: new Date(s.start_datetime).toLocaleString('es-CL', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        hasta: new Date(s.end_datetime).toLocaleString('es-CL', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        nota: s.notes || '',
+        estado: s.status,
+        suplente: s.assigned_caregiver?.full_name || null,
+        suplenteId: s.assigned_caregiver?.id || null,
+        fechaInicio: s.actual_start ? new Date(s.actual_start).toLocaleString('es-CL') : null,
+        fechaFin: s.actual_end ? new Date(s.actual_end).toLocaleString('es-CL') : null,
+        postulaciones: []
+      }));
+
+      setSolicitudes(solicitudesTransformadas);
+    } catch (error) {
+      console.error('Error cargando solicitudes:', error);
+      Alert.alert('Error', 'No se pudieron cargar las solicitudes.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cargarSolicitudesDisponibles = async () => {
+    try {
+      const data = await getAvailableSupportRequests();
+
+      const solicitudesTransformadas = data.requests.map((s) => ({
+        id: s.id,
+        motivo: s.reason,
+        desde: new Date(s.start_datetime).toLocaleString('es-CL', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        hasta: new Date(s.end_datetime).toLocaleString('es-CL', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        nota: s.notes || '',
+        estado: s.status,
+        solicitante: s.requester?.full_name || 'Desconocido',
+        emailSolicitante: s.requester?.email || '',
+        telefonoSolicitante: s.requester?.phone_number || '',
+        suplente: null,
+        suplenteId: null,
+        fechaInicio: null,
+        fechaFin: null,
+        postulaciones: []
+      }));
+
+      setSolicitudesDisponibles(solicitudesTransformadas);
+    } catch (error) {
+      console.error('Error cargando solicitudes disponibles:', error);
+    }
+  };
+
+  const crearSolicitud = async () => {
+    if (!motivo.trim() || !fechaDesde || !fechaHasta) {
       Alert.alert("Campos incompletos", "Por favor completa motivo, fecha de inicio y fin.");
       return;
     }
 
-    // Simular postulaciones automáticas (1-3 cuidadores disponibles)
-    const disponibles = cuidadores.filter(c => c.disponible);
-    const numPostulaciones = Math.min(disponibles.length, Math.floor(Math.random() * 3) + 1);
-    const postulantes = disponibles
-      .sort(() => Math.random() - 0.5)
-      .slice(0, numPostulaciones)
-      .map(c => c.id);
+    try {
+      setLoading(true);
 
-    const nueva = {
-      id: Date.now().toString(),
-      motivo,
-      desde: fechaDesde,
-      hasta: fechaHasta,
-      nota,
-      estado: ESTADOS.ESPERA,
-      suplente: null,
-      suplenteId: null,
-      postulaciones: postulantes,
-      fechaInicio: null,
-      fechaFin: null,
-    };
+      const parseDateTime = (dateInput) => {
+        if (!dateInput) throw new Error('Date input is missing');
 
-    const actualizadas = [nueva, ...solicitudes];
-    guardar(actualizadas);
-    setModalVisible(false);
-    setMotivo("");
-    setNota("");
-    setFechaDesde("");
-    setFechaHasta("");
+        if (dateInput instanceof Date) {
+          return dateInput.toISOString();
+        }
 
-    Alert.alert("Solicitud creada", `${postulantes.length} cuidador(es) han mostrado interés.`);
+        if (typeof dateInput === 'string') {
+          // If ISO format
+          if (dateInput.includes('T')) {
+            return dateInput;
+          }
+
+          // Handle "DD/MM/YYYY" or "DD/MM/YYYY HH:MM"
+          const parts = dateInput.split(' ');
+          const datePart = parts[0];
+          const timePart = parts[1] || "00:00"; // Default to 00:00 if missing
+
+          if (!datePart.includes('/')) {
+            throw new Error('Invalid date format');
+          }
+
+          const [day, month, year] = datePart.split('/');
+          const [hours, minutes] = timePart.split(':');
+
+          return new Date(year, month - 1, day, hours, minutes).toISOString();
+        }
+
+        throw new Error('Invalid date input type');
+      };
+
+      const requestData = {
+        reason: motivo,
+        start_datetime: parseDateTime(fechaDesde),
+        end_datetime: parseDateTime(fechaHasta),
+        notes: nota
+      };
+
+      await createSupportRequest(requestData);
+      await cargarSolicitudes();
+
+      setModalVisible(false);
+      setMotivo("");
+      setNota("");
+      setFechaDesde("");
+      setFechaHasta("");
+
+      Alert.alert("Solicitud creada", "Tu solicitud ha sido creada exitosamente.");
+    } catch (error) {
+      console.error('Error creando solicitud:', error);
+      Alert.alert("Error", "No se pudo crear la solicitud. Verifica los datos e intenta nuevamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const asignarCuidador = (solicitudId, cuidadorId) => {
-    const cuidador = cuidadores.find(c => c.id === cuidadorId);
-    if (!cuidador) return;
+  const asignarCuidador = async (solicitudId, cuidadorId) => {
+    const idToAssign = cuidadorId || currentUserId;
 
-    const actualizadas = solicitudes.map((s) =>
-      s.id === solicitudId
-        ? { ...s, estado: ESTADOS.ASIGNADA, suplente: cuidador.nombre, suplenteId: cuidadorId }
-        : s
-    );
-    guardar(actualizadas);
-    Alert.alert("Apoyo asignado", `${cuidador.nombre} cubrirá este turno.`);
+    if (!idToAssign) {
+      Alert.alert("Error", "No se pudo identificar el cuidador.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await assignCaregiverToRequest(solicitudId, parseInt(idToAssign));
+
+      await Promise.all([
+        cargarSolicitudes(),
+        cargarSolicitudesDisponibles(),
+        cargarCuidadores(),
+        cargarPerfilUsuario()
+      ]);
+
+      // Emit event immediately (delay handled in listener)
+      eventEmitter.emit(EVENTS.PATIENT_CHANGED);
+
+      Alert.alert("Apoyo asignado", "Has tomado esta solicitud exitosamente.");
+    } catch (error) {
+      console.error('Error asignando cuidador:', error);
+      Alert.alert("Error", "No se pudo asignar el cuidador.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const iniciarApoyo = (id) => {
-    const actualizadas = solicitudes.map((s) =>
-      s.id === id
-        ? { ...s, estado: ESTADOS.CURSO, fechaInicio: new Date().toLocaleString() }
-        : s
-    );
-    guardar(actualizadas);
+  const iniciarApoyo = async (id) => {
+    try {
+      setLoading(true);
+      await updateRequestStatus(id, ESTADOS.CURSO);
+      await cargarSolicitudes();
+    } catch (error) {
+      console.error('Error iniciando apoyo:', error);
+      Alert.alert("Error", "No se pudo iniciar el apoyo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const finalizarApoyo = async (id) => {
-    const actualizadas = solicitudes.map((s) =>
-      s.id === id
-        ? { ...s, estado: ESTADOS.FINALIZADA, fechaFin: new Date().toLocaleString() }
-        : s
-    );
-    guardar(actualizadas);
+    try {
+      setLoading(true);
+      await updateRequestStatus(id, ESTADOS.FINALIZADA);
+      await Promise.all([
+        cargarSolicitudes(),
+        cargarPerfilUsuario()
+      ]);
 
-    const finalizada = actualizadas.find((s) => s.id === id);
-    const registro = {
-      id: Date.now().toString(),
-      tipo: "Apoyo finalizado",
-      fecha: new Date().toLocaleString(),
-      descripcion: `El cuidador suplente ${finalizada.suplente} completó el apoyo (${finalizada.motivo}).`,
-    };
-    const bitacora = (await AsyncStorage.getItem("bitacoraEntries")) || "[]";
-    await AsyncStorage.setItem(
-      "bitacoraEntries",
-      JSON.stringify([registro, ...JSON.parse(bitacora)])
-    );
+      // Emit event immediately (delay handled in listener)
+      eventEmitter.emit(EVENTS.PATIENT_CHANGED);
+
+      Alert.alert("Apoyo finalizado", "El apoyo ha sido marcado como finalizado.");
+    } catch (error) {
+      console.error('Error finalizando apoyo:', error);
+      Alert.alert("Error", "No se pudo finalizar el apoyo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const cancelarApoyo = (id) => {
-    const actualizadas = solicitudes.map((s) =>
-      s.id === id ? { ...s, estado: ESTADOS.CANCELADA } : s
-    );
-    guardar(actualizadas);
+  const cancelarApoyo = async (id) => {
+    try {
+      setLoading(true);
+      await updateRequestStatus(id, ESTADOS.CANCELADA);
+      await Promise.all([
+        cargarSolicitudes(),
+        cargarPerfilUsuario()
+      ]);
+
+      // Emit event immediately (delay handled in listener)
+      eventEmitter.emit(EVENTS.PATIENT_CHANGED);
+    } catch (error) {
+      console.error('Error cancelando apoyo:', error);
+      Alert.alert("Error", "No se pudo cancelar el apoyo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const eliminarApoyo = (id) => {
-    const actualizadas = solicitudes.filter((s) => s.id !== id);
-    guardar(actualizadas);
+  const eliminarApoyo = async (id) => {
+    try {
+      setLoading(true);
+      await deleteSupportRequest(id);
+      await cargarSolicitudes();
+    } catch (error) {
+      console.error('Error eliminando apoyo:', error);
+      Alert.alert("Error", "No se pudo eliminar la solicitud.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filtroActivo = useMemo(
@@ -193,6 +323,7 @@ export default function useRedApoyo() {
 
   return {
     solicitudes,
+    solicitudesDisponibles,
     modalVisible,
     setModalVisible,
     motivo,
@@ -203,7 +334,6 @@ export default function useRedApoyo() {
     setFechaHasta,
     nota,
     setNota,
-    pacienteUbicacion,
     cuidadores,
     crearSolicitud,
     asignarCuidador,
@@ -213,5 +343,8 @@ export default function useRedApoyo() {
     eliminarApoyo,
     filtroActivo,
     ESTADOS,
+    loading,
+    cargarDatos,
+    tienePacienteAsignado
   };
 }

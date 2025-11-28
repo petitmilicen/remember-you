@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-from .serializers import UserDataSerializer, ProfilePictureSerializer, PatientInfoSerializer
+from .serializers import UserDataSerializer, ProfilePictureSerializer, PatientInfoSerializer, CaregiverSerializer
 from ..user.models import User
 
 
@@ -158,4 +158,25 @@ class DeleteAccountView(APIView):
         
         return Response({
             'message': 'Cuenta eliminada exitosamente.'
+        }, status=status.HTTP_200_OK)
+
+
+class GetAvailableCaregiversView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """
+        Get all caregivers without assigned patients
+        """
+        # Filter caregivers without assigned patients
+        available_caregivers = User.objects.filter(
+            user_type=User.UserType.CAREGIVER,
+            patient__isnull=True
+        ).exclude(id=request.user.id)  # Exclude the requesting user
+        
+        serializer = CaregiverSerializer(available_caregivers, many=True, context={'request': request})
+        
+        return Response({
+            'caregivers': serializer.data,
+            'count': available_caregivers.count()
         }, status=status.HTTP_200_OK)

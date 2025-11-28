@@ -7,6 +7,7 @@ from .modules.medical_appointment.models import MedicalAppointment
 from .modules.safe_zone.models import SafeZone
 from .modules.caregiver_log.models import CaregiverLog
 from .modules.achievements.models import Achievement
+from .modules.support_request.models import SupportRequest
 
 admin.site.register(Memory)
 admin.site.register(User)
@@ -16,3 +17,4 @@ admin.site.register(SafeZone)
 admin.site.register(Card) 
 admin.site.register(CaregiverLog)
 admin.site.register(Achievement)
+admin.site.register(SupportRequest)

@@ -9,4 +9,5 @@ urlpatterns = [
     path('assign-patient/', views.AssignCaregiverToPatientView.as_view(), name='assign-caregiver-to-patient'),
     path('unassign-patient/', views.UnassignPatientView.as_view(), name='unassign-patient'),
     path('delete-account/', views.DeleteAccountView.as_view(), name='delete-account'),
+    path('available-caregivers/', views.GetAvailableCaregiversView.as_view(), name='available-caregivers'),
 ]

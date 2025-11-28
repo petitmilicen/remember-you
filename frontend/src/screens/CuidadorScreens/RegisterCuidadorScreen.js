@@ -17,8 +17,10 @@ import { styles } from "../../styles/RegisterCuidadorStyles";
 export default function RegisterCuidadorScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const {
-    nombre,
-    setNombre,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
     relacion,
     setRelacion,
     telefono,
@@ -53,10 +55,18 @@ export default function RegisterCuidadorScreen({ navigation }) {
 
         <TextInput
           style={styles.input}
-          placeholder="Nombre completo"
+          placeholder="Nombre"
           placeholderTextColor="#999"
-          value={nombre}
-          onChangeText={setNombre}
+          value={firstName}
+          onChangeText={setFirstName}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Apellido"
+          placeholderTextColor="#999"
+          value={lastName}
+          onChangeText={setLastName}
         />
 
         <TextInput
