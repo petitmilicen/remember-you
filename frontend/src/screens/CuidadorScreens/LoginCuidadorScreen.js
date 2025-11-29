@@ -10,7 +10,7 @@ const { width } = Dimensions.get('window');
 
 export default function LoginCuidadorScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const { login } = useContext(AuthContext);
+  const { login, logout } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,6 +21,19 @@ export default function LoginCuidadorScreen({ navigation }) {
     setLoading(true);
     try {
       await login(email, password);
+
+      // Verificar que el usuario sea de tipo "cuidador"
+      const { getUserProfile } = require('../../api/userService');
+      const profile = await getUserProfile();
+
+      if (profile.user_type !== 'Caregiver') {
+        // Si no es cuidador, hacer logout y mostrar error
+        await logout();
+        setError('No estás registrado como cuidador o tu cuenta no es válida');
+        setLoading(false);
+        return;
+      }
+
       navigation.navigate("HomeCuidador");
     } catch (err) {
       setError('Correo o contraseña incorrectos');

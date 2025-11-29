@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 const { width } = Dimensions.get('window');
 
 export default function LoginPacienteScreen({ navigation }) {
-  const { login } = useContext(AuthContext);
+  const { login, logout } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,6 +17,18 @@ export default function LoginPacienteScreen({ navigation }) {
   const handleLogin = async () => {
     try {
       await login(email, password);
+
+      // Verificar que el usuario sea de tipo "Patient"
+      const { getUserProfile } = require('../../api/userService');
+      const profile = await getUserProfile();
+
+      if (profile.user_type !== 'Patient') {
+        // Si no es paciente, hacer logout y mostrar error
+        await logout();
+        setError('No estás registrado como paciente o tu cuenta no es válida');
+        return;
+      }
+
       navigation.navigate("Home");
     } catch (err) {
       setError('Correo o contraseña incorrectos');

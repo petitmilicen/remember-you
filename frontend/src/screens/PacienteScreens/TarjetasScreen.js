@@ -14,7 +14,6 @@ export default function TarjetasScreen({ navigation }) {
   const isFocused = useIsFocused();
   const { settings } = useSettings();
 
-  // ← USAMOS SOLO EL HOOK
   const { cards, loadCards, handleDeleteCard } = useTarjetasPaciente();
 
   const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
@@ -23,8 +22,8 @@ export default function TarjetasScreen({ navigation }) {
     settings.fontSize === "small"
       ? base - 2
       : settings.fontSize === "large"
-      ? base + 2
-      : base;
+        ? base + 2
+        : base;
 
   const gradientColors =
     settings.theme === "dark"
@@ -32,7 +31,7 @@ export default function TarjetasScreen({ navigation }) {
       : ["#00C897", "#00E0AC"];
 
   useEffect(() => {
-    if (isFocused) loadCards(); // ← RECARGA CORRECTA
+    if (isFocused) loadCards();
   }, [isFocused]);
 
   return (
@@ -59,7 +58,7 @@ export default function TarjetasScreen({ navigation }) {
       </View>
 
       <FlatList
-        data={cards}  // ← AHORA SÍ SE ACTUALIZA
+        data={cards}
         renderItem={({ item }) => (
           <TarjetaPacienteItem
             item={item}
