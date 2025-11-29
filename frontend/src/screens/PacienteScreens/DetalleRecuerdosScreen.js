@@ -1,6 +1,6 @@
 // src/screens/PacienteScreens/DetalleRecuerdosScreen.js
-import React from "react";
-import { View, Text, TouchableOpacity, Image, StatusBar, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, Image, StatusBar, ScrollView, Modal } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,6 +14,7 @@ export default function DetalleRecuerdosScreen({ route, navigation }) {
   const { settings } = useSettings();
   const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
   const { handleDelete } = useDetalleRecuerdo(navigation, memory);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const getFontSize = (base = 16) =>
     settings.fontSize === "small" ? base - 2 :
@@ -38,7 +39,14 @@ export default function DetalleRecuerdosScreen({ route, navigation }) {
 
       <View style={styles.content}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {memory.image && <Image source={{ uri: memory.image }} style={styles.image} />}
+          {memory.image && (
+            <TouchableOpacity
+              onLongPress={() => setShowImageModal(true)}
+              activeOpacity={0.9}
+            >
+              <Image source={{ uri: memory.image }} style={styles.image} />
+            </TouchableOpacity>
+          )}
           <Text style={[styles.date, themeStyles.subtext, { fontSize: getFontSize(13) }]}>{memory.date}</Text>
           <Text style={[styles.title, themeStyles.text, { fontSize: getFontSize(22) }]}>{memory.title}</Text>
           <Text style={[styles.description, themeStyles.subtext, { fontSize: getFontSize(16) }]}>
@@ -56,6 +64,36 @@ export default function DetalleRecuerdosScreen({ route, navigation }) {
           <Text style={[styles.deleteButtonText, { fontSize: getFontSize(16) }]}>Eliminar Recuerdo</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal para ver imagen completa */}
+      <Modal
+        visible={showImageModal}
+        transparent={true}
+        onRequestClose={() => setShowImageModal(false)}
+        animationType="fade"
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowImageModal(false)}
+          >
+            <View style={styles.modalContent}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowImageModal(false)}
+              >
+                <FontAwesome5 name="times-circle" size={32} color="#FFF" />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: memory.image }}
+                style={styles.fullImage}
+                resizeMode="contain"
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
