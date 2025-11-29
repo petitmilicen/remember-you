@@ -51,7 +51,7 @@ export default function GridMenuPaciente({ navigation, theme, getFontSize }) {
         icon={<MaterialIcons name="logout" size={42} color="#FFF" />}
         color="#FF9BDE"
         label="Salida"
-        onPress={() => navigation.navigate("Welcome")}
+        onPress={() => navigation.navigate("Logout")}
         fontSize={getFontSize(15)}
       />
     </View>

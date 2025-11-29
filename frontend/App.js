@@ -30,6 +30,7 @@ import BitacoiraScreenCuidador from "./src/screens/CuidadorScreens/BitacoraScree
 import CitasMedicasScreen from "./src/screens/CuidadorScreens/CitasMedicasScreen";
 import RedApoyoScreen from "./src/screens/CuidadorScreens/RedApoyoScreen";
 import PerfilCuidadorScreen from "./src/screens/CuidadorScreens/PerfilCuidadorScreen";
+import LogoutScreen from "./src/components/paciente/LogoutScreen";
 import { SettingsProvider } from './src/context/SettingsContext';
 import { AuthProvider } from "./src/auth/AuthContext";
 
@@ -55,6 +56,7 @@ export default function App() {
             <Stack.Screen name="Sudoku" component={SudokuScreen} options={{ title: 'Sudoku' }} />
             <Stack.Screen name="Bitacora" component={BitacoraScreen} />
             <Stack.Screen name="Tarjetas" component={TarjetasScreen} />
+            <Stack.Screen name="Logout" component={LogoutScreen} />
             <Stack.Screen name="AddTarjetas" component={AddTarjetasScreen} />
             <Stack.Screen name="Recuerdos" component={RecuerdosScreen} />
             <Stack.Screen name="AddRecuerdos" component={AddRecuerdosScreen} />

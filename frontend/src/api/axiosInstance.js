@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { refreshAccessToken } from '../auth/authService';
 
 const api = axios.create({
-  baseURL: 'http://10.33.250.248:8000/',
+  baseURL: 'http://192.168.100.131:8000/',
   timeout: 15000,
   headers: { "Content-Type": "application/json" }
 });
