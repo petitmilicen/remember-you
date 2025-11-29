@@ -69,7 +69,7 @@ export default function TarjetasScreen({ navigation }) {
           />
         )}
         keyExtractor={(item) => item.card_id}
-        numColumns={2}
+        numColumns={1}
         contentContainerStyle={
           cards.length === 0
             ? { flex: 1, justifyContent: "center", alignItems: "center" }

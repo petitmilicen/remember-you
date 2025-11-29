@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, StatusBar } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,7 +16,7 @@ export default function AddTarjetasScreen({ navigation }) {
 
   const getFontSize = (base = 16) =>
     settings.fontSize === "small" ? base - 2 :
-    settings.fontSize === "large" ? base + 2 : base;
+      settings.fontSize === "large" ? base + 2 : base;
 
   const gradientColors =
     settings.theme === "dark" ? ["#007E67", "#009E7A"] : ["#00C897", "#00E0AC"];
@@ -36,13 +37,18 @@ export default function AddTarjetasScreen({ navigation }) {
         <Text style={[styles.label, themeStyles.text, { fontSize: getFontSize(16) }]}>
           Tipo de tarjeta
         </Text>
-        <TextInput
-          style={[styles.input, themeStyles.input, { fontSize: getFontSize(16) }]}
-          placeholder="Ejemplo: Recordatorio, Mensaje..."
-          placeholderTextColor={settings.theme === "dark" ? "#AAA" : "#999"}
-          value={tipo}
-          onChangeText={setTipo}
-        />
+        <View style={[styles.input, themeStyles.input]}>
+          <Picker
+            selectedValue={tipo}
+            onValueChange={(itemValue) => setTipo(itemValue)}
+            style={{ color: settings.theme === "dark" ? "#FFF" : "#000" }}
+          >
+            <Picker.Item label="Seleccione tipo de tarjeta..." value="" />
+            <Picker.Item label="Mensaje" value="Message" />
+            <Picker.Item label="Otro" value="Other" />
+            <Picker.Item label="Emergencia" value="Emergency" />
+          </Picker>
+        </View>
 
         <Text style={[styles.label, themeStyles.text, { fontSize: getFontSize(16) }]}>
           Mensaje
