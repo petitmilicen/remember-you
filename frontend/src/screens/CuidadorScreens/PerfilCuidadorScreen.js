@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     View,
     Text,
@@ -14,6 +14,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../../auth/AuthContext";
 import { getUserProfile, uploadProfilePicture, deleteProfilePicture, deleteAccount } from "../../api/userService";
 import { styles } from "../../styles/PerfilCuidadorStyles";
 import { ACCENT } from "../../utils/constants";
@@ -21,6 +22,7 @@ import { ACCENT } from "../../utils/constants";
 const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
 export default function PerfilCuidadorScreen({ navigation }) {
+    const { logout } = useContext(AuthContext);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -145,7 +147,7 @@ export default function PerfilCuidadorScreen({ navigation }) {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            await AsyncStorage.clear();
+                            await logout();
                             navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
                         } catch (error) {
                             console.error("Error al cerrar sesión:", error);

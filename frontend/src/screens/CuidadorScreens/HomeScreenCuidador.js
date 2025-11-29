@@ -1,5 +1,5 @@
 // src/screens/CuidadorScreens/HomeScreenCuidador.js
-import React from "react";
+import React, { useContext } from "react";
 import {
   View,
   ScrollView,
@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../../auth/AuthContext";
 import usePaciente from "../../hooks/usePaciente.js";
 import useZonaSegura from "../../hooks/useZonaSegura.js";
 import useTarjetas from "../../hooks/useTarjetas.js";
@@ -50,6 +51,7 @@ const LoadingSkeleton = () => (
 );
 
 export default function HomeScreenCuidador({ navigation }) {
+  const { logout } = useContext(AuthContext);
   const { paciente } = usePaciente();
   const zona = useZonaSegura(paciente);
   const tarjetas = useTarjetas();
@@ -63,7 +65,7 @@ export default function HomeScreenCuidador({ navigation }) {
         style: "destructive",
         onPress: async () => {
           try {
-            await AsyncStorage.clear();
+            await logout();
             navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
           } catch (error) {
             console.error("Error cerrando sesión:", error);
