@@ -1,5 +1,5 @@
 // src/screens/CuidadorScreens/HomeScreenCuidador.js
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -56,6 +57,16 @@ export default function HomeScreenCuidador({ navigation }) {
   const zona = useZonaSegura(paciente);
   const tarjetas = useTarjetas();
   const { fotoPerfil, nombrePaciente, theme, getFontSize, loading } = usePacienteHome();
+
+  // Bloquear el botón de retroceso del sistema Android
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Retornar true previene la acción por defecto (salir de la app)
+      return true;
+    });
+
+    return () => backHandler.remove();
+  }, []);
 
   const cerrarSesion = async () => {
     Alert.alert("Cerrar sesión", "¿Deseas cerrar tu sesión actual?", [

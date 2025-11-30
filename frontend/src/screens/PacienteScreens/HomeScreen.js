@@ -1,14 +1,24 @@
-import React from "react";
-import { View, StatusBar, ActivityIndicator, Text } from "react-native";
+import React, { useEffect } from "react";
+import { View, StatusBar, ActivityIndicator, Text, BackHandler } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import usePacienteHome from "../../hooks/usePacienteHome";        
-import HeaderPaciente from "../../components/paciente/HeaderPaciente"; 
-import GridMenuPaciente from "../../components/paciente/GridMenuPaciente"; 
-import { styles } from "../../styles/HomePacienteStyles";      
+import usePacienteHome from "../../hooks/usePacienteHome";
+import HeaderPaciente from "../../components/paciente/HeaderPaciente";
+import GridMenuPaciente from "../../components/paciente/GridMenuPaciente";
+import { styles } from "../../styles/HomePacienteStyles";
 
 export default function HomeScreenPaciente({ navigation }) {
   const insets = useSafeAreaInsets();
   const { fotoPerfil, nombrePaciente, theme, getFontSize, loading } = usePacienteHome();
+
+  // Bloquear el botón de retroceso del sistema Android
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Retornar true previene la acción por defecto (salir de la app)
+      return true;
+    });
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <View
