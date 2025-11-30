@@ -1,6 +1,7 @@
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { refreshAccessToken } from '../auth/refreshToken';
+import authManager from '../auth/authManager';
 
 const api = axios.create({
   baseURL: 'http://192.168.1.87:8000/',
@@ -40,9 +41,13 @@ api.interceptors.response.use(
           return api(originalRequest);
         } else {
           console.log('⏰ Sesión expirada - Por favor inicia sesión nuevamente');
+          // Notificar al AuthContext que la sesión expiró
+          authManager.notifySessionExpired('Token inválido o expirado');
         }
       } catch (err) {
         console.error('❌ Error al renovar token:', err);
+        // Notificar al AuthContext que hubo un error al renovar
+        authManager.notifySessionExpired('Error al renovar token');
       }
 
       await AsyncStorage.removeItem('access');

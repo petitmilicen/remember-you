@@ -6,6 +6,7 @@ import {
   refreshAccessToken,
 } from "./authService";
 import { getUserProfile } from "../api/userService";
+import authManager from "./authManager";
 
 export const AuthContext = createContext();
 
@@ -28,27 +29,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-  try {
-    const access = await AsyncStorage.getItem("access");
-    const refresh = await AsyncStorage.getItem("refresh");
+    try {
+      const access = await AsyncStorage.getItem("access");
+      const refresh = await AsyncStorage.getItem("refresh");
 
-    if (!access && !refresh) {
+      if (!access && !refresh) {
+        setUser(null);
+        return;
+      }
+
+      if (access) {
+        await logoutService();
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesión en backend:", error.response?.data || error.message);
+    } finally {
+      await AsyncStorage.multiRemove(["access", "refresh"]);
       setUser(null);
-      return;
+      console.log("Sesión cerrada correctamente");
     }
+  };
 
-    if (access) {
-      await logoutService();
-    }
-  } catch (error) {
-    console.error("Error al cerrar sesión en backend:", error.response?.data || error.message);
-  } finally {
-    await AsyncStorage.multiRemove(["access", "refresh"]);
+  /**
+   * Forzar logout cuando la sesión expira (llamado por authManager)
+   * @param {string} reason - Razón de la expiración
+   */
+  const forceLogout = async (reason = 'Sesión expirada') => {
+    console.log(`🔒 ${reason} - Cerrando sesión automáticamente`);
+    await AsyncStorage.multiRemove(['access', 'refresh']);
     setUser(null);
-    console.log("Sesión cerrada correctamente");
-  }
-};
-
+  };
 
   const checkSession = async () => {
     try {
@@ -106,6 +116,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     console.log("loadSession");
     loadSession();
+
+    // Registrar callback para cuando la sesión expire desde axiosInstance
+    authManager.setSessionExpiredCallback(forceLogout);
   }, []);
 
   return (
@@ -116,6 +129,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         checkSession,
+        forceLogout,
       }}
     >
       {children}

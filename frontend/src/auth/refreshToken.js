@@ -22,13 +22,22 @@ export async function refreshAccessToken() {
     try {
         // Use raw axios (NOT api instance) to avoid circular dependency
         const response = await axios.post(`${BASE_URL}auth/jwt/refresh/`, { refresh });
-        const { access } = response.data;
+        const { access, refresh: newRefresh } = response.data;
 
         await AsyncStorage.setItem('access', access);
+
+        // Si el backend envía un nuevo refresh token (rotación), guardarlo
+        if (newRefresh) {
+            await AsyncStorage.setItem('refresh', newRefresh);
+            console.log('✅ Refresh token actualizado (rotado)');
+        }
+
         console.log('✅ Access token refreshed successfully');
         return access;
     } catch (error) {
         console.error('❌ Could not refresh token:', error.response?.data || error.message);
+        // Limpiar tokens inválidos/blacklisted
+        await AsyncStorage.multiRemove(['access', 'refresh']);
         return null;
     }
 }
