@@ -27,7 +27,7 @@ export const uploadProfilePicture = async (imageUri) => {
       type: type,
     });
 
-    const response = await api.post('/api/user-data/profile-picture/', formData, {
+    const response = await api.post('/api/user-data/upload-profile-picture/', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -42,7 +42,7 @@ export const uploadProfilePicture = async (imageUri) => {
 
 export const deleteProfilePicture = async () => {
   try {
-    const response = await api.delete('/api/user-data/profile-picture/');
+    const response = await api.delete('/api/user-data/delete-profile-picture/');
     return response.data;
   } catch (error) {
     console.error('Error eliminando foto de perfil:', error.response?.data || error);
