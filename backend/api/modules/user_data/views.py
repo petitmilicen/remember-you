@@ -147,13 +147,11 @@ class DeleteAccountView(APIView):
     def delete(self, request):
         user = request.user
         
-        # Delete profile picture if exists
         if user.profile_picture:
             picture_path = user.profile_picture.path
             if os.path.exists(picture_path):
                 os.remove(picture_path)
         
-        # Delete the user account
         user.delete()
         
         return Response({
@@ -165,14 +163,11 @@ class GetAvailableCaregiversView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """
-        Get all caregivers without assigned patients
-        """
-        # Filter caregivers without assigned patients
+
         available_caregivers = User.objects.filter(
             user_type=User.UserType.CAREGIVER,
             patient__isnull=True
-        ).exclude(id=request.user.id)  # Exclude the requesting user
+        ).exclude(id=request.user.id)  
         
         serializer = CaregiverSerializer(available_caregivers, many=True, context={'request': request})
         

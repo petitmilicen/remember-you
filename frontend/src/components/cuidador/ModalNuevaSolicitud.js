@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { styles } from "../../styles/RedApoyoStyles";
 
 const ACCENT = "#FF7043";
@@ -35,12 +37,64 @@ export default function ModalNuevaSolicitud({
 }) {
   const [motivoSeleccionado, setMotivoSeleccionado] = React.useState("");
 
+  // Date picker states
+  const [dateDesde, setDateDesde] = React.useState(new Date());
+  const [timeDesde, setTimeDesde] = React.useState(new Date());
+  const [dateHasta, setDateHasta] = React.useState(new Date());
+  const [timeHasta, setTimeHasta] = React.useState(new Date());
+
+  const [showDateDesde, setShowDateDesde] = React.useState(false);
+  const [showTimeDesde, setShowTimeDesde] = React.useState(false);
+  const [showDateHasta, setShowDateHasta] = React.useState(false);
+  const [showTimeHasta, setShowTimeHasta] = React.useState(false);
+
   const handleSelectMotivo = (m) => {
     setMotivoSeleccionado(m);
     if (m !== "Otro motivo") {
       setMotivo(m);
     } else {
       setMotivo("");
+    }
+  };
+
+  const formatDateTime = (date, time) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(time.getHours()).padStart(2, '0');
+    const minutes = String(time.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
+  const onChangeDateDesde = (event, selectedDate) => {
+    setShowDateDesde(Platform.OS === 'ios');
+    if (selectedDate) {
+      setDateDesde(selectedDate);
+      setFechaDesde(formatDateTime(selectedDate, timeDesde));
+    }
+  };
+
+  const onChangeTimeDesde = (event, selectedTime) => {
+    setShowTimeDesde(Platform.OS === 'ios');
+    if (selectedTime) {
+      setTimeDesde(selectedTime);
+      setFechaDesde(formatDateTime(dateDesde, selectedTime));
+    }
+  };
+
+  const onChangeDateHasta = (event, selectedDate) => {
+    setShowDateHasta(Platform.OS === 'ios');
+    if (selectedDate) {
+      setDateHasta(selectedDate);
+      setFechaHasta(formatDateTime(selectedDate, timeHasta));
+    }
+  };
+
+  const onChangeTimeHasta = (event, selectedTime) => {
+    setShowTimeHasta(Platform.OS === 'ios');
+    if (selectedTime) {
+      setTimeHasta(selectedTime);
+      setFechaHasta(formatDateTime(dateHasta, selectedTime));
     }
   };
 
@@ -101,22 +155,98 @@ export default function ModalNuevaSolicitud({
             <Text style={{ fontSize: 13, fontWeight: "600", color: "#455A64", marginBottom: 8, marginTop: 8 }}>
               Fecha y hora de inicio:
             </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: 14/12/2025 09:00"
-              value={fechaDesde}
-              onChangeText={setFechaDesde}
-            />
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+              <TouchableOpacity
+                style={[styles.input, { flex: 1, justifyContent: "center", paddingHorizontal: 12 }]}
+                onPress={() => setShowDateDesde(true)}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Ionicons name="calendar-outline" size={20} color="#757575" />
+                  <Text style={{ color: dateDesde ? "#212121" : "#9E9E9E", fontSize: 14 }}>
+                    {dateDesde.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.input, { flex: 1, justifyContent: "center", paddingHorizontal: 12 }]}
+                onPress={() => setShowTimeDesde(true)}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Ionicons name="time-outline" size={20} color="#757575" />
+                  <Text style={{ color: timeDesde ? "#212121" : "#9E9E9E", fontSize: 14 }}>
+                    {timeDesde.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {showDateDesde && (
+              <DateTimePicker
+                value={dateDesde}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onChangeDateDesde}
+                minimumDate={new Date()}
+              />
+            )}
+
+            {showTimeDesde && (
+              <DateTimePicker
+                value={timeDesde}
+                mode="time"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onChangeTimeDesde}
+                is24Hour={true}
+              />
+            )}
 
             <Text style={{ fontSize: 13, fontWeight: "600", color: "#455A64", marginBottom: 8 }}>
               Fecha y hora de fin:
             </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: 14/12/2025 15:00"
-              value={fechaHasta}
-              onChangeText={setFechaHasta}
-            />
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+              <TouchableOpacity
+                style={[styles.input, { flex: 1, justifyContent: "center", paddingHorizontal: 12 }]}
+                onPress={() => setShowDateHasta(true)}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Ionicons name="calendar-outline" size={20} color="#757575" />
+                  <Text style={{ color: dateHasta ? "#212121" : "#9E9E9E", fontSize: 14 }}>
+                    {dateHasta.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.input, { flex: 1, justifyContent: "center", paddingHorizontal: 12 }]}
+                onPress={() => setShowTimeHasta(true)}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Ionicons name="time-outline" size={20} color="#757575" />
+                  <Text style={{ color: timeHasta ? "#212121" : "#9E9E9E", fontSize: 14 }}>
+                    {timeHasta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {showDateHasta && (
+              <DateTimePicker
+                value={dateHasta}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onChangeDateHasta}
+                minimumDate={dateDesde}
+              />
+            )}
+
+            {showTimeHasta && (
+              <DateTimePicker
+                value={timeHasta}
+                mode="time"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onChangeTimeHasta}
+                is24Hour={true}
+              />
+            )}
 
             <Text style={{ fontSize: 13, fontWeight: "600", color: "#455A64", marginBottom: 8 }}>
               Notas para el suplente (opcional):
