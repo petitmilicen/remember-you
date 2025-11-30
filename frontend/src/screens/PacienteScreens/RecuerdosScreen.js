@@ -11,50 +11,57 @@ import {
   Image,
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSettings } from "../../context/SettingsContext";
-import { deleteMemory } from "../../api/memoryService";
-import { getMemories } from "../../api/memoryService";
+import { deleteMemory, getMemories } from "../../api/memoryService";
 import { AuthContext } from "../../auth/AuthContext";
 
 const { width } = Dimensions.get("window");
 
-const MemoryCard = ({ memory, onPress, onLongPress, themeStyles, getFontSizeStyle }) => (
-  <TouchableOpacity
-    style={[styles.memoryCard, themeStyles.card]}
-    onPress={onPress}
-    onLongPress={onLongPress}
-  >
-    {memory.image && <Image source={{ uri: memory.image }} style={styles.memoryImage} />}
-    <View style={styles.memoryInfo}>
-      <Text style={[styles.memoryTitle, themeStyles.text, getFontSizeStyle(14)]}>
-        {memory.title}
-      </Text>
-      <Text style={[styles.memoryDate, themeStyles.subtext, getFontSizeStyle(12)]}>
-        {memory.created_at.split("T")[0]}
-      </Text>
-    </View>
-  </TouchableOpacity>
-);
+// Polaroid-style Memory Card
+const MemoryCard = ({ memory, onPress, onLongPress, index, getFontSizeStyle }) => {
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(index * 100).duration(600).springify()}
+      style={styles.cardContainer}
+    >
+      <TouchableOpacity
+        style={styles.card}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        activeOpacity={0.9}
+      >
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: memory.image }} style={styles.cardImage} />
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={[styles.cardTitle, getFontSizeStyle(14)]} numberOfLines={1}>
+            {memory.title}
+          </Text>
+          <Text style={[styles.cardDate, getFontSizeStyle(12)]}>
+            {memory.created_at.split("T")[0]}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
 export default function RecuerdosScreen({ navigation }) {
-  const { user, logout, loading } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [memories, setMemories] = useState([]);
   const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
-  const themeStyles = settings.theme === "dark" ? darkStyles : lightStyles;
+
   const getFontSizeStyle = (baseSize = 16) => {
     switch (settings.fontSize) {
-      case "small":
-        return { fontSize: baseSize - 2 };
-      case "large":
-        return { fontSize: baseSize + 2 };
-      default:
-        return { fontSize: baseSize };
+      case "small": return { fontSize: baseSize - 2 };
+      case "large": return { fontSize: baseSize + 2 };
+      default: return { fontSize: baseSize };
     }
   };
 
@@ -65,8 +72,6 @@ export default function RecuerdosScreen({ navigation }) {
   const loadMemories = async () => {
     try {
       const data = await getMemories();
-      console.log('MEMORIES', data);
-
       setMemories(data);
     } catch (error) {
       console.error("Error cargando recuerdos:", error);
@@ -76,11 +81,7 @@ export default function RecuerdosScreen({ navigation }) {
   const handleDeleteMemory = (id) => {
     Alert.alert("Eliminar Recuerdo", "¿Seguro que quieres eliminar este recuerdo?", [
       { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: () => removeMemory(id),
-      },
+      { text: "Eliminar", style: "destructive", onPress: () => removeMemory(id) },
     ]);
   };
 
@@ -93,150 +94,178 @@ export default function RecuerdosScreen({ navigation }) {
     }
   };
 
-  const renderMemory = ({ item }) => (
-    <MemoryCard
-      memory={item}
-      onPress={() => navigation.navigate("DetalleRecuerdos", { memory: item })}
-      onLongPress={() => handleDeleteMemory(item.memory_id)}
-      themeStyles={themeStyles}
-      getFontSizeStyle={getFontSizeStyle}
-    />
-  );
-
-  const gradientColors =
-    settings.theme === "dark"
-      ? ["#101A50", "#202E8A"]
-      : ["#1A2A80", "#3C4FCE"];
+  // Consistent Magic Gradient
+  const gradientColors = ["#a18cd1", "#fbc2eb"];
 
   return (
-    <View style={[styles.container, themeStyles.container]}>
+    <View style={[styles.container, { backgroundColor: settings.theme === "dark" ? "#0D0D0D" : "#F5F5F5" }]}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      {/* 🔹 Header */}
-      <View style={styles.headerBleed}>
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.header, { paddingTop: insets.top + 12 }]}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
+      {/* Magic Header */}
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
+      >
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
           </TouchableOpacity>
+          <Text style={[styles.headerTitle, { fontSize: 28 }]}>Recuerdos</Text>
+          <View style={{ width: 45 }} />
+        </View>
+      </LinearGradient>
 
-          <View style={{ flex: 1 }}>
-            <Text
-              style={[
-                styles.headerTitle,
-                { textAlign: "center" },
-                getFontSizeStyle(20),
-              ]}
-            >
-              Recuerdos
+      {/* Content */}
+      <FlatList
+        data={memories}
+        keyExtractor={(item) => item.memory_id.toString()}
+        numColumns={3} // 3 Columns
+        key={3} // Force re-render when changing columns
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item, index }) => (
+          <MemoryCard
+            memory={item}
+            index={index}
+            onPress={() => navigation.navigate("DetalleRecuerdos", { memory: item })}
+            onLongPress={() => handleDeleteMemory(item.memory_id)}
+            getFontSizeStyle={getFontSizeStyle}
+          />
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <FontAwesome5 name="images" size={60} color="#CCC" />
+            <Text style={[styles.emptyText, { color: settings.theme === "dark" ? "#666" : "#999" }]}>
+              No hay recuerdos guardados
             </Text>
           </View>
-          <View style={{ width: 28 }} />
-        </LinearGradient>
-      </View>
+        }
+      />
 
-      <View style={styles.content}>
-        <FlatList
-          data={memories}
-          renderItem={renderMemory}
-          keyExtractor={(item) => item.memory_id}
-          numColumns={2}
-          contentContainerStyle={
-            memories.length === 0
-              ? { flex: 1, justifyContent: "center", alignItems: "center" }
-              : { paddingBottom: 100 }
-          }
-          ListEmptyComponent={
-            <Text
-              style={[styles.emptyText, themeStyles.subtext, getFontSizeStyle(16)]}
-            >
-              No hay recuerdos todavía
-            </Text>
-          }
-        />
-
-        <TouchableOpacity
-          style={[
-            styles.addButton,
-            { backgroundColor: settings.theme === "dark" ? "#2F3A9D" : "#3C4FCE" },
-          ]}
-          onPress={() => navigation.navigate("AddRecuerdos")}
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate("AddRecuerdos")}
+      >
+        <LinearGradient
+          colors={["#a18cd1", "#fbc2eb"]}
+          style={styles.fabGradient}
         >
-          <Text style={[styles.addButtonText, getFontSizeStyle(16)]}>
-            + Añadir Recuerdo
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <Ionicons name="add" size={30} color="#FFF" />
+        </LinearGradient>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerBleed: {
-    marginLeft: 0,
-    marginRight: 0,
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    overflow: "hidden",
-    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    zIndex: 10,
   },
-  header: {
-    width: width,
+  headerContent: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    justifyContent: "space-between",
   },
   headerTitle: {
     color: "#FFF",
     fontWeight: "bold",
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  content: { flex: 1, justifyContent: "space-between" },
-  memoryCard: {
-    flex: 1,
-    borderRadius: 15,
-    margin: 8,
-    overflow: "hidden",
-    elevation: 3,
-  },
-  memoryImage: {
-    width: "100%",
-    height: 120,
-  },
-  memoryInfo: {
+  listContent: {
     padding: 10,
+    paddingTop: 20,
+    paddingBottom: 100,
   },
-  memoryTitle: { fontWeight: "bold" },
-  memoryDate: { marginTop: 4 },
-  addButton: {
-    padding: 16,
-    borderRadius: 25,
-    alignItems: "center",
-    marginHorizontal: 20,
-    marginBottom: 45,
+  cardContainer: {
+    flex: 1,
+    margin: 4, // Reduced margin for 3 columns
+    height: 180, // Reduced height
+    borderRadius: 12,
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    padding: 6, // Reduced frame padding
   },
-  addButtonText: {
-    color: "#FFF",
+  card: {
+    flex: 1,
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  imageContainer: {
+    flex: 1,
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "#F0F0F0",
+  },
+  cardImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  textContainer: {
+    paddingTop: 6,
+    paddingHorizontal: 2,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  cardTitle: {
+    color: "#333",
     fontWeight: "bold",
+    marginBottom: 1,
+    textAlign: "left",
+    fontFamily: "System",
+    fontSize: 12, // Smaller font
   },
-  emptyText: { textAlign: "center" },
-});
-
-const lightStyles = StyleSheet.create({
-  container: { backgroundColor: "#EDEDED" },
-  card: { backgroundColor: "#FFF" },
-  text: { color: "#333" },
-  subtext: { color: "#777" },
-});
-
-const darkStyles = StyleSheet.create({
-  container: { backgroundColor: "#121212" },
-  card: { backgroundColor: "#1E1E1E" },
-  text: { color: "#FFFFFF" },
-  subtext: { color: "#AAAAAA" },
+  cardDate: {
+    color: "#888",
+    textAlign: "left",
+    fontSize: 10, // Smaller date
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 100,
+  },
+  emptyText: {
+    marginTop: 20,
+    fontSize: 18,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 50,
+    right: 30,
+    borderRadius: 30,
+    shadowColor: "#6A5ACD",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  fabGradient: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });

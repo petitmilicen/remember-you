@@ -33,12 +33,12 @@ export default function MagicCard({
     const getCardStyle = () => {
         switch (size) {
             case "wide":
-                return { width: width - 40, height: 160 }; // Full width
+                return { width: width - 40, height: 120 }; // Reduced height
             case "tall":
-                return { width: (width - 50) / 2, height: 240 }; // Half width, tall
+                return { width: (width - 50) / 2, height: 180 }; // Reduced height
             case "small":
             default:
-                return { width: (width - 50) / 2, height: 160 }; // Half width, square-ish
+                return { width: (width - 50) / 2, height: 120 }; // Reduced height
         }
     };
 
@@ -74,8 +74,8 @@ export default function MagicCard({
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: 24,
-        marginBottom: 15,
+        borderRadius: 20, // Slightly reduced radius
+        marginBottom: 10, // Reduced margin
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
