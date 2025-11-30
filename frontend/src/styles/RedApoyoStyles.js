@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 12,
   },
-  headerTitle: { fontSize: 24, fontWeight: "700", color: "#212121" },
+  headerTitle: { fontSize: 24, fontWeight: "700", color: "#212121", flex: 1, textAlign: "center" },
 
   summaryBox: {
     flexDirection: "row",

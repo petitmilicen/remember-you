@@ -10,7 +10,7 @@ import { styles } from "../../styles/RedApoyoStyles";
 const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 const ACCENT = "#FF7043";
 
-export default function RedApoyoScreen() {
+export default function RedApoyoScreen({ navigation }) {
   const {
     solicitudes,
     modalVisible,
@@ -41,12 +41,16 @@ export default function RedApoyoScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#212121" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Red de Apoyo</Text>
         {tienePacienteAsignado && (
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Ionicons name="add-circle" size={28} color={ACCENT} />
           </TouchableOpacity>
         )}
+        {!tienePacienteAsignado && <View style={{ width: 28 }} />}
       </View>
 
       <View style={styles.summaryBox}>

@@ -14,13 +14,15 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: TOP_PAD + 10,
+    paddingTop: TOP_PAD + 16,
     marginBottom: 10,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#212121",
+    flex: 1,
+    textAlign: "center",
   },
 
   emptyContainer: {

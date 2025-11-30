@@ -271,43 +271,59 @@ export default function SudokuScreen({ navigation }) {
 
   const renderDifficulty = () => (
     <View style={styles.diffContainer}>
-      <Text style={styles.diffTitle}>Selecciona la dificultad</Text>
-
-      <View style={styles.tutorialBox}>
-        <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
-        <Text style={styles.tutorialText}>
-          El objetivo del Sudoku es llenar todas las celdas con números del 1 al
-          9 sin repetir en la misma fila, columna o bloque. ¡Piensa con calma y
-          diviértete!
-        </Text>
-      </View>
-
-      {["easy", "normal", "hard"].map((lvl) => (
-        <TouchableOpacity
-          key={lvl}
-          style={[
-            styles.diffButton,
-            difficulty === lvl && { backgroundColor: "#F93827" },
-          ]}
-          onPress={() => setDifficulty(lvl)}
-        >
-          <Text
-            style={[
-              styles.diffText,
-              { color: difficulty === lvl ? "#fff" : "#333" },
-            ]}
-          >
-            {lvl === "easy"
-              ? "Fácil"
-              : lvl === "normal"
-                ? "Normal"
-                : "Difícil"}
-          </Text>
+      {/* Header con botón de retroceso */}
+      <LinearGradient
+        colors={["#F93827", "#FF6B6B"]}
+        style={[styles.menuHeader, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
         </TouchableOpacity>
-      ))}
-      <TouchableOpacity style={styles.startButton} onPress={startGame}>
-        <Text style={styles.startText}> Comenzar</Text>
-      </TouchableOpacity>
+
+        <Text style={[styles.headerTitle, { flex: 1, textAlign: "center" }]}>Sudoku</Text>
+
+        <View style={{ width: 26 }} />
+      </LinearGradient>
+
+      <View style={styles.diffContent}>
+        <Text style={styles.diffTitle}>Selecciona la dificultad</Text>
+
+        <View style={styles.tutorialBox}>
+          <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
+          <Text style={styles.tutorialText}>
+            El objetivo del Sudoku es llenar todas las celdas con números del 1 al
+            9 sin repetir en la misma fila, columna o bloque. ¡Piensa con calma y
+            diviértete!
+          </Text>
+        </View>
+
+        {["easy", "normal", "hard"].map((lvl) => (
+          <TouchableOpacity
+            key={lvl}
+            style={[
+              styles.diffButton,
+              difficulty === lvl && { backgroundColor: "#F93827" },
+            ]}
+            onPress={() => setDifficulty(lvl)}
+          >
+            <Text
+              style={[
+                styles.diffText,
+                { color: difficulty === lvl ? "#fff" : "#333" },
+              ]}
+            >
+              {lvl === "easy"
+                ? "Fácil"
+                : lvl === "normal"
+                  ? "Normal"
+                  : "Difícil"}
+            </Text>
+          </TouchableOpacity>
+        ))}
+        <TouchableOpacity style={styles.startButton} onPress={startGame}>
+          <Text style={styles.startText}> Comenzar</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -390,12 +406,26 @@ const styles = StyleSheet.create({
   controlText: { color: "#fff", fontWeight: "bold", marginLeft: 8 },
   diffContainer: {
     alignItems: "center",
-    marginTop: 60,
+    marginTop: 0,
     backgroundColor: "#fff",
-    width: width * 0.9,
-    borderRadius: 20,
-    padding: 20,
+    width: width,
+    flex: 1,
+  },
+  menuHeader: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
     elevation: 5,
+  },
+  diffContent: {
+    alignItems: "center",
+    padding: 20,
+    width: "100%",
   },
   diffTitle: {
     fontSize: 20,

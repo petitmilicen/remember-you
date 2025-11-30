@@ -6,7 +6,7 @@ import RegistroItem from "../../components/cuidador/RegistroItem";
 import ModalRegistro from "../../components/cuidador/ModalRegistro";
 import { styles } from "../../styles/BitacoraCuidadorStyles";
 
-export default function BitacoraScreenCuidador() {
+export default function BitacoraScreenCuidador({ navigation }) {
   const {
     bitacora,
     modalVisible,
@@ -27,6 +27,9 @@ export default function BitacoraScreenCuidador() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#212121" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Bitácora del Cuidador</Text>
 
         {bitacora.length > 0 && (
@@ -34,6 +37,7 @@ export default function BitacoraScreenCuidador() {
             <Ionicons name="trash-outline" size={22} color="#B71C1C" />
           </TouchableOpacity>
         )}
+        {bitacora.length === 0 && <View style={{ width: 22 }} />}
       </View>
 
       {bitacora.length === 0 ? (

@@ -10,9 +10,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 10,
-    paddingTop: TOP_PAD + 10,
+    paddingTop: TOP_PAD + 16,
   },
-  headerTitle: { fontSize: 20, fontWeight: "700", color: "#212121" },
+  headerTitle: { fontSize: 20, fontWeight: "700", color: "#212121", flex: 1, textAlign: "center" },
 
   emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center", marginTop: 100 },
   emptyText: { color: "#455A64", fontSize: 16, fontWeight: "600", marginTop: 10 },
@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
 
   fab: {
     position: "absolute",
-    bottom: 30,
+    bottom: 80,
     right: 20,
     backgroundColor: ACCENT,
     width: 56,

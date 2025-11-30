@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
     View,
     Text,
@@ -9,6 +9,8 @@ import {
     ActivityIndicator,
     Platform,
     StatusBar,
+    Animated,
+    PanResponder,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,6 +28,56 @@ export default function PerfilCuidadorScreen({ navigation }) {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+
+    // Valores animados para el efecto 3D
+    const rotateX = useRef(new Animated.Value(0)).current;
+    const rotateY = useRef(new Animated.Value(0)).current;
+    const scale = useRef(new Animated.Value(1)).current;
+
+    // PanResponder para manejar los gestos
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: () => true,
+            onPanResponderGrant: () => {
+                // Escalar ligeramente la tarjeta al tocarla
+                Animated.spring(scale, {
+                    toValue: 1.05,
+                    useNativeDriver: true,
+                }).start();
+            },
+            onPanResponderMove: (evt, gestureState) => {
+                // Calcular la inclinación basada en la posición del dedo
+                // Limitar los valores para que no sea demasiado exagerado
+                const maxRotation = 15; // grados
+                const cardWidth = 340; // aproximado del ancho de la tarjeta
+                const cardHeight = 200; // aproximado del alto de la tarjeta
+
+                const rotateYValue = (gestureState.dx / cardWidth) * maxRotation;
+                const rotateXValue = -(gestureState.dy / cardHeight) * maxRotation;
+
+                rotateX.setValue(rotateXValue);
+                rotateY.setValue(rotateYValue);
+            },
+            onPanResponderRelease: () => {
+                // Volver a la posición original con animación
+                Animated.parallel([
+                    Animated.spring(rotateX, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }),
+                    Animated.spring(rotateY, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }),
+                    Animated.spring(scale, {
+                        toValue: 1,
+                        useNativeDriver: true,
+                    }),
+                ]).start();
+            },
+        })
+    ).current;
 
     useEffect(() => {
         fetchUserData();
@@ -235,71 +287,93 @@ export default function PerfilCuidadorScreen({ navigation }) {
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.idCardContainer}>
-                    <LinearGradient
-                        colors={['#1976D2', '#1565C0', '#0D47A1']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.idCard}
+                    <Animated.View
+                        {...panResponder.panHandlers}
+                        style={{
+                            transform: [
+                                { perspective: 1000 },
+                                {
+                                    rotateX: rotateX.interpolate({
+                                        inputRange: [-15, 15],
+                                        outputRange: ['-15deg', '15deg'],
+                                    }),
+                                },
+                                {
+                                    rotateY: rotateY.interpolate({
+                                        inputRange: [-15, 15],
+                                        outputRange: ['-15deg', '15deg'],
+                                    }),
+                                },
+                                { scale },
+                            ],
+                        }}
                     >
-                        <View style={styles.hologram}>
-                            <FontAwesome5 name="shield-alt" size={20} color="rgba(255,255,255,0.3)" />
-                        </View>
-                        <View style={styles.cardBrand}>
-                            <FontAwesome5 name="heart" size={16} color="rgba(255,255,255,0.9)" />
-                            <Text style={styles.brandText}>REMEMBER YOU</Text>
-                        </View>
-
-                        <View style={styles.cardContent}>
-                            <View style={styles.photoSection}>
-                                <View style={styles.photoFrame}>
-                                    {userData?.profile_picture ? (
-                                        <Image
-                                            source={{ uri: userData.profile_picture }}
-                                            style={styles.cardPhoto}
-                                        />
-                                    ) : (
-                                        <View style={styles.cardPhotoPlaceholder}>
-                                            <FontAwesome5 name="user" size={40} color="rgba(255,255,255,0.7)" />
-                                        </View>
-                                    )}
-                                    {uploading && (
-                                        <View style={styles.uploadingOverlay}>
-                                            <ActivityIndicator size="small" color="#FFF" />
-                                        </View>
-                                    )}
-                                </View>
-                                <TouchableOpacity
-                                    style={styles.editPhotoButton}
-                                    onPress={handleChangePhoto}
-                                    disabled={uploading}
-                                >
-                                    <FontAwesome5 name="camera" size={10} color="#1976D2" />
-                                </TouchableOpacity>
+                        <LinearGradient
+                            colors={['#1976D2', '#1565C0', '#0D47A1']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.idCard}
+                        >
+                            <View style={styles.hologram}>
+                                <FontAwesome5 name="shield-alt" size={20} color="rgba(255,255,255,0.3)" />
+                            </View>
+                            <View style={styles.cardBrand}>
+                                <FontAwesome5 name="heart" size={16} color="rgba(255,255,255,0.9)" />
+                                <Text style={styles.brandText}>REMEMBER YOU</Text>
                             </View>
 
-                            <View style={styles.infoSection}>
-                                <Text style={styles.cardName}>{userData?.full_name?.toUpperCase() || "USUARIO"}</Text>
-                                <Text style={styles.cardRole}>CUIDADOR PROFESIONAL</Text>
+                            <View style={styles.cardContent}>
+                                <View style={styles.photoSection}>
+                                    <View style={styles.photoFrame}>
+                                        {userData?.profile_picture ? (
+                                            <Image
+                                                source={{ uri: userData.profile_picture }}
+                                                style={styles.cardPhoto}
+                                            />
+                                        ) : (
+                                            <View style={styles.cardPhotoPlaceholder}>
+                                                <FontAwesome5 name="user" size={40} color="rgba(255,255,255,0.7)" />
+                                            </View>
+                                        )}
+                                        {uploading && (
+                                            <View style={styles.uploadingOverlay}>
+                                                <ActivityIndicator size="small" color="#FFF" />
+                                            </View>
+                                        )}
+                                    </View>
+                                    <TouchableOpacity
+                                        style={styles.editPhotoButton}
+                                        onPress={handleChangePhoto}
+                                        disabled={uploading}
+                                    >
+                                        <FontAwesome5 name="camera" size={10} color="#1976D2" />
+                                    </TouchableOpacity>
+                                </View>
 
-                                <View style={styles.cardDetails}>
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>ID</Text>
-                                        <Text style={styles.detailValue}>#{userData?.id || "---"}</Text>
-                                    </View>
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>USUARIO</Text>
-                                        <Text style={styles.detailValue}>{userData?.username || "N/A"}</Text>
-                                    </View>
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>DESDE</Text>
-                                        <Text style={styles.detailValue}>
-                                            {userData?.created_at ? new Date(userData.created_at).getFullYear() : "2025"}
-                                        </Text>
+                                <View style={styles.infoSection}>
+                                    <Text style={styles.cardName}>{userData?.full_name?.toUpperCase() || "USUARIO"}</Text>
+                                    <Text style={styles.cardRole}>CUIDADOR PROFESIONAL</Text>
+
+                                    <View style={styles.cardDetails}>
+                                        <View style={styles.detailRow}>
+                                            <Text style={styles.detailLabel}>ID</Text>
+                                            <Text style={styles.detailValue}>#{userData?.id || "---"}</Text>
+                                        </View>
+                                        <View style={styles.detailRow}>
+                                            <Text style={styles.detailLabel}>USUARIO</Text>
+                                            <Text style={styles.detailValue}>{userData?.username || "N/A"}</Text>
+                                        </View>
+                                        <View style={styles.detailRow}>
+                                            <Text style={styles.detailLabel}>DESDE</Text>
+                                            <Text style={styles.detailValue}>
+                                                {userData?.created_at ? new Date(userData.created_at).getFullYear() : "2025"}
+                                            </Text>
+                                        </View>
                                     </View>
                                 </View>
                             </View>
-                        </View>
-                    </LinearGradient>
+                        </LinearGradient>
+                    </Animated.View>
                 </View>
 
                 <View style={styles.additionalInfo}>

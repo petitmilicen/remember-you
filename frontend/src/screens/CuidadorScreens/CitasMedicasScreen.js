@@ -6,7 +6,7 @@ import CitaItem from "../../components/cuidador/CitaItem";
 import ModalCita from "../../components/cuidador/ModalCita";
 import { styles } from "../../styles/CitasMedicasStyles";
 
-export default function CitasMedicasScreen() {
+export default function CitasMedicasScreen({ navigation }) {
   const {
     citas,
     modalVisible,
@@ -31,12 +31,16 @@ export default function CitasMedicasScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#212121" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Citas Médicas</Text>
         {citas.length > 0 && (
           <TouchableOpacity onPress={limpiarCitas}>
             <Ionicons name="trash-outline" size={22} color="#B71C1C" />
           </TouchableOpacity>
         )}
+        {citas.length === 0 && <View style={{ width: 22 }} />}
       </View>
 
       {citas.length === 0 ? (

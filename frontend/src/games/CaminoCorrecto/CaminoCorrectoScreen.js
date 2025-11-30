@@ -326,47 +326,63 @@ export default function CaminoCorrectoScreen({ navigation }) {
   const renderMenu = () => (
     <ScrollView contentContainerStyle={styles.scroll}>
       <View style={styles.menuContainer}>
-        <Text style={styles.menuTitle}>Selecciona la dificultad</Text>
-
-        <View style={styles.tutorialBox}>
-          <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
-          <Text style={styles.tutorialText}>
-            Desliza en la dirección que quieras moverte.
-            Recoge todos los orbes para abrir el portal y llegar a la salida.
-            Los niveles cambian cada vez que juegas.
-          </Text>
-        </View>
-
-        {Object.entries(DIFFS).map(([key, cfg]) => (
-          <TouchableOpacity
-            key={key}
-            style={[
-              styles.diffButton,
-              difficulty === key && { backgroundColor: "#F93827" },
-            ]}
-            onPress={() => setDifficulty(key)}
-          >
-            <Text
-              style={[
-                styles.diffText,
-                { color: difficulty === key ? "#fff" : "#333" },
-              ]}
-            >
-              {cfg.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity
-          style={styles.startButton}
-          onPress={() => {
-            setGameStarted(true);
-            setScore(0);
-            setWon(false);
-          }}
+        {/* Header con botón de retroceso */}
+        <LinearGradient
+          colors={["#F93827", "#FF6B6B"]}
+          style={[styles.menuHeader, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
         >
-          <Text style={styles.startText}>Comenzar</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
+          </TouchableOpacity>
+
+          <Text style={[styles.headerTitle, { flex: 1, textAlign: "center" }]}>Camino Correcto</Text>
+
+          <View style={{ width: 26 }} />
+        </LinearGradient>
+
+        <View style={styles.menuContent}>
+          <Text style={styles.menuTitle}>Selecciona la dificultad</Text>
+
+          <View style={styles.tutorialBox}>
+            <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
+            <Text style={styles.tutorialText}>
+              Desliza en la dirección que quieras moverte.
+              Recoge todos los orbes para abrir el portal y llegar a la salida.
+              Los niveles cambian cada vez que juegas.
+            </Text>
+          </View>
+
+          {Object.entries(DIFFS).map(([key, cfg]) => (
+            <TouchableOpacity
+              key={key}
+              style={[
+                styles.diffButton,
+                difficulty === key && { backgroundColor: "#F93827" },
+              ]}
+              onPress={() => setDifficulty(key)}
+            >
+              <Text
+                style={[
+                  styles.diffText,
+                  { color: difficulty === key ? "#fff" : "#333" },
+                ]}
+              >
+                {cfg.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+
+          <TouchableOpacity
+            style={styles.startButton}
+            onPress={() => {
+              setGameStarted(true);
+              setScore(0);
+              setWon(false);
+            }}
+          >
+            <Text style={styles.startText}>Comenzar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -466,12 +482,26 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1, alignItems: "center", backgroundColor: COL_APP_BG },
   menuContainer: {
     alignItems: "center",
-    marginTop: 60,
+    marginTop: 0,
     backgroundColor: "#fff",
-    width: SCREEN_W * 0.9,
-    borderRadius: 20,
-    padding: 20,
+    width: SCREEN_W,
+    flex: 1,
+  },
+  menuHeader: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
     elevation: 5,
+  },
+  menuContent: {
+    alignItems: "center",
+    padding: 20,
+    width: "100%",
   },
   menuTitle: {
     fontSize: 20,
