@@ -189,14 +189,16 @@ export default function MemoriceScreen({ navigation }) {
 
       import("../../api/achievementService").then(({ unlockAchievement }) => {
         unlockAchievement("memorice", difficultyLevel)
-          .then(() => {
-            setTimeout(() => {
-              Alert.alert(
-                "🏆 ¡Logro Desbloqueado!",
-                `Has completado Memorice en dificultad ${difficultyText}`,
-                [{ text: "¡Genial!" }]
-              );
-            }, 500);
+          .then((data) => {
+            if (data && !data.message) {
+              setTimeout(() => {
+                Alert.alert(
+                  "🏆 ¡Logro Desbloqueado!",
+                  `Has completado Memorice en dificultad ${difficultyText}`,
+                  [{ text: "¡Genial!" }]
+                );
+              }, 500);
+            }
           })
           .catch(err => console.error("Failed to unlock achievement:", err));
       });

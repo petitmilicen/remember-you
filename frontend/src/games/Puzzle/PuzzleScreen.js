@@ -107,14 +107,16 @@ export default function PuzzleScreen({ navigation }) {
 
       import("../../api/achievementService").then(({ unlockAchievement }) => {
         unlockAchievement("puzzle", difficultyLevel)
-          .then(() => {
-            setTimeout(() => {
-              Alert.alert(
-                "🏆 ¡Logro Desbloqueado!",
-                `Has completado el Rompecabezas en dificultad ${difficultyText}`,
-                [{ text: "¡Genial!" }]
-              );
-            }, 500);
+          .then((data) => {
+            if (data && !data.message) {
+              setTimeout(() => {
+                Alert.alert(
+                  "🏆 ¡Logro Desbloqueado!",
+                  `Has completado el Rompecabezas en dificultad ${difficultyText}`,
+                  [{ text: "¡Genial!" }]
+                );
+              }, 500);
+            }
           })
           .catch(err => console.error("Failed to unlock achievement:", err));
       });

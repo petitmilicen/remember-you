@@ -284,14 +284,16 @@ export default function CaminoCorrectoScreen({ navigation }) {
 
       import("../../api/achievementService").then(({ unlockAchievement }) => {
         unlockAchievement("camino", difficultyLevel)
-          .then(() => {
-            setTimeout(() => {
-              Alert.alert(
-                "🏆 ¡Logro Desbloqueado!",
-                `Has completado Camino Correcto en dificultad ${difficultyText}`,
-                [{ text: "¡Genial!" }]
-              );
-            }, 1000); // Más delay para que no interfiera con el overlay de victoria
+          .then((data) => {
+            if (data && !data.message) {
+              setTimeout(() => {
+                Alert.alert(
+                  "🏆 ¡Logro Desbloqueado!",
+                  `Has completado Camino Correcto en dificultad ${difficultyText}`,
+                  [{ text: "¡Genial!" }]
+                );
+              }, 1000); // Más delay para que no interfiera con el overlay de victoria
+            }
           })
           .catch(err => console.error("Failed to unlock achievement:", err));
       });
