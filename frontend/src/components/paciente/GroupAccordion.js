@@ -1,8 +1,8 @@
 import React, { memo } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Animated, { FadeIn, Layout } from "react-native-reanimated";
 import AchievementBadge from "./AchievementBadge";
-import { styles } from "../../styles/PerfilPacienteStyles";
 
 export default memo(function GroupAccordion({
   title,
@@ -10,71 +10,106 @@ export default memo(function GroupAccordion({
   open = false,
   onToggle,
   dark,
+  gradientColors,
 }) {
   const slots = Array.from({ length: 3 }).map((_, i) => items[i] || null);
 
   return (
-    <View style={{ marginBottom: 14 }}>
+    <Animated.View layout={Layout.springify()} style={styles.container}>
       {/* HEADER */}
       <TouchableOpacity
-        activeOpacity={0.9}
+        activeOpacity={0.8}
         onPress={onToggle}
         style={[
-          styles.groupHeader,
-          { backgroundColor: dark ? "#1A1A1A" : "#FFF" },
+          styles.header,
+          { backgroundColor: dark ? "#1E1E1E" : "#FFF" },
+          open && styles.headerOpen
         ]}
       >
-        <Text
-          style={[styles.groupTitle, { color: dark ? "#A88BFF" : "#8A6DE9" }]}
-        >
-          {title}
-        </Text>
+        <View style={styles.headerContent}>
+          <View style={[styles.iconContainer, { backgroundColor: dark ? "#333" : "#F0F0F0" }]}>
+            <Ionicons name="trophy" size={16} color={gradientColors ? gradientColors[0] : "#6a11cb"} />
+          </View>
+          <Text style={[styles.title, { color: dark ? "#FFF" : "#333" }]}>
+            {title}
+          </Text>
+        </View>
         <Ionicons
           name={open ? "chevron-up" : "chevron-down"}
           size={20}
-          color={dark ? "#DDD" : "#555"}
+          color={dark ? "#AAA" : "#888"}
         />
       </TouchableOpacity>
 
       {/* BODY */}
       {open && (
-        <View
+        <Animated.View
+          entering={FadeIn}
           style={[
-            styles.groupBody,
-            dark ? styles.groupBodyDark : styles.groupBodyLight,
+            styles.body,
+            { backgroundColor: dark ? "#252525" : "#F9F9F9" }
           ]}
         >
-          <View style={innerStyles.row}>
-            <AchievementBadge
-              source={slots[0]?.icon}
-              unlocked={slots[0]?.unlocked ?? false}
-              title={slots[0]?.title || "Logro Bloqueado"}
-              description={slots[0]?.description || "Completa actividades para desbloquear"}
-            />
-            <AchievementBadge
-              source={slots[1]?.icon}
-              unlocked={slots[1]?.unlocked ?? false}
-              title={slots[1]?.title || "Logro Bloqueado"}
-              description={slots[1]?.description || "Completa actividades para desbloquear"}
-            />
-            <AchievementBadge
-              source={slots[2]?.icon}
-              unlocked={slots[2]?.unlocked ?? false}
-              title={slots[2]?.title || "Logro Bloqueado"}
-              description={slots[2]?.description || "Completa actividades para desbloquear"}
-            />
+          <View style={styles.row}>
+            {slots.map((slot, index) => (
+              <AchievementBadge
+                key={index}
+                source={slot?.icon}
+                unlocked={slot?.unlocked ?? false}
+                title={slot?.title || "Bloqueado"}
+                description={slot?.description || "Completa actividades"}
+              />
+            ))}
           </View>
-        </View>
+        </Animated.View>
       )}
-    </View>
+    </Animated.View>
   );
 });
 
-const innerStyles = {
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 15,
+    borderRadius: 15,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+  },
+  headerOpen: {
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.05)",
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  body: {
+    padding: 15,
+  },
   row: {
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",
-    width: "100%",
   },
-};
+});
