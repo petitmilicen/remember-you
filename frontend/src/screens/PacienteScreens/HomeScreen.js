@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, StatusBar, ActivityIndicator, Text, BackHandler } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Location from 'expo-location';
 import { LOCATION_TASK_NAME, GEOFENCING_TASK_NAME } from '../../utils/locationTask';
+import Animated, { FadeInUp } from "react-native-reanimated";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../api/axiosInstance';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -154,7 +156,7 @@ export default function HomeScreenPaciente({ navigation }) {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme === "dark" ? "#0D0D0D" : "#EDEDED" },
+        { backgroundColor: theme === "dark" ? "#0D0D0D" : "#F5F5F5" },
       ]}
     >
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
@@ -166,6 +168,7 @@ export default function HomeScreenPaciente({ navigation }) {
         </View>
       ) : (
         <>
+          {/* Magic Header (Gradient is now internal) */}
           <HeaderPaciente
             navigation={navigation}
             fotoPerfil={fotoPerfil}
@@ -175,11 +178,14 @@ export default function HomeScreenPaciente({ navigation }) {
             insets={insets}
           />
 
-          <GridMenuPaciente
-            navigation={navigation}
-            theme={theme}
-            getFontSize={getFontSize}
-          />
+          {/* Bento Grid Content */}
+          <View style={{ flex: 1 }}>
+            <GridMenuPaciente
+              navigation={navigation}
+              theme={theme}
+              getFontSize={getFontSize}
+            />
+          </View>
         </>
       )}
     </View>

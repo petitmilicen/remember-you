@@ -5,51 +5,49 @@ const { width } = Dimensions.get("window");
 export const styles = StyleSheet.create({
   container: { flex: 1 },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
+  // Header Styles
+  headerGradient: {
     paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingBottom: 50,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   profileImage: {
     width: 60,
     height: 60,
     borderRadius: 30,
     borderWidth: 2,
-    borderColor: "#FFF",
+    borderColor: "rgba(255,255,255,0.8)",
   },
-  headerText: { marginLeft: 15, marginTop: 20 },
-  greeting: { fontWeight: "600" },
-  subText: { marginBottom: 5 },
-  profileLink: { textDecorationLine: "underline" },
-
-  grid: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    alignContent: "space-evenly",
-    padding: 20,
-  },
-  card: {
-    width: width / 2.5,
-    aspectRatio: 1,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  cardText: {
-    marginTop: 10,
+  greeting: {
     fontWeight: "600",
-    color: "#FFF",
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  subText: {
+    marginBottom: 5,
+    opacity: 0.9,
+  },
+
+  // Bento Grid Styles
+  gridContainer: {
+    padding: 20,
+    paddingTop: 10,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 0, // Margin is handled by card
   },
 });
