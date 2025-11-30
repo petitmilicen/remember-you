@@ -1,10 +1,10 @@
 import React from "react";
-import { TouchableOpacity, View, Text } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { styles } from "../../styles/TarjetasStyles";
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
-export default function TarjetaPacienteItem({ item, themeStyles, settings, getFontSize, onDelete }) {
-  // Función para formatear la fecha
+export default function TarjetaPacienteItem({ item, settings, getFontSize, onDelete, gradientColors }) {
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -17,52 +17,114 @@ export default function TarjetaPacienteItem({ item, themeStyles, settings, getFo
   };
 
   const isCuidador = item.created_by === "cuidador";
-  const fondo = isCuidador
-    ? settings.theme === "dark"
-      ? "#3C3A1E"
-      : "#FFF3CD"
-    : settings.theme === "dark"
-      ? "#2E3D2E"
-      : "#D0F0C0";
-
-  const borde = isCuidador
-    ? settings.theme === "dark"
-      ? "#C9A13C"
-      : "#FFB74D"
-    : settings.theme === "dark"
-      ? "#5FA77A"
-      : "#81C784";
 
   return (
-    <TouchableOpacity
-      style={[styles.postIt, { backgroundColor: fondo, borderLeftColor: borde }]}
-      onLongPress={() => onDelete(item.id)}
-      activeOpacity={0.9}
+    <Animated.View
+      entering={FadeInDown.delay(100).duration(500)}
+      style={[
+        styles.container,
+        { backgroundColor: settings.theme === "dark" ? "#1E1E1E" : "#FFF" }
+      ]}
     >
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <Text style={[styles.postItTipo, themeStyles.text, { fontSize: getFontSize(14) }]}>
-            {isCuidador ? "👨‍⚕️ Cuidador" : "🧠 Paciente"}
-          </Text>
-          <Text style={[styles.postItDate, themeStyles.subtext, { fontSize: getFontSize(12) }]}>
-            {formatDate(item.created_at)}
-          </Text>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <View style={[styles.iconContainer, { backgroundColor: isCuidador ? "#E3F2FD" : "#E8F5E9" }]}>
+            <Text style={{ fontSize: 16 }}>{isCuidador ? "👨‍⚕️" : "🧠"}</Text>
+          </View>
+          <View>
+            <Text style={[styles.author, { color: settings.theme === "dark" ? "#FFF" : "#333" }]}>
+              {isCuidador ? "Cuidador" : "Tú"}
+            </Text>
+            <Text style={[styles.date, { color: settings.theme === "dark" ? "#AAA" : "#888" }]}>
+              {formatDate(item.created_at)}
+            </Text>
+          </View>
         </View>
 
-        <Text style={[styles.postItMensaje, themeStyles.text, { fontSize: getFontSize(15) }]}>
+        {!isCuidador && (
+          <TouchableOpacity onPress={() => onDelete(item.card_id)} style={styles.deleteButton}>
+            <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={styles.content}>
+        <Text style={[
+          styles.message,
+          { color: settings.theme === "dark" ? "#DDD" : "#444" },
+          { fontSize: getFontSize(16) }
+        ]}>
           {item.message}
         </Text>
 
-        <Text style={[styles.postItTipoSecundario, themeStyles.subtext, { fontSize: getFontSize(12) }]}>
-          {item.card_type}
-        </Text>
+        <View style={[styles.tag, { borderColor: gradientColors[0] }]}>
+          <Text style={[styles.tagText, { color: gradientColors[1] }]}>
+            {item.card_type}
+          </Text>
+        </View>
       </View>
-
-      {!isCuidador && (
-        <TouchableOpacity style={[styles.deleteButton, themeStyles.card]} onPress={() => onDelete(item.card_id)}>
-          <FontAwesome5 name="trash" size={14} color="red" />
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
+    </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  author: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  date: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  deleteButton: {
+    padding: 5,
+  },
+  content: {
+    paddingLeft: 46, // Align with text start
+  },
+  message: {
+    lineHeight: 24,
+    marginBottom: 10,
+  },
+  tag: {
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginTop: 5,
+  },
+  tagText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+});

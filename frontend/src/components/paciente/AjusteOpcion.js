@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { styles as ajustesStyles } from "../../styles/AjustesStyles";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function AjusteOpcion({
   icon,
@@ -8,44 +8,90 @@ export default function AjusteOpcion({
   subtitle,
   right,
   onPress,
-  themeStyles,
+  settings,
   getFontSizeStyle,
+  delay = 0,
 }) {
   return (
-    <TouchableOpacity
-      style={ajustesStyles.option}
-      onPress={onPress}
-      activeOpacity={0.85}
-    >
-      {icon ? <View style={{ width: 32, alignItems: "center" }}>{icon}</View> : null}
+    <Animated.View entering={FadeInDown.delay(delay).duration(500)}>
+      <TouchableOpacity
+        style={[
+          styles.container,
+          { backgroundColor: settings.theme === "dark" ? "#1E1E1E" : "#FFF" }
+        ]}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        <View style={styles.leftContent}>
+          {icon && <View style={styles.iconContainer}>{icon}</View>}
 
-      <View style={ajustesStyles.textContainer}>
-        <Text
-          style={[
-            ajustesStyles.optionText,
-            themeStyles.text,
-            getFontSizeStyle(16),
-          ]}
-          numberOfLines={1}
-        >
-          {title}
-        </Text>
+          <View style={styles.textContainer}>
+            <Text
+              style={[
+                styles.title,
+                { color: settings.theme === "dark" ? "#FFF" : "#333" },
+                getFontSizeStyle(16),
+              ]}
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
 
-        {subtitle ? (
-          <Text
-            style={[
-              ajustesStyles.optionSubtext,
-              themeStyles.subtext,
-              getFontSizeStyle(14),
-            ]}
-            numberOfLines={2}
-          >
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
+            {subtitle && (
+              <Text
+                style={[
+                  styles.subtitle,
+                  { color: settings.theme === "dark" ? "#AAA" : "#888" },
+                  getFontSizeStyle(14),
+                ]}
+                numberOfLines={1}
+              >
+                {subtitle}
+              </Text>
+            )}
+          </View>
+        </View>
 
-      {right ? <View style={{ marginLeft: 12 }}>{right}</View> : null}
-    </TouchableOpacity>
+        {right && <View style={styles.rightContent}>{right}</View>}
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 15,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  leftContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconContainer: {
+    marginRight: 15,
+    width: 30,
+    alignItems: "center",
+  },
+  textContainer: {
+    flex: 1,
+  },
+  title: {
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  subtitle: {
+    opacity: 0.8,
+  },
+  rightContent: {
+    marginLeft: 10,
+  },
+});
