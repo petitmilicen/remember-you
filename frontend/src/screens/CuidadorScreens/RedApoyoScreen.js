@@ -42,9 +42,11 @@ export default function RedApoyoScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
         <Text style={styles.headerTitle}>Red de Apoyo</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Ionicons name="add-circle" size={28} color={ACCENT} />
-        </TouchableOpacity>
+        {tienePacienteAsignado && (
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Ionicons name="add-circle" size={28} color={ACCENT} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.summaryBox}>
