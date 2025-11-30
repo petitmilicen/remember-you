@@ -9,22 +9,27 @@ import {
   ScrollView,
   Vibration,
   Alert,
+  StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { Canvas, Group, Rect, Circle } from "@shopify/react-native-skia";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const WRAP_PAD = 16;
 const BOARD_SIZE = Math.min(SCREEN_W * 0.9, 440);
 
-const COL_APP_BG = "#EDEDED";
+const COL_APP_BG = "#F5F5F5";
 const COL_CARD = "#FFFFFF";
-const COL_WALL = "#F93827";
+const COL_WALL = "#ff9a9e"; // Magic Pink for walls
 const COL_PLAYER = "#FFE066";
 const COL_ORB = "#00FFF5";
 const COL_PORTAL_OUT = "#C86BFA";
 const COL_PORTAL_IN = "#A43FF0";
+
+// Magic Gradient (Peach to Pink)
+const gradientColors = ["#ff9a9e", "#fecfef"];
 
 const DIFFS = {
   FACIL: { size: 7, orbs: 5, color: "#4CAF50", label: "Fácil" },
@@ -211,6 +216,7 @@ function generateResolvableLevel(size, orbCount, maxTries = 60) {
 }
 
 export default function CaminoCorrectoScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [gameStarted, setGameStarted] = useState(false);
   const [difficulty, setDifficulty] = useState("FACIL");
   const [score, setScore] = useState(0);
@@ -324,80 +330,96 @@ export default function CaminoCorrectoScreen({ navigation }) {
   };
 
   const renderMenu = () => (
-    <ScrollView contentContainerStyle={styles.scroll}>
-      <View style={styles.menuContainer}>
-        {/* Header con botón de retroceso */}
-        <LinearGradient
-          colors={["#F93827", "#FF6B6B"]}
-          style={[styles.menuHeader, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
+    <View style={styles.menuContainer}>
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
+      >
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>Camino Correcto</Text>
+          <View style={{ width: 45 }} />
+        </View>
+      </LinearGradient>
 
-          <Text style={[styles.headerTitle, { flex: 1, textAlign: "center" }]}>Camino Correcto</Text>
-
-          <View style={{ width: 26 }} />
-        </LinearGradient>
-
-        <View style={styles.menuContent}>
-          <Text style={styles.menuTitle}>Selecciona la dificultad</Text>
-
+      <ScrollView contentContainerStyle={styles.menuContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.card}>
           <View style={styles.tutorialBox}>
-            <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
+            <View style={styles.iconCircle}>
+              <FontAwesome5 name="lightbulb" size={20} color="#ff9a9e" />
+            </View>
             <Text style={styles.tutorialText}>
               Desliza en la dirección que quieras moverte.
               Recoge todos los orbes para abrir el portal y llegar a la salida.
-              Los niveles cambian cada vez que juegas.
             </Text>
           </View>
+        </View>
 
+        <Text style={styles.sectionTitle}>Dificultad</Text>
+        <View style={styles.optionsRow}>
           {Object.entries(DIFFS).map(([key, cfg]) => (
             <TouchableOpacity
               key={key}
               style={[
-                styles.diffButton,
-                difficulty === key && { backgroundColor: "#F93827" },
+                styles.optionButton,
+                difficulty === key && { backgroundColor: "#ff9a9e", borderColor: "#ff9a9e" },
               ]}
               onPress={() => setDifficulty(key)}
             >
               <Text
                 style={[
-                  styles.diffText,
-                  { color: difficulty === key ? "#fff" : "#333" },
+                  styles.optionText,
+                  { color: difficulty === key ? "#fff" : "#666" },
                 ]}
               >
                 {cfg.label}
               </Text>
             </TouchableOpacity>
           ))}
-
-          <TouchableOpacity
-            style={styles.startButton}
-            onPress={() => {
-              setGameStarted(true);
-              setScore(0);
-              setWon(false);
-            }}
-          >
-            <Text style={styles.startText}>Comenzar</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={() => {
+            setGameStarted(true);
+            setScore(0);
+            setWon(false);
+          }}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={gradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientButton}
+          >
+            <Text style={styles.startText}>Comenzar Juego</Text>
+            <Ionicons name="play-circle" size={24} color="#FFF" style={{ marginLeft: 10 }} />
+          </LinearGradient>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 
   const renderGame = () => (
     <View style={styles.container}>
       <LinearGradient
-        colors={["#F93827", "#FF6B6B"]}
-        style={[styles.header, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
       >
-        <TouchableOpacity onPress={() => setGameStarted(false)}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Camino Correcto</Text>
-        <View style={{ width: 26 }} />
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => setGameStarted(false)} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Camino Correcto</Text>
+          <View style={{ width: 45 }} />
+        </View>
       </LinearGradient>
 
       <View
@@ -445,165 +467,291 @@ export default function CaminoCorrectoScreen({ navigation }) {
         </Canvas>
       </View>
 
-      <View style={styles.hud}>
-        <Text style={styles.hudText}>{DIFFS[difficulty].label}</Text>
-        <Text style={styles.hudText}>Puntos {score}</Text>
-        <Text style={styles.hudText}>
-          {orbs.filter((o) => o.taken).length}/{orbs.length} orbes
-        </Text>
+      <View style={[styles.hud, { marginBottom: insets.bottom + 20 }]}>
+        <View style={styles.hudItem}>
+          <Text style={styles.hudLabel}>Dificultad</Text>
+          <Text style={styles.hudValue}>{DIFFS[difficulty].label}</Text>
+        </View>
+        <View style={styles.hudItem}>
+          <Text style={styles.hudLabel}>Puntos</Text>
+          <Text style={styles.hudValue}>{score}</Text>
+        </View>
+        <View style={styles.hudItem}>
+          <Text style={styles.hudLabel}>Orbes</Text>
+          <Text style={styles.hudValue}>{orbs.filter((o) => o.taken).length}/{orbs.length}</Text>
+        </View>
       </View>
 
       {won && (
         <View style={styles.overlay}>
-          <Text style={styles.overlayTitle}>¡Nivel completado!</Text>
-          <Text style={styles.overlayText}>Puntaje total: {score}</Text>
-          <TouchableOpacity style={[styles.btn, styles.btnFull]} onPress={restartSameDifficulty}>
-            <Text style={styles.btnText}>Volver a jugar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.btnBack, styles.btnFull]}
-            onPress={() => {
-              setGameStarted(false);
-              setWon(false);
-              setScore(0);
-            }}
-          >
-            <Text style={styles.btnBackText}>Volver al menú</Text>
-          </TouchableOpacity>
+          <View style={styles.overlayContent}>
+            <Text style={styles.overlayTitle}>¡Nivel completado!</Text>
+            <Text style={styles.overlayText}>Puntaje total: {score}</Text>
+            <TouchableOpacity style={styles.btn} onPress={restartSameDifficulty}>
+              <LinearGradient
+                colors={gradientColors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.gradientButtonSmall}
+              >
+                <Text style={styles.btnText}>Volver a jugar</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.btnBack}
+              onPress={() => {
+                setGameStarted(false);
+                setWon(false);
+                setScore(0);
+              }}
+            >
+              <Text style={styles.btnBackText}>Volver al menú</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>
   );
 
-  return gameStarted ? renderGame() : renderMenu();
+  return (
+    <View style={styles.mainContainer}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      {gameStarted ? renderGame() : renderMenu()}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, alignItems: "center", backgroundColor: COL_APP_BG },
-  menuContainer: {
-    alignItems: "center",
-    marginTop: 0,
-    backgroundColor: "#fff",
-    width: SCREEN_W,
+  mainContainer: {
     flex: 1,
+    backgroundColor: "#F5F5F5",
   },
-  menuHeader: {
+  container: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+  },
+  menuContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    zIndex: 10,
     width: "100%",
+  },
+  headerContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
+  },
+  headerTitle: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 28,
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   menuContent: {
-    alignItems: "center",
     padding: 20,
-    width: "100%",
   },
-  menuTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F93827",
-    marginBottom: 20,
+  card: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   tutorialBox: {
-    backgroundColor: "#FFF5F5",
-    borderRadius: 15,
-    padding: 15,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: "#FBC4C4",
-  },
-  tutorialText: { color: "#444", fontSize: 15, flex: 1, lineHeight: 20 },
-  diffButton: {
-    backgroundColor: "#E0E0E0",
-    padding: 15,
-    borderRadius: 12,
-    width: "100%",
-    alignItems: "center",
-    marginVertical: 8,
-  },
-  diffText: { fontSize: 18, fontWeight: "600" },
-  startButton: {
-    backgroundColor: "#F93827",
-    padding: 15,
-    borderRadius: 15,
-    marginTop: 25,
-    width: "100%",
-    alignItems: "center",
-  },
-  startText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
-  container: { flex: 1, backgroundColor: COL_APP_BG, alignItems: "center" },
-  header: {
-    width: "100%",
     flexDirection: "row",
     alignItems: "center",
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF0F5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 15,
+  },
+  tutorialText: {
+    flex: 1,
+    color: "#555",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 15,
+    marginLeft: 5,
+  },
+  optionsRow: {
+    flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    marginBottom: 25,
+    gap: 10,
   },
-  headerTitle: { color: "#FFF", fontSize: 24, fontWeight: "bold" },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 15,
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#EEE",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  optionText: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  startButton: {
+    marginTop: 10,
+    borderRadius: 25,
+    shadowColor: "#ff9a9e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  gradientButton: {
+    paddingVertical: 15,
+    borderRadius: 25,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   boardWrapper: {
-    marginTop: 14,
+    marginTop: 20,
     backgroundColor: COL_CARD,
-    borderRadius: 22,
+    borderRadius: 25,
     padding: WRAP_PAD,
     width: BOARD_SIZE + WRAP_PAD * 2,
     height: BOARD_SIZE + WRAP_PAD * 2,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+    justifyContent: "center",
+    alignItems: "center",
   },
   hud: {
     width: "90%",
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#F93827",
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 20,
-    marginTop: 16,
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginTop: 20,
+    borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  hudText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  hudItem: {
+    alignItems: "center",
+  },
+  hudLabel: {
+    fontSize: 12,
+    color: "#888",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    marginBottom: 2,
+  },
+  hudValue: {
+    fontSize: 18,
+    color: "#333",
+    fontWeight: "bold",
+  },
   overlay: {
-    position: "absolute",
-    top: "32%",
-    left: "5%",
-    right: "5%",
-    backgroundColor: COL_CARD,
-    borderRadius: 20,
-    padding: 20,
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
     alignItems: "center",
-    elevation: 6,
+    zIndex: 20,
   },
-  overlayTitle: { color: "#F93827", fontSize: 22, fontWeight: "bold", marginBottom: 8 },
-  overlayText: { color: "#333", marginBottom: 14, fontSize: 16 },
+  overlayContent: {
+    width: "85%",
+    backgroundColor: "#FFF",
+    borderRadius: 25,
+    padding: 30,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  overlayTitle: {
+    color: "#ff9a9e",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  overlayText: {
+    color: "#555",
+    marginBottom: 25,
+    fontSize: 18,
+  },
   btn: {
-    backgroundColor: "#F93827",
+    width: "100%",
+    marginBottom: 15,
+    borderRadius: 25,
+    shadowColor: "#ff9a9e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  gradientButtonSmall: {
     paddingVertical: 12,
-    borderRadius: 12,
-    marginVertical: 6,
+    borderRadius: 25,
     alignItems: "center",
+    justifyContent: "center",
     width: "100%",
   },
-  btnText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  btnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   btnBack: {
-    backgroundColor: "#FF6B6B",
     paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 8,
-    alignItems: "center",
     width: "100%",
+    alignItems: "center",
   },
-  btnBackText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  btnFull: { width: "100%" },
+  btnBackText: {
+    color: "#888",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });

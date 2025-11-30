@@ -8,13 +8,19 @@ import {
   ScrollView,
   Alert,
   Platform,
+  StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
+// Magic Gradient (Peach to Pink)
+const gradientColors = ["#ff9a9e", "#fecfef"];
+
 export default function PuzzleScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [difficulty, setDifficulty] = useState("easy");
   const [gameStarted, setGameStarted] = useState(false);
   const [puzzlePieces, setPuzzlePieces] = useState([]);
@@ -22,9 +28,9 @@ export default function PuzzleScreen({ navigation }) {
   const [moves, setMoves] = useState(0);
 
   const difficultySettings = {
-    easy: { grid: 3, size: width - 40 },
-    normal: { grid: 4, size: width - 40 },
-    hard: { grid: 5, size: width - 40 },
+    easy: { grid: 3, size: width - 40, label: "Fácil (3x3)" },
+    normal: { grid: 4, size: width - 40, label: "Normal (4x4)" },
+    hard: { grid: 5, size: width - 40, label: "Difícil (5x5)" },
   };
 
   const initializePuzzle = () => {
@@ -97,7 +103,7 @@ export default function PuzzleScreen({ navigation }) {
     if (allCorrect && emptyCorrect) {
       // Unlock achievement
       const difficultyLevel = difficulty === "easy" ? 1 : difficulty === "normal" ? 2 : 3;
-      const difficultyText = difficulty === "easy" ? "Fácil" : difficulty === "normal" ? "Normal" : "Difícil";
+      const difficultyText = difficultySettings[difficulty].label;
 
       import("../../api/achievementService").then(({ unlockAchievement }) => {
         unlockAchievement("puzzle", difficultyLevel)
@@ -132,196 +138,343 @@ export default function PuzzleScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={["#F93827", "#FF6B6B"]}
-          style={[
-            styles.header,
-            { paddingTop: Platform.OS === "android" ? 40 : 10 },
-          ]}
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.header, { paddingTop: insets.top + 20 }]}
         >
-          <TouchableOpacity onPress={() => setGameStarted(false)}>
-            <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Rompecabezas</Text>
-          <View style={{ width: 28 }} />
+          <View style={styles.headerContent}>
+            <TouchableOpacity onPress={() => setGameStarted(false)} style={styles.backButton}>
+              <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Rompecabezas</Text>
+            <View style={{ width: 45 }} />
+          </View>
         </LinearGradient>
 
-        <View style={styles.infoBox}>
-          <Text style={styles.infoText}> Movimientos: {moves}</Text>
-        </View>
-
-        <Text style={styles.instructions}>
-          Toca una pieza adyacente al espacio vacío para moverla.
-        </Text>
-
-        <View
-          style={[
-            styles.puzzleBoard,
-            { width: size, height: size, backgroundColor: "#fff" },
-          ]}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              width: size,
-              height: size,
-            }}
-          >
-            {Array.from({ length: total }).map((_, position) => {
-              const piece = puzzlePieces.find(
-                (p) => p.currentPosition === position
-              );
-              const isEmpty = position === emptyIndex;
-              const pieceExists = piece && !isEmpty;
-
-              return (
-                <TouchableOpacity
-                  key={position}
-                  style={[
-                    styles.puzzlePiece,
-                    {
-                      width: pieceSize,
-                      height: pieceSize,
-                      backgroundColor: isEmpty
-                        ? "transparent"
-                        : piece.currentPosition === piece.correctPosition
-                          ? "#C8E6C9"
-                          : "#FFF4E0",
-                      borderColor: "#999",
-                      borderWidth: isEmpty ? 0 : 1,
-                    },
-                  ]}
-                  onPress={() => pieceExists && handlePiecePress(position)}
-                  disabled={isEmpty}
-                >
-                  {pieceExists && (
-                    <Text
-                      style={[
-                        styles.pieceText,
-                        {
-                          color:
-                            piece.currentPosition === piece.correctPosition
-                              ? "#2E7D32"
-                              : "#F93827",
-                          fontSize: grid === 3 ? 20 : grid === 4 ? 18 : 16,
-                        },
-                      ]}
-                    >
-                      {piece.number}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+        <ScrollView contentContainerStyle={styles.gameContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.infoBox}>
+            <View style={styles.infoItem}>
+              <FontAwesome5 name="arrows-alt" size={16} color="#ff9a9e" style={{ marginBottom: 4 }} />
+              <Text style={styles.infoValue}>{moves} Movimientos</Text>
+            </View>
           </View>
-        </View>
 
-        <Text style={styles.objectiveText}>
-          Objetivo: Ordena los números del 1 al {total - 1}.
-        </Text>
+          <Text style={styles.instructions}>
+            Toca una pieza adyacente al espacio vacío para moverla.
+          </Text>
 
-        <TouchableOpacity style={styles.resetButton} onPress={initializePuzzle}>
-          <FontAwesome5 name="redo-alt" size={18} color="#fff" />
-          <Text style={styles.resetText}>Reiniciar</Text>
-        </TouchableOpacity>
+          <View
+            style={[
+              styles.puzzleBoard,
+              { width: size, height: size, backgroundColor: "#fff" },
+            ]}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                width: size,
+                height: size,
+              }}
+            >
+              {Array.from({ length: total }).map((_, position) => {
+                const piece = puzzlePieces.find(
+                  (p) => p.currentPosition === position
+                );
+                const isEmpty = position === emptyIndex;
+                const pieceExists = piece && !isEmpty;
+
+                return (
+                  <TouchableOpacity
+                    key={position}
+                    style={[
+                      styles.puzzlePiece,
+                      {
+                        width: pieceSize,
+                        height: pieceSize,
+                        backgroundColor: isEmpty
+                          ? "transparent"
+                          : piece.currentPosition === piece.correctPosition
+                            ? "#C8E6C9" // Green for correct
+                            : "#FFF0F5", // Light pink for incorrect
+                        borderColor: "#ff9a9e",
+                        borderWidth: isEmpty ? 0 : 1,
+                      },
+                    ]}
+                    onPress={() => pieceExists && handlePiecePress(position)}
+                    disabled={isEmpty}
+                    activeOpacity={0.8}
+                  >
+                    {pieceExists && (
+                      <Text
+                        style={[
+                          styles.pieceText,
+                          {
+                            color:
+                              piece.currentPosition === piece.correctPosition
+                                ? "#2E7D32"
+                                : "#ff9a9e",
+                            fontSize: grid === 3 ? 24 : grid === 4 ? 20 : 18,
+                          },
+                        ]}
+                      >
+                        {piece.number}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          <Text style={styles.objectiveText}>
+            Objetivo: Ordena los números del 1 al {total - 1}.
+          </Text>
+
+          <TouchableOpacity style={styles.resetBtnContainer} onPress={initializePuzzle}>
+            <LinearGradient
+              colors={gradientColors}
+              style={styles.resetBtn}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <FontAwesome5 name="redo-alt" size={16} color="#fff" />
+              <Text style={styles.resetText}>Reiniciar</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </View>
     );
   };
 
   const renderDifficultySelector = () => (
-    <View style={styles.diffContainer}>
-      {/* Header con botón de retroceso */}
+    <View style={styles.menuContainer}>
       <LinearGradient
-        colors={["#F93827", "#FF6B6B"]}
-        style={[styles.menuHeader, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={[styles.headerTitle, { flex: 1, textAlign: "center" }]}>Rompecabezas</Text>
-
-        <View style={{ width: 26 }} />
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Rompecabezas</Text>
+          <View style={{ width: 45 }} />
+        </View>
       </LinearGradient>
 
-      <View style={styles.diffContent}>
-        <Text style={styles.diffTitle}>Selecciona la dificultad</Text>
-        <View style={styles.tutorialBox}>
-          <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
-          <Text style={styles.tutorialText}>
-            Mueve las piezas tocando una adyacente al espacio vacío. El objetivo
-            es ordenar los números hasta formar la secuencia correcta. ¡Usa tu
-            lógica y paciencia!
-          </Text>
+      <ScrollView contentContainerStyle={styles.menuContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.card}>
+          <View style={styles.tutorialBox}>
+            <View style={styles.iconCircle}>
+              <FontAwesome5 name="lightbulb" size={20} color="#ff9a9e" />
+            </View>
+            <Text style={styles.tutorialText}>
+              Mueve las piezas tocando una adyacente al espacio vacío. El objetivo
+              es ordenar los números hasta formar la secuencia correcta.
+            </Text>
+          </View>
         </View>
 
-        {[
-          { lvl: "easy", label: "Fácil (3x3)" },
-          { lvl: "normal", label: "Normal (4x4)" },
-          { lvl: "hard", label: "Difícil (5x5)" },
-        ].map(({ lvl, label }) => (
-          <TouchableOpacity
-            key={lvl}
-            style={[
-              styles.diffButton,
-              difficulty === lvl && { backgroundColor: "#F93827" },
-            ]}
-            onPress={() => setDifficulty(lvl)}
-          >
-            <Text
+        <Text style={styles.sectionTitle}>Dificultad</Text>
+        <View style={styles.optionsRow}>
+          {Object.keys(difficultySettings).map((lvl) => (
+            <TouchableOpacity
+              key={lvl}
               style={[
-                styles.diffText,
-                { color: difficulty === lvl ? "#fff" : "#333" },
+                styles.optionButton,
+                difficulty === lvl && { backgroundColor: "#ff9a9e", borderColor: "#ff9a9e" },
               ]}
+              onPress={() => setDifficulty(lvl)}
             >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.optionText,
+                  { color: difficulty === lvl ? "#fff" : "#666" },
+                ]}
+              >
+                {difficultySettings[lvl].label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        <TouchableOpacity style={styles.startButton} onPress={initializePuzzle}>
-          <Text style={styles.startText}>🎯 Comenzar</Text>
+        <TouchableOpacity style={styles.startButton} onPress={initializePuzzle} activeOpacity={0.8}>
+          <LinearGradient
+            colors={gradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientButton}
+          >
+            <Text style={styles.startText}>Comenzar Juego</Text>
+            <Ionicons name="play-circle" size={24} color="#FFF" style={{ marginLeft: 10 }} />
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
+    <View style={styles.mainContainer}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       {!gameStarted ? renderDifficultySelector() : renderPuzzleGame()}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, alignItems: "center", backgroundColor: "#EDEDED" },
-  container: { flex: 1, alignItems: "center", backgroundColor: "#EDEDED" },
-
+  mainContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  menuContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
   header: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 30,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    zIndex: 10,
+    width: "100%",
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 28,
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  menuContent: {
+    padding: 20,
+  },
+  gameContent: {
+    alignItems: "center",
+    paddingTop: 20,
+  },
+  card: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  tutorialBox: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF0F5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 15,
+  },
+  tutorialText: {
+    flex: 1,
+    color: "#555",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 15,
+    marginLeft: 5,
+  },
+  optionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 25,
+    gap: 10,
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 15,
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#EEE",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  optionText: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  startButton: {
+    marginTop: 10,
+    borderRadius: 25,
+    shadowColor: "#ff9a9e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 5,
   },
-  headerTitle: { color: "#FFF", fontSize: 24, fontWeight: "bold" },
-
-  infoBox: {
-    width: width * 0.9,
-    backgroundColor: "#F93827",
-    borderRadius: 20,
-    padding: 10,
-    marginVertical: 10,
+  gradientButton: {
+    paddingVertical: 15,
+    borderRadius: 25,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  infoText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
+  startText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  infoBox: {
+    width: "90%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    paddingVertical: 15,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  infoItem: {
+    alignItems: "center",
+  },
+  infoValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
   },
   instructions: {
     fontSize: 15,
@@ -329,16 +482,21 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     marginBottom: 10,
+    paddingHorizontal: 20,
   },
-
   puzzleBoard: {
     flexDirection: "row",
     flexWrap: "wrap",
     borderWidth: 3,
-    borderColor: "#000",
+    borderColor: "#ff9a9e",
     borderRadius: 10,
     overflow: "hidden",
     marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
   },
   puzzlePiece: {
     justifyContent: "center",
@@ -351,80 +509,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
-
-  resetButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FF6B6B",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  resetText: { color: "#fff", fontWeight: "bold", marginLeft: 6 },
-
-  diffContainer: {
-    alignItems: "center",
-    marginTop: 0,
-    backgroundColor: "#fff",
-    width: width,
-    flex: 1,
-  },
-  menuHeader: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+  resetBtnContainer: {
+    marginTop: 10,
+    borderRadius: 25,
+    shadowColor: "#ff9a9e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 5,
   },
-  diffContent: {
-    alignItems: "center",
-    padding: 20,
-    width: "100%",
-  },
-  diffTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F93827",
-    marginBottom: 20,
-  },
-  tutorialBox: {
-    backgroundColor: "#FFF5F5",
-    borderRadius: 15,
-    padding: 15,
+  resetBtn: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: "#FBC4C4",
-  },
-  tutorialText: {
-    color: "#444",
-    fontSize: 15,
-    flex: 1,
-    lineHeight: 20,
-  },
-  diffButton: {
-    backgroundColor: "#E0E0E0",
-    padding: 15,
-    borderRadius: 12,
-    width: "100%",
     alignItems: "center",
-    marginVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
   },
-  diffText: { fontSize: 18, fontWeight: "600" },
-  startButton: {
-    backgroundColor: "#F93827",
-    padding: 15,
-    borderRadius: 15,
-    marginTop: 25,
-    width: "100%",
-    alignItems: "center",
+  resetText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 8,
+    fontSize: 16,
   },
-  startText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
 });

@@ -10,12 +10,16 @@ import {
   Vibration,
   Animated,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import ConfettiCannon from "react-native-confetti-cannon";
 import MemoryCard from "../../components/MemoryCard";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FadeInDown, FadeInUp } from "react-native-reanimated"; // Import reanimated animations if needed, but here we use Animated API for legacy compatibility or switch to reanimated fully.
+// Note: The original code used Animated from react-native. I will stick to that for internal logic but use the style of the new design.
 
 const { width } = Dimensions.get("window");
 
@@ -35,6 +39,7 @@ const messages = [
 ];
 
 export default function MemoriceScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [cards, setCards] = useState([]);
   const [flipped, setFlipped] = useState([]);
   const [matched, setMatched] = useState([]);
@@ -54,6 +59,9 @@ export default function MemoriceScreen({ navigation }) {
   const bgMusic = useRef(null);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // Magic Gradient (Peach to Pink)
+  const gradientColors = ["#ff9a9e", "#fecfef"];
 
   const difficultySettings = {
     easy: 6,
@@ -176,14 +184,12 @@ export default function MemoriceScreen({ navigation }) {
       showMessage("¡Increíble! 🏆 Completaste el juego 🎉");
       victorySound.current?.replayAsync();
 
-      // Unlock achievement based on difficulty
       const difficultyLevel = difficulty === "easy" ? 1 : difficulty === "normal" ? 2 : 3;
       const difficultyText = difficulty === "easy" ? "Fácil" : difficulty === "normal" ? "Normal" : "Difícil";
 
       import("../../api/achievementService").then(({ unlockAchievement }) => {
         unlockAchievement("memorice", difficultyLevel)
           .then(() => {
-            // Notificación de logro desbloqueado
             setTimeout(() => {
               Alert.alert(
                 "🏆 ¡Logro Desbloqueado!",
@@ -227,41 +233,49 @@ export default function MemoriceScreen({ navigation }) {
       ) : null}
 
       <LinearGradient
-        colors={["#F93827", "#FF6B6B"]}
-        style={[styles.header, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
       >
-        <TouchableOpacity onPress={() => setGameStarted(false)}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={[styles.headerTitle, { flex: 1, textAlign: "center" }]}>Memorice</Text>
-
-        <TouchableOpacity onPress={toggleMusic}>
-          <Ionicons
-            name={musicEnabled ? "musical-notes" : "volume-mute"}
-            size={26}
-            color="#FFF"
-          />
-        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => setGameStarted(false)} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Memorice</Text>
+          <TouchableOpacity onPress={toggleMusic} style={styles.musicButton}>
+            <Ionicons
+              name={musicEnabled ? "musical-notes" : "volume-mute"}
+              size={28}
+              color="#FFF"
+            />
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
 
-      <View style={styles.grid}>
-        {cards.map((card, i) => (
-          <MemoryCard
-            key={card.id}
-            index={i}
-            emoji={card.emoji}
-            isFlipped={flipped.includes(card.id)}
-            isMatched={matched.includes(card.id)}
-            onPress={() => handleFlip(card.id)}
-          />
-        ))}
+      <View style={styles.gridContainer}>
+        <View style={styles.grid}>
+          {cards.map((card, i) => (
+            <MemoryCard
+              key={card.id}
+              index={i}
+              emoji={card.emoji}
+              isFlipped={flipped.includes(card.id)}
+              isMatched={matched.includes(card.id)}
+              onPress={() => handleFlip(card.id)}
+              gradientColors={gradientColors}
+            />
+          ))}
+        </View>
       </View>
 
-      <View style={styles.infoBox}>
-        <Text style={styles.infoText}>Movimientos: {moves}</Text>
+      <View style={[styles.infoBox, { marginBottom: insets.bottom + 20 }]}>
+        <View style={styles.infoItem}>
+          <Text style={styles.infoLabel}>Movimientos</Text>
+          <Text style={styles.infoValue}>{moves}</Text>
+        </View>
         <TouchableOpacity style={styles.resetBtn} onPress={initGame}>
-          <FontAwesome5 name="redo-alt" size={18} color="#fff" />
+          <FontAwesome5 name="redo-alt" size={16} color="#fff" />
           <Text style={styles.resetText}>Reiniciar</Text>
         </TouchableOpacity>
       </View>
@@ -270,67 +284,72 @@ export default function MemoriceScreen({ navigation }) {
 
 
   const renderMenu = () => (
-    <View style={styles.diffContainer}>
-      {/* Header con botón de retroceso */}
+    <View style={styles.menuContainer}>
       <LinearGradient
-        colors={["#F93827", "#FF6B6B"]}
-        style={[styles.menuHeader, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={[styles.headerTitle, { flex: 1, textAlign: "center" }]}>Memorice</Text>
-
-        <View style={{ width: 26 }} />
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Memorice</Text>
+          <View style={{ width: 45 }} />
+        </View>
       </LinearGradient>
 
-      <View style={styles.diffContent}>
-        <Text style={styles.diffTitle}>Selecciona la dificultad</Text>
-
-        <View style={styles.tutorialBox}>
-          <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
-          <Text style={styles.tutorialText}>
-            Encuentra todas las parejas volteando dos cartas por turno. Observa, recuerda y
-            planifica: si no coinciden, se voltearán de nuevo. ¡Entrena tu memoria!
-          </Text>
+      <ScrollView contentContainerStyle={styles.menuContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.card}>
+          <View style={styles.tutorialBox}>
+            <View style={styles.iconCircle}>
+              <FontAwesome5 name="lightbulb" size={20} color="#ff9a9e" />
+            </View>
+            <Text style={styles.tutorialText}>
+              Encuentra todas las parejas volteando dos cartas por turno. ¡Entrena tu memoria!
+            </Text>
+          </View>
         </View>
 
-        {["easy", "normal", "hard"].map((lvl) => (
-          <TouchableOpacity
-            key={lvl}
-            style={[
-              styles.diffButton,
-              difficulty === lvl && { backgroundColor: "#F93827" },
-            ]}
-            onPress={() => setDifficulty(lvl)}
-          >
-            <Text
+        <Text style={styles.sectionTitle}>Dificultad</Text>
+        <View style={styles.optionsRow}>
+          {["easy", "normal", "hard"].map((lvl) => (
+            <TouchableOpacity
+              key={lvl}
               style={[
-                styles.diffText,
-                { color: difficulty === lvl ? "#fff" : "#333" },
+                styles.optionButton,
+                difficulty === lvl && { backgroundColor: "#ff9a9e", borderColor: "#ff9a9e" },
               ]}
+              onPress={() => setDifficulty(lvl)}
             >
-              {lvl === "easy" ? "Fácil" : lvl === "normal" ? "Normal" : "Difícil"}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.optionText,
+                  { color: difficulty === lvl ? "#fff" : "#666" },
+                ]}
+              >
+                {lvl === "easy" ? "Fácil" : lvl === "normal" ? "Normal" : "Difícil"}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        <Text style={styles.subTitle}>Tema de cartas</Text>
-        <View style={styles.emojiRow}>
+        <Text style={styles.sectionTitle}>Tema</Text>
+        <View style={styles.optionsRow}>
           {Object.keys(emojiSets).map((key) => (
             <TouchableOpacity
               key={key}
               style={[
-                styles.emojiOption,
-                emojiSet === key && { backgroundColor: "#F93827" },
+                styles.optionButton,
+                emojiSet === key && { backgroundColor: "#ff9a9e", borderColor: "#ff9a9e" },
               ]}
               onPress={() => setEmojiSet(key)}
             >
               <Text
                 style={[
-                  styles.emojiLabel,
-                  { color: emojiSet === key ? "#fff" : "#333" },
+                  styles.optionText,
+                  { color: emojiSet === key ? "#fff" : "#666" },
                 ]}
               >
                 {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -339,167 +358,230 @@ export default function MemoriceScreen({ navigation }) {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.startButton} onPress={initGame}>
-          <Text style={styles.startText}>Comenzar</Text>
+        <TouchableOpacity style={styles.startButton} onPress={initGame} activeOpacity={0.8}>
+          <LinearGradient
+            colors={gradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientButton}
+          >
+            <Text style={styles.startText}>Comenzar Juego</Text>
+            <Ionicons name="play-circle" size={24} color="#FFF" style={{ marginLeft: 10 }} />
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
+    <View style={styles.mainContainer}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       {!gameStarted ? renderMenu() : renderGame()}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, alignItems: "center", backgroundColor: "#EDEDED" },
-  diffContainer: {
-    alignItems: "center",
-    marginTop: 0,
-    backgroundColor: "#fff",
-    width: width,
+  mainContainer: {
     flex: 1,
+    backgroundColor: "#F5F5F5",
   },
-  menuHeader: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
-  },
-  diffContent: {
-    alignItems: "center",
-    padding: 20,
-    width: "100%",
-  },
-  diffTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F93827",
-    marginBottom: 20,
-  },
-  tutorialBox: {
-    backgroundColor: "#FFF5F5",
-    borderRadius: 15,
-    padding: 15,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: "#FBC4C4",
-  },
-  tutorialText: { color: "#444", fontSize: 15, flex: 1, lineHeight: 20 },
-  diffButton: {
-    backgroundColor: "#E0E0E0",
-    padding: 15,
-    borderRadius: 12,
-    width: "100%",
-    alignItems: "center",
-    marginVertical: 8,
-  },
-  diffText: { fontSize: 18, fontWeight: "600" },
-  subTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#F93827",
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  emojiRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 15,
-  },
-  emojiOption: {
-    flex: 1,
-    marginHorizontal: 5,
-    backgroundColor: "#E0E0E0",
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  emojiLabel: { fontSize: 16, fontWeight: "600" },
-  startButton: {
-    backgroundColor: "#F93827",
-    padding: 15,
-    borderRadius: 15,
-    marginTop: 25,
-    width: "100%",
-    alignItems: "center",
-  },
-  startText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
-
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#EDEDED",
-    paddingBottom: Platform.OS === "android" ? 40 : 20,
+    backgroundColor: "#F5F5F5",
+  },
+  menuContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
   },
   header: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    zIndex: 10,
     width: "100%",
+  },
+  headerContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+  },
+  headerTitle: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 28,
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  menuContent: {
+    padding: 20,
+  },
+  card: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  tutorialBox: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF0F5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 15,
+  },
+  tutorialText: {
+    flex: 1,
+    color: "#555",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 15,
+    marginLeft: 5,
+  },
+  optionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 25,
+    gap: 10,
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 15,
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#EEE",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  optionText: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  startButton: {
+    marginTop: 10,
+    borderRadius: 25,
+    shadowColor: "#ff9a9e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 5,
   },
-  headerTitle: { color: "#FFF", fontSize: 24, fontWeight: "bold" },
+  gradientButton: {
+    paddingVertical: 15,
+    borderRadius: 25,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  gridContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
   grid: {
-    width: width * 0.9,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    padding: 10,
   },
   infoBox: {
-    width: width * 0.9,
+    width: "90%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#F93827",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginBottom: 10,
-    borderRadius: 20,
+    backgroundColor: "#FFF",
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  infoText: { color: "#fff", fontSize: 18, fontWeight: "600" },
+  infoItem: {
+    alignItems: "flex-start",
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: "#888",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  infoValue: {
+    fontSize: 24,
+    color: "#333",
+    fontWeight: "bold",
+  },
   resetBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FF6B6B",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    backgroundColor: "#ff9a9e",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
   },
-  resetText: { color: "#fff", fontWeight: "bold", marginLeft: 6 },
+  resetText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
   messageBox: {
     position: "absolute",
-    top: "45%",
-    left: 0,
-    right: 0,
+    top: "15%",
+    zIndex: 20,
+    alignSelf: "center",
+    width: "100%",
     alignItems: "center",
-    zIndex: 10,
   },
   messageText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#F93827",
-    backgroundColor: "rgba(255,255,255,0.85)",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
+    color: "#FFF",
+    backgroundColor: "rgba(255, 154, 158, 0.95)",
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    borderRadius: 25,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
 });

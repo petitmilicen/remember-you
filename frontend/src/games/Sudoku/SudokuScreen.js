@@ -8,13 +8,19 @@ import {
   Alert,
   ScrollView,
   Platform,
+  StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
+// Magic Gradient (Peach to Pink)
+const gradientColors = ["#ff9a9e", "#fecfef"];
+
 export default function SudokuScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [difficulty, setDifficulty] = useState("easy");
   const [gameStarted, setGameStarted] = useState(false);
   const [board, setBoard] = useState([]);
@@ -25,9 +31,9 @@ export default function SudokuScreen({ navigation }) {
   const [timer, setTimer] = useState(0);
 
   const difficultySettings = {
-    easy: { cellsToRemove: 40, maxMistakes: 5 },
-    normal: { cellsToRemove: 50, maxMistakes: 3 },
-    hard: { cellsToRemove: 60, maxMistakes: 1 },
+    easy: { cellsToRemove: 40, maxMistakes: 5, label: "Fácil" },
+    normal: { cellsToRemove: 50, maxMistakes: 3, label: "Normal" },
+    hard: { cellsToRemove: 60, maxMistakes: 1, label: "Difícil" },
   };
 
   const generateSudoku = () => {
@@ -110,7 +116,7 @@ export default function SudokuScreen({ navigation }) {
       if (isComplete(newBoard)) {
         // Unlock achievement
         const difficultyLevel = difficulty === "easy" ? 1 : difficulty === "normal" ? 2 : 3;
-        const difficultyText = difficulty === "easy" ? "Fácil" : difficulty === "normal" ? "Normal" : "Difícil";
+        const difficultyText = difficultySettings[difficulty].label;
 
         import("../../api/achievementService").then(({ unlockAchievement }) => {
           unlockAchievement("sudoku", difficultyLevel)
@@ -173,10 +179,10 @@ export default function SudokuScreen({ navigation }) {
     const sel = selectedCell?.r === r && selectedCell?.c === c;
     const wrong = v !== 0 && v !== solution[r]?.[c];
 
-    const borderTop = r % 3 === 0 ? 3 : 1;
-    const borderLeft = c % 3 === 0 ? 3 : 1;
-    const borderBottom = r === 8 ? 3 : (r + 1) % 3 === 0 ? 3 : 1;
-    const borderRight = c === 8 ? 3 : (c + 1) % 3 === 0 ? 3 : 1;
+    const borderTop = r % 3 === 0 ? 2 : 0.5;
+    const borderLeft = c % 3 === 0 ? 2 : 0.5;
+    const borderBottom = r === 8 ? 2 : (r + 1) % 3 === 0 ? 2 : 0.5;
+    const borderRight = c === 8 ? 2 : (c + 1) % 3 === 0 ? 2 : 0.5;
 
     return (
       <TouchableOpacity
@@ -189,12 +195,13 @@ export default function SudokuScreen({ navigation }) {
             borderBottomWidth: borderBottom,
             borderRightWidth: borderRight,
             backgroundColor: sel
-              ? "#FFF4E0"
+              ? "#FFF0F5" // Light pink for selection
               : wrong
                 ? "#FFD1D1"
                 : init
-                  ? "#F5F5F5"
+                  ? "#F9F9F9"
                   : "#FFFFFF",
+            borderColor: "#ff9a9e", // Magic pink for borders
           },
         ]}
         onPress={() => handleCellPress(r, c)}
@@ -203,7 +210,7 @@ export default function SudokuScreen({ navigation }) {
         <Text
           style={[
             styles.cellText,
-            { color: init ? "#000" : wrong ? "#D32F2F" : "#F93827" },
+            { color: init ? "#333" : wrong ? "#D32F2F" : "#ff9a9e" },
           ]}
         >
           {v !== 0 ? v : ""}
@@ -219,8 +226,16 @@ export default function SudokuScreen({ navigation }) {
           key={n}
           style={styles.numberButton}
           onPress={() => handleNumberInput(n)}
+          activeOpacity={0.8}
         >
-          <Text style={styles.numberButtonText}>{n}</Text>
+          <LinearGradient
+            colors={gradientColors}
+            style={styles.numberButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.numberButtonText}>{n}</Text>
+          </LinearGradient>
         </TouchableOpacity>
       ))}
     </View>
@@ -229,243 +244,356 @@ export default function SudokuScreen({ navigation }) {
   const renderGame = () => (
     <View style={styles.container}>
       <LinearGradient
-        colors={["#F93827", "#FF6B6B"]}
-        style={[styles.header, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
       >
-        <TouchableOpacity onPress={() => setGameStarted(false)}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={28} color="#FFF" />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            Sudoku
-          </Text>
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => setGameStarted(false)} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Sudoku</Text>
+          <View style={{ width: 45 }} />
         </View>
-        <View style={{ width: 28 }} />
       </LinearGradient>
 
-      <View style={styles.infoBox}>
-        <Text style={styles.infoText}>⏱ {formatTime(timer)}</Text>
-        <Text style={styles.infoText}>
-          😵 {mistakes}/{difficultySettings[difficulty].maxMistakes}
-        </Text>
-      </View>
-
-      <View style={styles.sudokuBoard}>
-        {board.map((row, i) => (
-          <View key={i} style={styles.row}>
-            {row.map((_, j) => renderCell(i, j))}
+      <ScrollView contentContainerStyle={styles.gameContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.infoBox}>
+          <View style={styles.infoItem}>
+            <FontAwesome5 name="clock" size={16} color="#ff9a9e" style={{ marginBottom: 4 }} />
+            <Text style={styles.infoValue}>{formatTime(timer)}</Text>
           </View>
-        ))}
-      </View>
+          <View style={styles.divider} />
+          <View style={styles.infoItem}>
+            <FontAwesome5 name="times-circle" size={16} color="#ff9a9e" style={{ marginBottom: 4 }} />
+            <Text style={styles.infoValue}>
+              {mistakes}/{difficultySettings[difficulty].maxMistakes}
+            </Text>
+          </View>
+        </View>
 
-      {renderNumberPad()}
+        <View style={styles.sudokuBoard}>
+          {board.map((row, i) => (
+            <View key={i} style={styles.row}>
+              {row.map((_, j) => renderCell(i, j))}
+            </View>
+          ))}
+        </View>
 
-      <View style={styles.controls}>
-        <TouchableOpacity style={styles.controlButton} onPress={startGame}>
-          <FontAwesome5 name="redo-alt" size={18} color="#fff" />
-          <Text style={styles.controlText}>Reiniciar</Text>
+        {renderNumberPad()}
+
+        <TouchableOpacity style={styles.resetBtnContainer} onPress={startGame}>
+          <LinearGradient
+            colors={gradientColors}
+            style={styles.resetBtn}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <FontAwesome5 name="redo-alt" size={16} color="#fff" />
+            <Text style={styles.resetText}>Reiniciar</Text>
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+        <View style={{ height: 40 }} />
+      </ScrollView>
     </View>
   );
 
-  const renderDifficulty = () => (
-    <View style={styles.diffContainer}>
-      {/* Header con botón de retroceso */}
+  const renderMenu = () => (
+    <View style={styles.menuContainer}>
       <LinearGradient
-        colors={["#F93827", "#FF6B6B"]}
-        style={[styles.menuHeader, { paddingTop: Platform.OS === "android" ? 40 : 10 }]}
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 20 }]}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="arrow-alt-circle-left" size={26} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={[styles.headerTitle, { flex: 1, textAlign: "center" }]}>Sudoku</Text>
-
-        <View style={{ width: 26 }} />
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back-circle" size={45} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Sudoku</Text>
+          <View style={{ width: 45 }} />
+        </View>
       </LinearGradient>
 
-      <View style={styles.diffContent}>
-        <Text style={styles.diffTitle}>Selecciona la dificultad</Text>
-
-        <View style={styles.tutorialBox}>
-          <FontAwesome5 name="lightbulb" size={20} color="#F93827" />
-          <Text style={styles.tutorialText}>
-            El objetivo del Sudoku es llenar todas las celdas con números del 1 al
-            9 sin repetir en la misma fila, columna o bloque. ¡Piensa con calma y
-            diviértete!
-          </Text>
+      <ScrollView contentContainerStyle={styles.menuContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.card}>
+          <View style={styles.tutorialBox}>
+            <View style={styles.iconCircle}>
+              <FontAwesome5 name="lightbulb" size={20} color="#ff9a9e" />
+            </View>
+            <Text style={styles.tutorialText}>
+              Llena todas las celdas con números del 1 al 9 sin repetir en la misma fila, columna o bloque. ¡Diviértete!
+            </Text>
+          </View>
         </View>
 
-        {["easy", "normal", "hard"].map((lvl) => (
-          <TouchableOpacity
-            key={lvl}
-            style={[
-              styles.diffButton,
-              difficulty === lvl && { backgroundColor: "#F93827" },
-            ]}
-            onPress={() => setDifficulty(lvl)}
-          >
-            <Text
+        <Text style={styles.sectionTitle}>Dificultad</Text>
+        <View style={styles.optionsRow}>
+          {Object.keys(difficultySettings).map((lvl) => (
+            <TouchableOpacity
+              key={lvl}
               style={[
-                styles.diffText,
-                { color: difficulty === lvl ? "#fff" : "#333" },
+                styles.optionButton,
+                difficulty === lvl && { backgroundColor: "#ff9a9e", borderColor: "#ff9a9e" },
               ]}
+              onPress={() => setDifficulty(lvl)}
             >
-              {lvl === "easy"
-                ? "Fácil"
-                : lvl === "normal"
-                  ? "Normal"
-                  : "Difícil"}
-            </Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity style={styles.startButton} onPress={startGame}>
-          <Text style={styles.startText}> Comenzar</Text>
+              <Text
+                style={[
+                  styles.optionText,
+                  { color: difficulty === lvl ? "#fff" : "#666" },
+                ]}
+              >
+                {difficultySettings[lvl].label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.startButton} onPress={startGame} activeOpacity={0.8}>
+          <LinearGradient
+            colors={gradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientButton}
+          >
+            <Text style={styles.startText}>Comenzar Juego</Text>
+            <Ionicons name="play-circle" size={24} color="#FFF" style={{ marginLeft: 10 }} />
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
-      {!gameStarted ? renderDifficulty() : renderGame()}
-    </ScrollView>
+    <View style={styles.mainContainer}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      {!gameStarted ? renderMenu() : renderGame()}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, alignItems: "center", backgroundColor: "#EDEDED" },
-  container: { flex: 1, alignItems: "center", backgroundColor: "#EDEDED" },
+  mainContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  menuContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
   header: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    zIndex: 10,
     width: "100%",
+  },
+  headerContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
   },
-  headerTitle: { color: "#FFF", fontSize: 24, fontWeight: "bold" },
-  infoBox: {
-    width: width * 0.9,
+  headerTitle: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 28,
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  menuContent: {
+    padding: 20,
+  },
+  gameContent: {
+    alignItems: "center",
+    paddingTop: 20,
+  },
+  card: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  tutorialBox: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF0F5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 15,
+  },
+  tutorialText: {
+    flex: 1,
+    color: "#555",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 15,
+    marginLeft: 5,
+  },
+  optionsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#F93827",
-    padding: 12,
-    borderRadius: 20,
-    marginVertical: 10,
+    marginBottom: 25,
+    gap: 10,
   },
-  infoText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 15,
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#EEE",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  optionText: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  startButton: {
+    marginTop: 10,
+    borderRadius: 25,
+    shadowColor: "#ff9a9e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  gradientButton: {
+    paddingVertical: 15,
+    borderRadius: 25,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  infoBox: {
+    width: "90%",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    paddingVertical: 15,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  infoItem: {
+    alignItems: "center",
+  },
+  infoValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  divider: {
+    width: 1,
+    height: "80%",
+    backgroundColor: "#EEE",
+  },
   sudokuBoard: {
-    backgroundColor: "#000",
-    borderWidth: 3,
-    borderColor: "#000",
-    marginVertical: 20,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+    marginBottom: 20,
   },
   row: { flexDirection: "row" },
   cell: {
-    width: (width - 80) / 9,
-    height: (width - 80) / 9,
+    width: (width - 60) / 9,
+    height: (width - 60) / 9,
     justifyContent: "center",
     alignItems: "center",
-    borderColor: "#000",
   },
-  cellText: { fontSize: 16, fontWeight: "bold" },
+  cellText: { fontSize: 18, fontWeight: "bold" },
   numberPad: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    marginBottom: 15,
+    width: "90%",
+    marginBottom: 20,
+    gap: 10,
   },
   numberButton: {
-    width: 60,
-    height: 60,
-    backgroundColor: "#F93827",
+    width: (width - 100) / 5,
+    height: (width - 100) / 5,
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  numberButtonGradient: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 15,
-    margin: 5,
   },
-  numberButtonText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
-  controls: {
-    width: width * 0.9,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  controlButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FF6B6B",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-  },
-  controlText: { color: "#fff", fontWeight: "bold", marginLeft: 8 },
-  diffContainer: {
-    alignItems: "center",
-    marginTop: 0,
-    backgroundColor: "#fff",
-    width: width,
-    flex: 1,
-  },
-  menuHeader: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+  numberButtonText: { color: "#fff", fontSize: 22, fontWeight: "bold" },
+  resetBtnContainer: {
+    marginTop: 10,
+    borderRadius: 25,
+    shadowColor: "#ff9a9e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 5,
   },
-  diffContent: {
-    alignItems: "center",
-    padding: 20,
-    width: "100%",
-  },
-  diffTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F93827",
-    marginBottom: 20,
-  },
-  tutorialBox: {
-    backgroundColor: "#FFF5F5",
-    borderRadius: 15,
-    padding: 15,
+  resetBtn: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: "#FBC4C4",
-  },
-  tutorialText: {
-    color: "#444",
-    fontSize: 15,
-    flex: 1,
-    lineHeight: 20,
-  },
-  diffButton: {
-    backgroundColor: "#E0E0E0",
-    padding: 15,
-    borderRadius: 12,
-    width: "100%",
     alignItems: "center",
-    marginVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
   },
-  diffText: { fontSize: 18, fontWeight: "600" },
-  startButton: {
-    backgroundColor: "#F93827",
-    padding: 15,
-    borderRadius: 15,
-    marginTop: 25,
-    width: "100%",
-    alignItems: "center",
+  resetText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 8,
+    fontSize: 16,
   },
-  startText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
 });
