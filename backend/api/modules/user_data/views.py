@@ -17,6 +17,28 @@ class UserDataView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+class RegisterPushTokenView(APIView):
+    """Register or update user's Expo push notification token"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        push_token = request.data.get('push_token')
+        
+        if not push_token:
+            return Response({
+                'error': 'Se requiere el push_token.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = request.user
+        user.push_token = push_token
+        user.save()
+        
+        return Response({
+            'message': 'Push token registrado exitosamente.',
+            'push_token': push_token
+        }, status=status.HTTP_200_OK)
+
+
 class UploadProfilePictureView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
@@ -133,11 +155,19 @@ class UnassignPatientView(APIView):
                 'error': 'No hay paciente asignado actualmente.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        # 🗑️ Eliminar zona segura y historial de ubicaciones del paciente
+        from ..safe_zone.models import SafeZone, LocationHistory
+        
+        patient = user.patient
+        SafeZone.objects.filter(user=patient).delete()
+        LocationHistory.objects.filter(user=patient).delete()
+        
+        # Desvincular paciente
         user.patient = None
         user.save()
         
         return Response({
-            'message': 'Paciente desvinculado exitosamente.'
+            'message': 'Paciente y zona segura desvinculados exitosamente.'
         }, status=status.HTTP_200_OK)
 
 

@@ -70,8 +70,8 @@ export default function ZonaSeguraPanel({
                     salidaSegura
                       ? "Salida segura activa"
                       : alertaActiva
-                      ? "Fuera de la zona 🚨"
-                      : "Dentro de la zona ✅"
+                        ? "Fuera de la zona 🚨"
+                        : "Dentro de la zona ✅"
                   }
                 />
               )}
@@ -82,19 +82,19 @@ export default function ZonaSeguraPanel({
                   salidaSegura
                     ? "rgba(76,175,80,0.8)"
                     : alertaActiva
-                    ? "rgba(239,83,80,0.95)"
-                    : distanciaActual > zonaSegura.radio * 0.8
-                    ? "rgba(255,213,79,0.9)"
-                    : "rgba(100,181,246,0.95)"
+                      ? "rgba(239,83,80,0.95)"
+                      : distanciaActual > zonaSegura.radio * 0.8
+                        ? "rgba(255,213,79,0.9)"
+                        : "rgba(100,181,246,0.95)"
                 }
                 fillColor={
                   salidaSegura
                     ? "rgba(200,230,201,0.3)"
                     : alertaActiva
-                    ? "rgba(244,67,54,0.15)"
-                    : distanciaActual > zonaSegura.radio * 0.8
-                    ? "rgba(255,235,59,0.15)"
-                    : "rgba(187,222,251,0.15)"
+                      ? "rgba(244,67,54,0.15)"
+                      : distanciaActual > zonaSegura.radio * 0.8
+                        ? "rgba(255,235,59,0.15)"
+                        : "rgba(187,222,251,0.15)"
                 }
               />
             </MapView>
@@ -107,10 +107,10 @@ export default function ZonaSeguraPanel({
                     backgroundColor: salidaSegura
                       ? "rgba(76,175,80,0.9)"
                       : alertaActiva
-                      ? "rgba(239,83,80,0.95)"
-                      : distanciaActual > (zonaSegura?.radio || 1) * 0.8
-                      ? "rgba(255,213,79,0.95)"
-                      : "rgba(100,181,246,0.95)",
+                        ? "rgba(239,83,80,0.95)"
+                        : distanciaActual > (zonaSegura?.radio || 1) * 0.8
+                          ? "rgba(255,213,79,0.95)"
+                          : "rgba(100,181,246,0.95)",
                   },
                 ]}
               >
@@ -119,8 +119,8 @@ export default function ZonaSeguraPanel({
                     salidaSegura
                       ? "walk"
                       : alertaActiva
-                      ? "alert"
-                      : "checkmark-circle"
+                        ? "alert"
+                        : "checkmark-circle"
                   }
                   size={16}
                   color="#fff"
@@ -129,10 +129,10 @@ export default function ZonaSeguraPanel({
                   {salidaSegura
                     ? "Salida segura activa"
                     : alertaActiva
-                    ? "Paciente fuera"
-                    : distanciaActual > (zonaSegura?.radio || 1) * 0.8
-                    ? "Cerca del límite"
-                    : "Dentro de la zona"}
+                      ? "Paciente fuera"
+                      : distanciaActual > (zonaSegura?.radio || 1) * 0.8
+                        ? "Cerca del límite"
+                        : "Dentro de la zona"}
                 </Text>
               </View>
 
@@ -146,12 +146,12 @@ export default function ZonaSeguraPanel({
           <View style={styles.zoneInfoRow}>
             <Text style={styles.zoneInfoText}>
               🧭 Distancia:{" "}
-              <Text style={styles.zoneInfoStrong}>{distanciaActual.toFixed(0)} m</Text>
+              <Text style={styles.zoneInfoStrong}>{(distanciaActual || 0).toFixed(0)} m</Text>
             </Text>
             <Text style={styles.zoneInfoText}>
               Límite:{" "}
               <Text style={styles.zoneInfoStrong}>
-                {zonaSegura.radio.toFixed(0)} m
+                {zonaSegura && zonaSegura.radio ? zonaSegura.radio.toFixed(0) : 0} m
               </Text>
             </Text>
           </View>

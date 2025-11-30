@@ -26,6 +26,7 @@ export default function ZonaSeguraScreen({ navigation }) {
     eliminarZona,
     recentrar,
     setRadio,
+    historial,
   } = useZonaSeguraMap();
 
   return (
@@ -73,48 +74,61 @@ export default function ZonaSeguraScreen({ navigation }) {
             />
           </>
         )}
+
+        {/* Puntos del historial (breadcrumbs) */}
+        {historial && historial.length > 1 && historial.slice(1).map((punto, index) => (
+          <Circle
+            key={`history-${index}`}
+            center={punto}
+            radius={3}
+            fillColor="rgba(255, 107, 107, 0.6)"
+            strokeColor="rgba(229, 57, 53, 0.8)"
+            strokeWidth={1}
+          />
+        ))}
+
         {ubicacionPaciente && (
           <Marker
             coordinate={ubicacionPaciente}
-            title="Paciente"
             pinColor={pacienteFuera ? "red" : "blue"}
-            description={
-              pacienteFuera ? "Fuera de zona segura 🚨" : "Dentro de zona segura ✅"
-            }
+            title={pacienteFuera ? "⚠️ Paciente fuera de zona" : "✅ Paciente en zona segura"}
+            description={pacienteFuera ? "Fuera de la zona segura" : "Dentro de la zona segura"}
           />
         )}
       </MapView>
 
       {/* Estado y botón */}
-      {centro && (
-        <>
-          <View style={styles.statusOverlay}>
-            <View
-              style={[
-                styles.statusPill,
-                {
-                  backgroundColor: pacienteFuera
-                    ? "rgba(229,57,53,0.95)"
-                    : "rgba(100,181,246,0.95)",
-                },
-              ]}
-            >
-              <Ionicons
-                name={pacienteFuera ? "alert-circle" : "checkmark-circle"}
-                size={16}
-                color="#FFF"
-              />
-              <Text style={styles.statusText}>
-                {pacienteFuera ? "Paciente fuera" : "Paciente dentro"}
-              </Text>
+      {
+        centro && (
+          <>
+            <View style={styles.statusOverlay}>
+              <View
+                style={[
+                  styles.statusPill,
+                  {
+                    backgroundColor: pacienteFuera
+                      ? "rgba(229,57,53,0.95)"
+                      : "rgba(100,181,246,0.95)",
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={pacienteFuera ? "alert-circle" : "checkmark-circle"}
+                  size={16}
+                  color="#FFF"
+                />
+                <Text style={styles.statusText}>
+                  {pacienteFuera ? "Paciente fuera" : "Paciente dentro"}
+                </Text>
+              </View>
             </View>
-          </View>
 
-          <TouchableOpacity style={styles.recenterBtn} onPress={recentrar}>
-            <Ionicons name="locate" size={20} color="#FFF" />
-          </TouchableOpacity>
-        </>
-      )}
+            <TouchableOpacity style={styles.recenterBtn} onPress={recentrar}>
+              <Ionicons name="locate" size={20} color="#FFF" />
+            </TouchableOpacity>
+          </>
+        )
+      }
 
       {/* Panel inferior */}
       <View style={styles.bottomPanel}>
@@ -159,16 +173,18 @@ export default function ZonaSeguraScreen({ navigation }) {
       </View>
 
       {/* Mensaje */}
-      {mensaje && (
-        <Animated.View
-          style={[
-            styles.mensajeBox,
-            { opacity: fadeAnim, backgroundColor: colorMensaje },
-          ]}
-        >
-          <Text style={styles.mensajeTexto}>{mensaje}</Text>
-        </Animated.View>
-      )}
-    </View>
+      {
+        mensaje && (
+          <Animated.View
+            style={[
+              styles.mensajeBox,
+              { opacity: fadeAnim, backgroundColor: colorMensaje },
+            ]}
+          >
+            <Text style={styles.mensajeTexto}>{mensaje}</Text>
+          </Animated.View>
+        )
+      }
+    </View >
   );
 }

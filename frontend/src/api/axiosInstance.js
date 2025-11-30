@@ -1,6 +1,6 @@
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { refreshAccessToken } from '../auth/authService';
+import { refreshAccessToken } from '../auth/refreshToken';
 
 const api = axios.create({
   baseURL: 'http://192.168.1.87:8000/',
@@ -24,14 +24,25 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      // Verificar si el usuario está haciendo logout intencional
+      const isLoggingOut = await AsyncStorage.getItem('isLoggingOut');
+
+      if (isLoggingOut === 'true') {
+        console.log('🔓 Sesión cerrada por el usuario');
+        await AsyncStorage.removeItem('isLoggingOut');
+        return Promise.reject(error);
+      }
+
       try {
         const newAccess = await refreshAccessToken();
         if (newAccess) {
           originalRequest.headers.Authorization = `JWT ${newAccess}`;
           return api(originalRequest);
+        } else {
+          console.log('⏰ Sesión expirada - Por favor inicia sesión nuevamente');
         }
       } catch (err) {
-        console.error('Error at getting new token:', err);
+        console.error('❌ Error al renovar token:', err);
       }
 
       await AsyncStorage.removeItem('access');

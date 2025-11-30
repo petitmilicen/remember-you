@@ -25,6 +25,8 @@ import AlertasPanel from "../../components/cuidador/AlertasPanel.js";
 import TarjetasPanel from "../../components/cuidador/TarjetasPanel.js";
 import QuickMenu from "../../components/cuidador/QuickMenu.js";
 import NuevaTarjetaModal from "../../components/cuidador/NuevaTarjetaModal.js";
+import EmergencyAlert from "../../components/cuidador/EmergencyAlert.js";
+import { setupPushNotifications } from "../../utils/pushNotifications.js";
 import { styles } from "../../styles/HomeCuidadorStyles.js";
 import { ACCENT } from "../../utils/constants.js";
 
@@ -59,6 +61,15 @@ export default function HomeScreenCuidador({ navigation }) {
   const { fotoPerfil, nombrePaciente, theme, getFontSize, loading } = usePacienteHome();
 
   // Bloquear el botón de retroceso del sistema Android
+  useEffect(() => {
+    // 🔔 Register for push notifications
+    setupPushNotifications().then(token => {
+      if (token) {
+        console.log("✅ Push notifications ready");
+      }
+    });
+  }, []);
+
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       // Retornar true previene la acción por defecto (salir de la app)
@@ -112,6 +123,14 @@ export default function HomeScreenCuidador({ navigation }) {
             )}
           </TouchableOpacity>
         </View>
+
+        {/* 🚨 EMERGENCY ALERT - Shows when patient is outside */}
+        {zona.alertaActiva && !zona.salidaSegura && (
+          <EmergencyAlert
+            paciente={paciente}
+            ubicacionPaciente={zona.ubicacionPaciente}
+          />
+        )}
 
         <PacientePanel paciente={paciente} navigation={navigation} />
 

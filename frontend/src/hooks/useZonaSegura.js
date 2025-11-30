@@ -5,6 +5,7 @@ import { Vibration, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { calcularDistancia } from "../utils/helpers";
 import useAudioAlert from "./useAudioAlert";
+import api from "../api/axiosInstance";
 
 /**
  * Hook que controla la zona segura, las alertas, la distancia del paciente
@@ -63,7 +64,13 @@ export default function useZonaSegura(paciente) {
 
   /** 🔹 Calcular distancia y manejar alertas de salida/entrada */
   useEffect(() => {
-    if (!zonaSegura || !ubicacionPaciente || salidaSegura) return;
+    if (!zonaSegura || !zonaSegura.centro || !ubicacionPaciente || salidaSegura) return;
+
+    // Validar que existan coordenadas
+    if (ubicacionPaciente.latitude === undefined || ubicacionPaciente.longitude === undefined ||
+      zonaSegura.centro.latitude === undefined || zonaSegura.centro.longitude === undefined) {
+      return;
+    }
 
     const distancia = calcularDistancia(ubicacionPaciente, zonaSegura.centro);
     setDistanciaActual(distancia);
@@ -99,15 +106,29 @@ export default function useZonaSegura(paciente) {
 
   /** 🔹 Alternar salida segura */
   const toggleSalidaSegura = async (value) => {
-    setSalidaSegura(value);
-    await AsyncStorage.setItem("salidaSegura", JSON.stringify(value));
+    try {
+      // Call backend API to sync across devices
+      const response = await api.post('/api/safe-zone/safe-exit/toggle/', {
+        active: value
+      });
 
-    Alert.alert(
-      value ? "Salida Segura activada" : "Salida Segura desactivada",
-      value
-        ? "Las alertas por salida de zona segura estarán deshabilitadas temporalmente."
-        : "Las alertas se han reactivado."
-    );
+      // Update local state
+      setSalidaSegura(value);
+      await AsyncStorage.setItem("salidaSegura", JSON.stringify(value));
+
+      Alert.alert(
+        value ? "Salida Segura activada" : "Salida Segura desactivada",
+        value
+          ? "Las alertas por salida de zona segura estarán deshabilitadas temporalmente."
+          : "Las alertas se han reactivado."
+      );
+    } catch (error) {
+      console.error("Error toggling safe exit:", error);
+      Alert.alert(
+        "Error",
+        "No se pudo actualizar el modo de salida segura. Intenta nuevamente."
+      );
+    }
   };
 
   /** 🔹 Limpiar alertas */

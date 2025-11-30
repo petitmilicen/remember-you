@@ -10,7 +10,7 @@ export default function PacientePanel({ paciente, navigation }) {
   const handleUnassign = async () => {
     Alert.alert(
       "Desvincular paciente",
-      "¿Estás seguro de que deseas desvincular a este paciente?",
+      "¿Estás seguro de que deseas desvincular a este paciente? Se eliminará la zona segura asociada.",
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -18,9 +18,19 @@ export default function PacientePanel({ paciente, navigation }) {
           style: "destructive",
           onPress: async () => {
             try {
+              // 1️⃣ Desvincular paciente del backend
               await unassignPatient();
+
+              // 2️⃣ Limpiar datos locales del paciente
               await AsyncStorage.removeItem("pacienteAsignado");
-              Alert.alert("Éxito", "Paciente desvinculado correctamente.", [
+
+              // 3️⃣ 🗑️ Eliminar zona segura local
+              await AsyncStorage.removeItem("zonaSegura");
+
+              // 4️⃣ 🗑️ Limpiar ubicación guardada
+              await AsyncStorage.removeItem("ubicacionPaciente");
+
+              Alert.alert("Éxito", "Paciente y zona segura eliminados correctamente.", [
                 { text: "OK", onPress: () => navigation.replace("HomeCuidador") }
               ]);
             } catch (error) {
