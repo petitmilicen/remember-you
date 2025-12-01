@@ -79,24 +79,6 @@ export default function HomeScreenCuidador({ navigation }) {
     return () => backHandler.remove();
   }, []);
 
-  const cerrarSesion = async () => {
-    Alert.alert("Cerrar sesión", "¿Deseas cerrar tu sesión actual?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Sí, salir",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await logout();
-            navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
-          } catch (error) {
-            console.error("Error cerrando sesión:", error);
-          }
-        },
-      },
-    ]);
-  };
-
   // Show loading skeleton while data loads
   if (loading) {
     return <LoadingSkeleton />;
@@ -154,7 +136,7 @@ export default function HomeScreenCuidador({ navigation }) {
 
         <QuickMenu navigation={navigation} />
 
-        <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate("Logout")}>
           <FontAwesome5 name="sign-out-alt" size={16} color="#FFF" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>

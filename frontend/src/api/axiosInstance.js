@@ -1,10 +1,9 @@
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { refreshAccessToken } from '../auth/refreshToken';
-import authManager from '../auth/authManager';
+import { refreshAccessToken } from '../auth/authService';
 
 const api = axios.create({
-  baseURL: 'http://192.168.1.87:8000/',
+  baseURL: 'http://192.168.100.131:8000/',
   timeout: 15000,
   headers: { "Content-Type": "application/json" }
 });
@@ -25,29 +24,14 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // Verificar si el usuario está haciendo logout intencional
-      const isLoggingOut = await AsyncStorage.getItem('isLoggingOut');
-
-      if (isLoggingOut === 'true') {
-        console.log('🔓 Sesión cerrada por el usuario');
-        await AsyncStorage.removeItem('isLoggingOut');
-        return Promise.reject(error);
-      }
-
       try {
         const newAccess = await refreshAccessToken();
         if (newAccess) {
           originalRequest.headers.Authorization = `JWT ${newAccess}`;
           return api(originalRequest);
-        } else {
-          console.log('⏰ Sesión expirada - Por favor inicia sesión nuevamente');
-          // Notificar al AuthContext que la sesión expiró
-          authManager.notifySessionExpired('Token inválido o expirado');
         }
       } catch (err) {
-        console.error('❌ Error al renovar token:', err);
-        // Notificar al AuthContext que hubo un error al renovar
-        authManager.notifySessionExpired('Error al renovar token');
+        console.error('Error at getting new token:', err);
       }
 
       await AsyncStorage.removeItem('access');
