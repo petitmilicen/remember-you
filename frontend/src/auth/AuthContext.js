@@ -21,6 +21,11 @@ export const AuthProvider = ({ children }) => {
 
       const profile = await getUserProfile();
       setUser(profile);
+
+      // Store user_type for background tasks validation
+      if (profile.user_type) {
+        await AsyncStorage.setItem("user_type", profile.user_type);
+      }
     } catch (err) {
       console.error("Error en login:", err.response?.data || err);
       throw new Error("Invalid credentials");
@@ -43,7 +48,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error("Error al cerrar sesión en backend:", error.response?.data || error.message);
     } finally {
-      await AsyncStorage.multiRemove(["access", "refresh"]);
+      // Clear all auth-related data including user_type
+      await AsyncStorage.multiRemove(["access", "refresh", "user_type"]);
       setUser(null);
       console.log("Sesión cerrada correctamente");
     }
@@ -78,6 +84,12 @@ export const AuthProvider = ({ children }) => {
       try {
         const data = await getUserProfile();
         setUser(data);
+
+        // Store user_type for background tasks validation
+        if (data.user_type) {
+          await AsyncStorage.setItem("user_type", data.user_type);
+        }
+
         console.log("Session loaded:", data);
       } catch (error) {
         console.log("Trying getting new token");
@@ -86,10 +98,16 @@ export const AuthProvider = ({ children }) => {
         if (newAccess) {
           const data = await getUserProfile();
           setUser(data);
+
+          // Store user_type for background tasks validation
+          if (data.user_type) {
+            await AsyncStorage.setItem("user_type", data.user_type);
+          }
+
           console.log("Restored new session", data);
         } else {
           console.log("Could not get new token");
-          await AsyncStorage.multiRemove(["access", "refresh"]);
+          await AsyncStorage.multiRemove(["access", "refresh", "user_type"]);
           setUser(null);
         }
       }

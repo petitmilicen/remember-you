@@ -30,6 +30,13 @@ export default function HomeScreenPaciente({ navigation }) {
   useEffect(() => {
     (async () => {
       try {
+        // 🔒 VALIDACIÓN CRÍTICA: Solo obtener ubicación si es paciente
+        const userType = await AsyncStorage.getItem('user_type');
+        if (userType !== 'Patient') {
+          console.log('[HomeScreen] Usuario no es paciente, no se obtendrá ubicación');
+          return;
+        }
+
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status === 'granted') {
           // Intentar obtener posición precisa con timeout
@@ -107,6 +114,13 @@ export default function HomeScreenPaciente({ navigation }) {
   // 3. Iniciar Geofencing (Batería optimizada)
   useEffect(() => {
     (async () => {
+      // 🔒 VALIDACIÓN CRÍTICA: Solo iniciar geofencing si es paciente
+      const userType = await AsyncStorage.getItem('user_type');
+      if (userType !== 'Patient') {
+        console.log('[HomeScreen] Usuario no es paciente, no se iniciará geofencing');
+        return;
+      }
+
       const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
       if (foregroundStatus === 'granted') {
         const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();

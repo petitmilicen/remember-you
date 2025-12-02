@@ -112,9 +112,18 @@ async function processQueue() {
 
 /**
  * Envía ubicación con manejo de errores y queue automática
+ * IMPORTANTE: Solo envía si el usuario es de tipo "Patient"
  */
 async function sendLocationWithRetry(latitude, longitude, isOutOfZone) {
     try {
+        // 🔒 VALIDACIÓN CRÍTICA: Solo enviar ubicación si es paciente
+        const userType = await AsyncStorage.getItem('user_type');
+
+        if (userType !== 'Patient') {
+            console.log('[Location] ⚠️ Usuario no es paciente, no se enviará ubicación');
+            return;
+        }
+
         await api.post('/api/safe-zone/location/update/', {
             latitude: parseFloat(latitude.toFixed(6)),
             longitude: parseFloat(longitude.toFixed(6)),
@@ -140,6 +149,20 @@ async function sendLocationWithRetry(latitude, longitude, isOutOfZone) {
 TaskManager.defineTask(GEOFENCING_TASK_NAME, async ({ data: { eventType, region }, error }) => {
     if (error) {
         console.error("[Geofencing] Error:", error);
+        return;
+    }
+
+    // 🔒 VALIDACIÓN CRÍTICA: Verificar que el usuario es paciente
+    const userType = await AsyncStorage.getItem('user_type');
+    if (userType !== 'Patient') {
+        console.log('[Geofencing] ⚠️ Usuario no es paciente, deteniendo geofencing');
+        // Detener el geofencing si el usuario no es paciente
+        try {
+            await Location.stopGeofencingAsync(GEOFENCING_TASK_NAME);
+            await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME).catch(() => { });
+        } catch (e) {
+            console.error('[Geofencing] Error deteniendo tracking:', e);
+        }
         return;
     }
 
@@ -243,6 +266,20 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
         console.error("Error en tarea de ubicación:", error);
         return;
     }
+
+    // 🔒 VALIDACIÓN CRÍTICA: Verificar que el usuario es paciente
+    const userType = await AsyncStorage.getItem('user_type');
+    if (userType !== 'Patient') {
+        console.log('[Location Task] ⚠️ Usuario no es paciente, deteniendo tracking');
+        // Detener el tracking si el usuario no es paciente
+        try {
+            await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+        } catch (e) {
+            console.error('[Location Task] Error deteniendo tracking:', e);
+        }
+        return;
+    }
+
     if (data) {
         const { locations } = data;
         const location = locations[0];

@@ -17,7 +17,7 @@ import { Picker } from "@react-native-picker/picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import Icon from "react-native-vector-icons/FontAwesome6";
+import { Ionicons } from "@expo/vector-icons";
 import useRegisterPaciente from "../../hooks/useRegisterPaciente";
 
 const { width } = Dimensions.get("window");
@@ -100,7 +100,7 @@ export default function RegisterPacienteScreen({ navigation }) {
             <Text style={styles.sectionTitle}>Datos Personales</Text>
 
             <View style={styles.inputContainer}>
-              <Icon name="user" size={18} color="#6A5ACD" style={styles.inputIcon} />
+              <Ionicons name="person-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Nombre"
@@ -111,7 +111,7 @@ export default function RegisterPacienteScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="user" size={18} color="#6A5ACD" style={styles.inputIcon} />
+              <Ionicons name="person-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Apellido"
@@ -122,7 +122,7 @@ export default function RegisterPacienteScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="envelope" size={18} color="#6A5ACD" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
@@ -136,7 +136,7 @@ export default function RegisterPacienteScreen({ navigation }) {
 
             <View style={styles.row}>
               <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
-                <Icon name="calendar" size={18} color="#6A5ACD" style={styles.inputIcon} />
+                <Ionicons name="calendar-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Edad"
@@ -147,7 +147,7 @@ export default function RegisterPacienteScreen({ navigation }) {
                 />
               </View>
               <View style={[styles.inputContainer, { flex: 1 }]}>
-                <Icon name="phone" size={18} color="#6A5ACD" style={styles.inputIcon} />
+                <Ionicons name="call-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Contacto"
@@ -161,7 +161,7 @@ export default function RegisterPacienteScreen({ navigation }) {
 
             <Text style={styles.label}>Género</Text>
             <View style={styles.pickerContainer}>
-              <Icon name="venus-mars" size={18} color="#6A5ACD" style={styles.pickerIcon} />
+              <Ionicons name="male-female-outline" size={20} color="#6A5ACD" style={styles.pickerIcon} />
               <Picker
                 style={styles.picker}
                 selectedValue={gender}
@@ -176,7 +176,7 @@ export default function RegisterPacienteScreen({ navigation }) {
 
             <Text style={styles.label}>Nivel de Alzheimer</Text>
             <View style={styles.pickerContainer}>
-              <Icon name="brain" size={18} color="#6A5ACD" style={styles.pickerIcon} />
+              <Ionicons name="water-outline" size={20} color="#6A5ACD" style={styles.pickerIcon} />
               <Picker
                 style={styles.picker}
                 selectedValue={alzheimerLevel}
@@ -190,7 +190,7 @@ export default function RegisterPacienteScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="lock" size={18} color="#6A5ACD" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#6A5ACD" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
@@ -200,7 +200,7 @@ export default function RegisterPacienteScreen({ navigation }) {
                 onChangeText={setPassword}
               />
               <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                <Icon name={isPasswordVisible ? "eye" : "eye-slash"} size={18} color="#999" />
+                <Ionicons name={isPasswordVisible ? "eye-outline" : "eye-off-outline"} size={20} color="#999" />
               </TouchableOpacity>
             </View>
 
@@ -299,6 +299,17 @@ const styles = StyleSheet.create({
     borderBottomColor: "#E0E0E0",
     marginBottom: 20,
     paddingVertical: 5,
+  },
+  inputIcon: {
+    marginRight: 10,
+    width: 20,
+    textAlign: 'center',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+    textAlign: 'left',
   },
   row: {
     flexDirection: "row",

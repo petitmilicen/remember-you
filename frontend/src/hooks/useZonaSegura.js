@@ -48,6 +48,7 @@ export default function useZonaSegura(paciente) {
     }, [])
   );
 
+
   /** 🔹 Actualizar ubicación del paciente cada 5 segundos */
   useEffect(() => {
     const interval = setInterval(async () => {

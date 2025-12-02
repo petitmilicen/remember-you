@@ -16,7 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import Icon from "react-native-vector-icons/FontAwesome6";
+import { Ionicons } from "@expo/vector-icons";
 import useRegisterCuidador from "../../hooks/useRegisterCuidador";
 
 const { width } = Dimensions.get("window");
@@ -80,7 +80,7 @@ export default function RegisterCuidadorScreen({ navigation }) {
             <Text style={styles.sectionTitle}>Datos Personales</Text>
 
             <View style={styles.inputContainer}>
-              <Icon name="user" size={18} color="#48D1CC" style={styles.inputIcon} />
+              <Ionicons name="person-outline" size={20} color="#48D1CC" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Nombre"
@@ -91,7 +91,7 @@ export default function RegisterCuidadorScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="user" size={18} color="#48D1CC" style={styles.inputIcon} />
+              <Ionicons name="person-outline" size={20} color="#48D1CC" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Apellido"
@@ -102,7 +102,7 @@ export default function RegisterCuidadorScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="heart" size={18} color="#48D1CC" style={styles.inputIcon} />
+              <Ionicons name="heart-outline" size={20} color="#48D1CC" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Relación con el paciente"
@@ -113,7 +113,7 @@ export default function RegisterCuidadorScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="phone" size={18} color="#48D1CC" style={styles.inputIcon} />
+              <Ionicons name="call-outline" size={20} color="#48D1CC" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Teléfono"
@@ -125,7 +125,7 @@ export default function RegisterCuidadorScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="envelope" size={18} color="#48D1CC" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color="#48D1CC" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
@@ -138,7 +138,7 @@ export default function RegisterCuidadorScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="lock" size={18} color="#48D1CC" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#48D1CC" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
@@ -148,12 +148,12 @@ export default function RegisterCuidadorScreen({ navigation }) {
                 onChangeText={setPassword}
               />
               <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                <Icon name={isPasswordVisible ? "eye" : "eye-slash"} size={18} color="#999" />
+                <Ionicons name={isPasswordVisible ? "eye-outline" : "eye-off-outline"} size={20} color="#999" />
               </TouchableOpacity>
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="lock" size={18} color="#48D1CC" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#48D1CC" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Confirmar contraseña"
@@ -163,7 +163,7 @@ export default function RegisterCuidadorScreen({ navigation }) {
                 onChangeText={setConfirmPassword}
               />
               <TouchableOpacity onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}>
-                <Icon name={isConfirmPasswordVisible ? "eye" : "eye-slash"} size={18} color="#999" />
+                <Ionicons name={isConfirmPasswordVisible ? "eye-outline" : "eye-off-outline"} size={20} color="#999" />
               </TouchableOpacity>
             </View>
 
@@ -261,6 +261,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
     marginBottom: 20,
+    paddingVertical: 5,
+  },
+  inputIcon: {
+    marginRight: 10,
+    width: 20,
+    textAlign: 'center',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
     textAlign: 'left',
   },
   button: {
