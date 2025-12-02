@@ -53,8 +53,19 @@ export default function useZonaSegura(paciente) {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const stored = await AsyncStorage.getItem("ubicacionPaciente");
-        if (stored) setUbicacionPaciente(JSON.parse(stored));
+        const res = await api.get('/api/safe-zone/location/history/');
+        const history = res.data;
+
+        if (history && history.length > 0) {
+          const latest = history[0];
+
+          if (latest && latest.latitude !== undefined && latest.longitude !== undefined) {
+            setUbicacionPaciente({
+              latitude: parseFloat(latest.latitude),
+              longitude: parseFloat(latest.longitude),
+            });
+          }
+        }
       } catch (error) {
         console.error("Error actualizando ubicación del paciente:", error);
       }
