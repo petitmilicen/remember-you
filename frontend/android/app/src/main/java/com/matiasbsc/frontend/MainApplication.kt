@@ -1,4 +1,4 @@
-package com.frontend
+package com.matiasbsc.frontend
 
 import android.app.Application
 import android.content.res.Configuration

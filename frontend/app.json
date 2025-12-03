@@ -1,15 +1,36 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Remember You",
+    "slug": "remember-you",
     "version": "1.0.0",
-    "plugins": [
-      "expo-barcode-scanner"
-    ],
+    "icon": "./src/assets/images/LogoMain.png",
+    "splash": {
+      "image": "./src/assets/images/LogoMain.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "plugins": [],
     "extra": {
       "eas": {
         "projectId": "72bd8d15-cb5a-424c-87bc-54f11188c5f5"
       }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/LogoMain.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ],
+      "package": "com.matiasbsc.frontend",
+      "usesCleartextTraffic": true
     }
   }
 }
