@@ -46,7 +46,7 @@ export default function useRegisterPaciente(navigation) {
         age: Number(edad),
         gender,
         alzheimer_level: alzheimerLevel,
-        username: username, 
+        username: username,
       };
 
       console.log("Payload registro:", payload);
@@ -60,13 +60,22 @@ export default function useRegisterPaciente(navigation) {
     } catch (error) {
       console.log("Error al registrar:", error.response?.data || error);
 
-      Alert.alert(
-        "Error",
-        error.response?.data?.email?.[0] ||
-          error.response?.data?.password?.[0] ||
-          error.response?.data?.detail ||
-          "No se pudo completar el registro."
-      );
+      let errorMessage = "No se pudo completar el registro.";
+
+      if (error.response) {
+        // Server responded
+        errorMessage = error.response.data?.email?.[0] ||
+          error.response.data?.password?.[0] ||
+          error.response.data?.detail ||
+          JSON.stringify(error.response.data);
+      } else if (error.request) {
+        // Network error
+        errorMessage = "Error de conexión. Verifica tu internet o la IP del servidor.";
+      } else {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }

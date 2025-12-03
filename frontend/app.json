@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Remember You",
-    "slug": "remember-you",
+    "slug": "frontend",
     "version": "1.0.0",
     "icon": "./src/assets/images/LogoMain.png",
     "splash": {
