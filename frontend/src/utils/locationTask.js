@@ -147,12 +147,25 @@ async function sendLocationWithRetry(latitude, longitude, isOutOfZone) {
 
 // Tarea de Geofencing (Bajo consumo)
 TaskManager.defineTask(GEOFENCING_TASK_NAME, async ({ data: { eventType, region }, error }) => {
+    // 🔒 CRITICAL FIX: Check user type FIRST - before ANY other logic
+    // This prevents crashes when caregivers access zone security module
+    try {
+        const userType = await AsyncStorage.getItem('user_type');
+        if (userType !== 'Patient') {
+            console.log('[Geofencing] ⚠️ Usuario no es paciente - tarea ignorada');
+            return; // Exit immediately for caregivers
+        }
+    } catch (checkError) {
+        console.error('[Geofencing] Error checking user type:', checkError);
+        return; // Exit on any error to be safe
+    }
+
     if (error) {
         console.error("[Geofencing] Error:", error);
         return;
     }
 
-    // 🔒 VALIDACIÓN CRÍTICA: Verificar que el usuario es paciente
+    // Original validation (keeping for backwards compatibility)
     const userType = await AsyncStorage.getItem('user_type');
     if (userType !== 'Patient') {
         console.log('[Geofencing] ⚠️ Usuario no es paciente, deteniendo geofencing');
@@ -262,12 +275,25 @@ let lastMovementTime = Date.now();
 
 // Tarea de Tracking Continuo (Solo se activa cuando está FUERA)
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+    // 🔒 CRITICAL FIX: Check user type FIRST - before ANY other logic
+    // This prevents crashes when caregivers access zone security module
+    try {
+        const userType = await AsyncStorage.getItem('user_type');
+        if (userType !== 'Patient') {
+            console.log('[Location Task] ⚠️ Usuario no es paciente - tarea ignorada');
+            return; // Exit immediately for caregivers
+        }
+    } catch (checkError) {
+        console.error('[Location Task] Error checking user type:', checkError);
+        return; // Exit on any error to be safe
+    }
+
     if (error) {
         console.error("Error en tarea de ubicación:", error);
         return;
     }
 
-    // 🔒 VALIDACIÓN CRÍTICA: Verificar que el usuario es paciente
+    // Original validation (keeping for backwards compatibility)
     const userType = await AsyncStorage.getItem('user_type');
     if (userType !== 'Patient') {
         console.log('[Location Task] ⚠️ Usuario no es paciente, deteniendo tracking');
