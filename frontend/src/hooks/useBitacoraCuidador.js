@@ -35,6 +35,8 @@ export default function useBitacoraCuidador() {
           }),
           created_at: item.created_at,
         }));
+        // Ordenar del más reciente al más antiguo
+        transformedData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         setBitacora(transformedData);
       }
     } catch (error) {

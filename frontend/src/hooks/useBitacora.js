@@ -38,7 +38,10 @@ export default function useBitacora() {
           id: log.medical_log_id,
           text: log.description,
           date: new Date(log.created_at).toLocaleString("es-ES"),
+          created_at: log.created_at,
         }));
+        // Ordenar del más reciente al más antiguo
+        formatted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         setNotes(formatted);
       } else {
         setNotes([]);
@@ -69,12 +72,12 @@ export default function useBitacora() {
             prev.map((note) =>
               note.id === editingNote.id
                 ? {
-                    ...note,
-                    text: updated.description,
-                    date: new Date(
-                      updated.updated_at || Date.now()
-                    ).toLocaleString("es-ES"),
-                  }
+                  ...note,
+                  text: updated.description,
+                  date: new Date(
+                    updated.updated_at || Date.now()
+                  ).toLocaleString("es-ES"),
+                }
                 : note
             )
           );

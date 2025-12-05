@@ -24,7 +24,7 @@ export default function WelcomeScreen({ navigation }) {
 
       <Animated.Image
         entering={FadeIn.duration(1000)}
-        source={require("../assets/images/LogoMain.png")}
+        source={require("../assets/images/Logo.png")}
         style={styles.logo}
         resizeMode="contain"
       />

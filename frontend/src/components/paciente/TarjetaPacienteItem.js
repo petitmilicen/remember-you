@@ -16,6 +16,16 @@ export default function TarjetaPacienteItem({ item, settings, getFontSize, onDel
     return `${day}/${month}/${year} ${hours}:${minutes}`;
   };
 
+  // Función para traducir tipos de tarjetas a español
+  const getCardTypeLabel = (type) => {
+    const typeMap = {
+      Message: "Mensaje",
+      Other: "Otro",
+      Emergency: "Emergencia",
+    };
+    return typeMap[type] || type;
+  };
+
   const isCuidador = item.created_by === "cuidador";
 
   return (
@@ -59,7 +69,7 @@ export default function TarjetaPacienteItem({ item, settings, getFontSize, onDel
 
         <View style={[styles.tag, { borderColor: gradientColors[0] }]}>
           <Text style={[styles.tagText, { color: gradientColors[1] }]}>
-            {item.card_type}
+            {getCardTypeLabel(item.card_type)}
           </Text>
         </View>
       </View>

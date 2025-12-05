@@ -11,6 +11,7 @@ export default function ZonaSeguraPanel({
   distanciaActual,
   salidaSegura,
   toggleSalidaSegura,
+  historial,
   navigation,
 }) {
   const mapRef = useRef(null);
@@ -97,6 +98,18 @@ export default function ZonaSeguraPanel({
                         : "rgba(187,222,251,0.15)"
                 }
               />
+
+              {/* Puntos del historial (breadcrumbs) */}
+              {historial && historial.length > 1 && historial.slice(1).map((punto, index) => (
+                <Circle
+                  key={`history-${index}`}
+                  center={punto}
+                  radius={3}
+                  fillColor="rgba(255, 107, 107, 0.6)"
+                  strokeColor="rgba(229, 57, 53, 0.8)"
+                  strokeWidth={1}
+                />
+              ))}
             </MapView>
 
             <View style={styles.mapOverlay}>

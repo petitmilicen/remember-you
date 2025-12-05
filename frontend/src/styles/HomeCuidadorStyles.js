@@ -204,7 +204,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: ACCENT,
+    backgroundColor: "#1565C0",
     borderRadius: 12,
     paddingVertical: 10,
     marginTop: 10,
@@ -305,7 +305,7 @@ export const styles = StyleSheet.create({
 
   logoutButton: {
     alignItems: "center",
-    backgroundColor: ACCENT,
+    backgroundColor: "#FFF",
     borderRadius: 16,
     elevation: 2,
     flexDirection: "row",
@@ -315,9 +315,11 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 28,
     paddingVertical: 12,
+    borderWidth: 2,
+    borderColor: "#1565C0",
   },
   logoutText: {
-    color: "#FFF",
+    color: "#1565C0",
     fontWeight: "700",
   },
 

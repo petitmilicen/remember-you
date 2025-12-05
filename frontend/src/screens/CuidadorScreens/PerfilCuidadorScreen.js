@@ -11,8 +11,9 @@ import {
     StatusBar,
     Animated,
     PanResponder,
+    Modal,
 } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -28,6 +29,7 @@ export default function PerfilCuidadorScreen({ navigation }) {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [photoModalVisible, setPhotoModalVisible] = useState(false);
 
     // Valores animados para el efecto 3D
     const rotateX = useRef(new Animated.Value(0)).current;
@@ -96,30 +98,19 @@ export default function PerfilCuidadorScreen({ navigation }) {
         }
     };
 
-    const handleChangePhoto = async () => {
-        Alert.alert(
-            "Cambiar Foto de Perfil",
-            "Elige una opción",
-            [
-                {
-                    text: "Tomar Foto",
-                    onPress: () => pickImage("camera"),
-                },
-                {
-                    text: "Elegir de Galería",
-                    onPress: () => pickImage("library"),
-                },
-                {
-                    text: "Eliminar Foto",
-                    style: "destructive",
-                    onPress: handleDeletePhoto,
-                },
-                {
-                    text: "Cancelar",
-                    style: "cancel",
-                },
-            ]
-        );
+    const handleChangePhoto = () => {
+        setPhotoModalVisible(true);
+    };
+
+    const handlePhotoOption = (option) => {
+        setPhotoModalVisible(false);
+        if (option === "camera") {
+            pickImage("camera");
+        } else if (option === "library") {
+            pickImage("library");
+        } else if (option === "delete") {
+            handleDeletePhoto();
+        }
     };
 
     const pickImage = async (source) => {
@@ -286,6 +277,25 @@ export default function PerfilCuidadorScreen({ navigation }) {
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
+                {/* Título de la sección */}
+                <View style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginHorizontal: 24,
+                    marginTop: 10,
+                    marginBottom: 8,
+                    gap: 8,
+                }}>
+                    <Ionicons name="id-card" size={20} color="#1565C0" />
+                    <Text style={{
+                        fontSize: 16,
+                        fontWeight: "700",
+                        color: "#1565C0",
+                    }}>
+                        Credencial del Cuidador
+                    </Text>
+                </View>
+
                 <View style={styles.idCardContainer}>
                     <Animated.View
                         {...panResponder.panHandlers}
@@ -341,13 +351,6 @@ export default function PerfilCuidadorScreen({ navigation }) {
                                             </View>
                                         )}
                                     </View>
-                                    <TouchableOpacity
-                                        style={styles.editPhotoButton}
-                                        onPress={handleChangePhoto}
-                                        disabled={uploading}
-                                    >
-                                        <FontAwesome5 name="camera" size={10} color="#1976D2" />
-                                    </TouchableOpacity>
                                 </View>
 
                                 <View style={styles.infoSection}>
@@ -375,6 +378,36 @@ export default function PerfilCuidadorScreen({ navigation }) {
                         </LinearGradient>
                     </Animated.View>
                 </View>
+
+                {/* Botón para cambiar foto - FUERA de la tarjeta 3D */}
+                <TouchableOpacity
+                    onPress={handleChangePhoto}
+                    disabled={uploading}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 10,
+                        backgroundColor: "#FFF",
+                        marginHorizontal: 100,
+                        marginTop: -15,
+                        marginBottom: 15,
+                        paddingVertical: 12,
+                        borderRadius: 25,
+                        elevation: 4,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 4,
+                        borderWidth: 2,
+                        borderColor: "#1565C0",
+                    }}
+                >
+                    <Ionicons name="camera" size={18} color="#1565C0" />
+                    <Text style={{ color: "#1565C0", fontWeight: "700", fontSize: 14 }}>
+                        Cambiar Foto
+                    </Text>
+                </TouchableOpacity>
 
                 <View style={styles.additionalInfo}>
                     <Text style={styles.sectionTitle}>Información de Contacto</Text>
@@ -411,7 +444,7 @@ export default function PerfilCuidadorScreen({ navigation }) {
                 </View>
 
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <FontAwesome5 name="sign-out-alt" size={16} color="#FFF" />
+                    <FontAwesome5 name="sign-out-alt" size={16} color="#1565C0" />
                     <Text style={styles.logoutText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
 
@@ -424,6 +457,175 @@ export default function PerfilCuidadorScreen({ navigation }) {
                     <Text style={styles.deleteAccountText}>Eliminar Cuenta</Text>
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* Modal de Selección de Foto */}
+            <Modal
+                visible={photoModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setPhotoModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={{
+                        flex: 1,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        justifyContent: "flex-end",
+                    }}
+                    activeOpacity={1}
+                    onPress={() => setPhotoModalVisible(false)}
+                >
+                    <View style={{
+                        backgroundColor: "#FFF",
+                        borderTopLeftRadius: 24,
+                        borderTopRightRadius: 24,
+                        padding: 20,
+                        paddingBottom: 40,
+                    }}>
+                        <View style={{
+                            width: 40,
+                            height: 4,
+                            backgroundColor: "#E0E0E0",
+                            borderRadius: 2,
+                            alignSelf: "center",
+                            marginBottom: 20,
+                        }} />
+
+                        <Text style={{
+                            fontSize: 20,
+                            fontWeight: "700",
+                            color: "#1565C0",
+                            textAlign: "center",
+                            marginBottom: 20,
+                        }}>
+                            Cambiar Foto de Perfil
+                        </Text>
+
+                        <TouchableOpacity
+                            onPress={() => handlePhotoOption("camera")}
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                paddingVertical: 16,
+                                paddingHorizontal: 20,
+                                backgroundColor: "#F5F5F5",
+                                borderRadius: 16,
+                                marginBottom: 12,
+                                gap: 16,
+                            }}
+                        >
+                            <View style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 22,
+                                backgroundColor: "#E3F2FD",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}>
+                                <Ionicons name="camera" size={22} color="#1565C0" />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontSize: 16, fontWeight: "600", color: "#212121" }}>
+                                    Tomar Foto
+                                </Text>
+                                <Text style={{ fontSize: 12, color: "#757575", marginTop: 2 }}>
+                                    Usar la cámara del dispositivo
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color="#BDBDBD" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => handlePhotoOption("library")}
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                paddingVertical: 16,
+                                paddingHorizontal: 20,
+                                backgroundColor: "#F5F5F5",
+                                borderRadius: 16,
+                                marginBottom: 12,
+                                gap: 16,
+                            }}
+                        >
+                            <View style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 22,
+                                backgroundColor: "#E8F5E9",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}>
+                                <Ionicons name="images" size={22} color="#388E3C" />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontSize: 16, fontWeight: "600", color: "#212121" }}>
+                                    Elegir de Galería
+                                </Text>
+                                <Text style={{ fontSize: 12, color: "#757575", marginTop: 2 }}>
+                                    Seleccionar una imagen existente
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color="#BDBDBD" />
+                        </TouchableOpacity>
+
+                        {userData?.profile_picture && (
+                            <TouchableOpacity
+                                onPress={() => handlePhotoOption("delete")}
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    paddingVertical: 16,
+                                    paddingHorizontal: 20,
+                                    backgroundColor: "#FFEBEE",
+                                    borderRadius: 16,
+                                    marginBottom: 12,
+                                    gap: 16,
+                                }}
+                            >
+                                <View style={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 22,
+                                    backgroundColor: "#FFCDD2",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}>
+                                    <Ionicons name="trash" size={22} color="#D32F2F" />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontSize: 16, fontWeight: "600", color: "#D32F2F" }}>
+                                        Eliminar Foto
+                                    </Text>
+                                    <Text style={{ fontSize: 12, color: "#757575", marginTop: 2 }}>
+                                        Quitar la foto de perfil actual
+                                    </Text>
+                                </View>
+                                <Ionicons name="chevron-forward" size={20} color="#BDBDBD" />
+                            </TouchableOpacity>
+                        )}
+
+                        <TouchableOpacity
+                            onPress={() => setPhotoModalVisible(false)}
+                            style={{
+                                paddingVertical: 14,
+                                marginTop: 8,
+                                borderRadius: 16,
+                                borderWidth: 2,
+                                borderColor: "#E0E0E0",
+                            }}
+                        >
+                            <Text style={{
+                                textAlign: "center",
+                                fontSize: 16,
+                                fontWeight: "600",
+                                color: "#757575",
+                            }}>
+                                Cancelar
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 }

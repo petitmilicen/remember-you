@@ -1,5 +1,5 @@
 // src/screens/CuidadorScreens/HomeScreenCuidador.js
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   ScrollView,
@@ -7,13 +7,14 @@ import {
   Text,
   StatusBar,
   Platform,
-  Alert,
   Image,
   ActivityIndicator,
   BackHandler,
 } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../../auth/AuthContext";
 import usePaciente from "../../hooks/usePaciente.js";
 import useZonaSegura from "../../hooks/useZonaSegura.js";
@@ -30,23 +31,12 @@ import { setupPushNotifications } from "../../utils/pushNotifications.js";
 import { styles } from "../../styles/HomeCuidadorStyles.js";
 import { ACCENT } from "../../utils/constants.js";
 
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
-
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
   <View style={styles.skeletonContainer}>
-    <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
-      <View style={styles.headerLeft}>
-        <View style={[styles.skeletonText, { width: 150, height: 26 }]} />
-        <View style={[styles.skeletonText, { width: 80, height: 24, marginTop: 6 }]} />
-      </View>
-      <View style={styles.skeletonAvatar} />
-    </View>
-
     <View style={styles.skeletonPanel} />
     <View style={styles.skeletonPanel} />
     <View style={styles.skeletonPanel} />
-
     <View style={{ alignItems: "center", marginTop: 20 }}>
       <ActivityIndicator size="large" color={ACCENT} />
     </View>
@@ -54,15 +44,31 @@ const LoadingSkeleton = () => (
 );
 
 export default function HomeScreenCuidador({ navigation }) {
+  const insets = useSafeAreaInsets();
   const { logout } = useContext(AuthContext);
   const { paciente } = usePaciente();
   const zona = useZonaSegura(paciente);
   const tarjetas = useTarjetas();
   const { fotoPerfil, nombrePaciente, theme, getFontSize, loading } = usePacienteHome();
 
-  // Bloquear el botón de retroceso del sistema Android
+  const [greeting, setGreeting] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
+
+  // Saludo dinámico y fecha
   useEffect(() => {
-    // 🔔 Register for push notifications
+    const now = new Date();
+    const hour = now.getHours();
+    if (hour < 12) setGreeting("Buenos días");
+    else if (hour < 19) setGreeting("Buenas tardes");
+    else setGreeting("Buenas noches");
+
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    setCurrentDate(`${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]}`);
+  }, []);
+
+  // Register push notifications
+  useEffect(() => {
     setupPushNotifications().then(token => {
       if (token) {
         console.log("✅ Push notifications ready");
@@ -70,12 +76,11 @@ export default function HomeScreenCuidador({ navigation }) {
     });
   }, []);
 
+  // Bloquear el botón de retroceso del sistema Android
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      // Retornar true previene la acción por defecto (salir de la app)
       return true;
     });
-
     return () => backHandler.remove();
   }, []);
 
@@ -84,27 +89,89 @@ export default function HomeScreenCuidador({ navigation }) {
     return <LoadingSkeleton />;
   }
 
+  // Gradient colors - Professional blue theme for caregiver
+  const gradientColors = ["#1565C0", "#0D47A1"];
+
   return (
     <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-        <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.headerName}>{nombrePaciente}</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.headerRole}>Cuidador</Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Perfil')}
-            activeOpacity={0.7}
+        {/* ✨ NEW BEAUTIFUL GRADIENT HEADER */}
+        <LinearGradient
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            paddingTop: insets.top + 20,
+            paddingBottom: 30,
+            paddingHorizontal: 20,
+            borderBottomLeftRadius: 30,
+            borderBottomRightRadius: 30,
+          }}
+        >
+          <Animated.View
+            entering={FadeInDown.duration(600)}
+            style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
           >
-            {fotoPerfil ? (
-              <Image source={{ uri: fotoPerfil }} style={styles.avatarCircle} />
-            ) : (
-              <FontAwesome5 name="user-circle" size={52} color={ACCENT} />
-            )}
-          </TouchableOpacity>
-        </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, marginBottom: 4 }}>
+                {currentDate}
+              </Text>
+              <Text style={{ color: "#FFF", fontSize: 22, fontWeight: "300" }}>
+                {greeting},
+              </Text>
+              <Text style={{ color: "#FFF", fontSize: 26, fontWeight: "bold", marginTop: 2 }}>
+                {nombrePaciente}
+              </Text>
+              <View style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                alignSelf: "flex-start",
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 20,
+                marginTop: 10,
+                gap: 6,
+              }}>
+                <Ionicons name="shield-checkmark" size={14} color="#FFF" />
+                <Text style={{ color: "#FFF", fontSize: 12, fontWeight: "600" }}>
+                  Panel de Cuidador
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Perfil')}
+              activeOpacity={0.8}
+              style={{
+                borderWidth: 3,
+                borderColor: "rgba(255,255,255,0.4)",
+                borderRadius: 35,
+                padding: 3,
+              }}
+            >
+              {fotoPerfil ? (
+                <Image
+                  source={{ uri: fotoPerfil }}
+                  style={{ width: 60, height: 60, borderRadius: 30 }}
+                />
+              ) : (
+                <View style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 30,
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  <Ionicons name="person" size={32} color="#FFF" />
+                </View>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
+        </LinearGradient>
 
         {/* 🚨 EMERGENCY ALERT - Shows when patient is outside */}
         {zona.alertaActiva && !zona.salidaSegura && (
@@ -123,6 +190,7 @@ export default function HomeScreenCuidador({ navigation }) {
           distanciaActual={zona.distanciaActual}
           salidaSegura={zona.salidaSegura}
           toggleSalidaSegura={zona.toggleSalidaSegura}
+          historial={zona.historial}
           navigation={navigation}
         />
 
@@ -137,7 +205,7 @@ export default function HomeScreenCuidador({ navigation }) {
         <QuickMenu navigation={navigation} />
 
         <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate("Logout")}>
-          <FontAwesome5 name="sign-out-alt" size={16} color="#FFF" />
+          <FontAwesome5 name="sign-out-alt" size={16} color="#1565C0" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -152,7 +220,6 @@ export default function HomeScreenCuidador({ navigation }) {
         onSave={tarjetas.agregarTarjeta}
         accentColor={ACCENT}
       />
-
     </View>
   );
 }

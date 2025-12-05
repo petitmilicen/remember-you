@@ -18,8 +18,7 @@ export default function useZonaSegura(paciente) {
   const [distanciaActual, setDistanciaActual] = useState(0);
   const [salidaSegura, setSalidaSegura] = useState(false);
   const [alertas, setAlertas] = useState([]);
-
-  // Hook de audio
+  const [historial, setHistorial] = useState([]);
   const { reproducirSonido } = useAudioAlert();
 
 
@@ -65,6 +64,15 @@ export default function useZonaSegura(paciente) {
               longitude: parseFloat(latest.longitude),
             });
           }
+
+          // Guardar historial completo para mostrar breadcrumbs
+          const puntos = history
+            .filter(p => p.latitude !== undefined && p.longitude !== undefined)
+            .map(p => ({
+              latitude: parseFloat(p.latitude),
+              longitude: parseFloat(p.longitude),
+            }));
+          setHistorial(puntos);
         }
       } catch (error) {
         console.error("Error actualizando ubicación del paciente:", error);
@@ -157,5 +165,6 @@ export default function useZonaSegura(paciente) {
     toggleSalidaSegura,
     alertas,
     limpiarAlertas,
+    historial,
   };
 }
