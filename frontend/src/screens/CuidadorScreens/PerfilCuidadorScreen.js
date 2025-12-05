@@ -7,7 +7,6 @@ import {
     TouchableOpacity,
     Alert,
     ActivityIndicator,
-    Platform,
     StatusBar,
     Animated,
     PanResponder,
@@ -17,14 +16,14 @@ import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../../auth/AuthContext";
 import { getUserProfile, uploadProfilePicture, deleteProfilePicture, deleteAccount } from "../../api/userService";
 import { styles } from "../../styles/PerfilCuidadorStyles";
 import { ACCENT } from "../../utils/constants";
 
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
-
 export default function PerfilCuidadorScreen({ navigation }) {
+    const insets = useSafeAreaInsets();
     const { logout } = useContext(AuthContext);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -269,7 +268,8 @@ export default function PerfilCuidadorScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
+            <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+            <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <FontAwesome5 name="arrow-left" size={20} color="#212121" />
                     <Text style={styles.backText}>Volver</Text>

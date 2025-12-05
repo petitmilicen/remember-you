@@ -1,12 +1,14 @@
 import React from "react";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useBitacoraCuidador from "../../hooks/useBitacoraCuidador";
 import RegistroItem from "../../components/cuidador/RegistroItem";
 import ModalRegistro from "../../components/cuidador/ModalRegistro";
 import { styles } from "../../styles/BitacoraCuidadorStyles";
 
 export default function BitacoraScreenCuidador({ navigation }) {
+  const insets = useSafeAreaInsets();
   const {
     bitacora,
     modalVisible,
@@ -26,7 +28,8 @@ export default function BitacoraScreenCuidador({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#212121" />
         </TouchableOpacity>

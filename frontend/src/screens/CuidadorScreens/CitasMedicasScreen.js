@@ -1,12 +1,14 @@
 import React from "react";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useCitasMedicas from "../../hooks/useCitasMedicas";
 import CitaItem from "../../components/cuidador/CitaItem";
 import ModalCita from "../../components/cuidador/ModalCita";
 import { styles } from "../../styles/CitasMedicasStyles";
 
 export default function CitasMedicasScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const {
     citas,
     modalVisible,
@@ -30,7 +32,8 @@ export default function CitasMedicasScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#212121" />
         </TouchableOpacity>

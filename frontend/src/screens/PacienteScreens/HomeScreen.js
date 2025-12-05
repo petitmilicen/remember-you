@@ -105,7 +105,7 @@ export default function HomeScreenPaciente({ navigation }) {
     syncZone();
 
     // ✅ FIX CRÍTICO #1: Sync periódico cada 30 segundos
-    const interval = setInterval(syncZone, 30000);
+    const interval = setInterval(syncZone, 15000);
 
     return () => clearInterval(interval);
   }, []);

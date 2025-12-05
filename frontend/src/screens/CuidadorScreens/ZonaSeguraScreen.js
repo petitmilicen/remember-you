@@ -1,15 +1,16 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Animated, Platform, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, Animated, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker, Circle } from "react-native-maps";
 import Slider from "@react-native-community/slider";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useZonaSeguraMap from "../../hooks/useZonaSeguraMap";
 import { styles } from "../../styles/ZonaSeguraStyles";
 
 const ACCENT = "#FF7043";
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
 export default function ZonaSeguraScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const {
     centro,
     radio,
@@ -31,7 +32,8 @@ export default function ZonaSeguraScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: TOP_PAD + 12 }]}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#212121" />
         </TouchableOpacity>
@@ -39,7 +41,7 @@ export default function ZonaSeguraScreen({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.legend}>
+      <View style={[styles.legend, { top: insets.top + 55 }]}>
         {[
           { color: "#64B5F6", label: "Zona segura" },
           { color: "#FFB300", label: "Cerca del límite" },
@@ -101,7 +103,7 @@ export default function ZonaSeguraScreen({ navigation }) {
       {
         centro && (
           <>
-            <View style={styles.statusOverlay}>
+            <View style={[styles.statusOverlay, { top: insets.top + 100 }]}>
               <View
                 style={[
                   styles.statusPill,

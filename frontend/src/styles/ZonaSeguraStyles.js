@@ -1,5 +1,4 @@
-import { StyleSheet, Platform, StatusBar } from "react-native";
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
+import { StyleSheet, Platform } from "react-native";
 
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FAFAFA" },
@@ -22,7 +21,6 @@ export const styles = StyleSheet.create({
   },
   legend: {
     position: "absolute",
-    top: TOP_PAD + 55,
     alignSelf: "center",
     backgroundColor: "rgba(255,255,255,0.9)",
     flexDirection: "row",
@@ -39,7 +37,6 @@ export const styles = StyleSheet.create({
   map: { flex: 1 },
   statusOverlay: {
     position: "absolute",
-    top: TOP_PAD + 100,
     alignSelf: "center",
     zIndex: 20,
   },

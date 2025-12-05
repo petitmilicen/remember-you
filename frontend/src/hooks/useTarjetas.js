@@ -20,7 +20,7 @@ export default function useTarjetas() {
           id: card.card_id,
           tipo: card.card_type || "Message",
           mensaje: card.message,
-          date: new Date(card.created_at).toLocaleDateString(),
+          created_at: card.created_at,
           creadoPor: card.created_by || "paciente",
         }));
         setTarjetas(formatted);

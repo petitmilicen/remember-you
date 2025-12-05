@@ -1,6 +1,5 @@
-import { StyleSheet, Platform, StatusBar } from "react-native";
+import { StyleSheet } from "react-native";
 
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 const ACCENT = "#FF7043";
 
 export const styles = StyleSheet.create({
@@ -14,7 +13,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: TOP_PAD + 16,
+    paddingBottom: 10,
     marginBottom: 10,
   },
   headerTitle: {

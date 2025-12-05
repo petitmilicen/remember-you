@@ -45,7 +45,7 @@ function TarjetaItem({ item, onDelete, index }) {
               {isCuidador ? "Cuidador" : "Paciente"}
             </Text>
             <Text style={styles.cardDate}>
-              {formatDate(item.created_at || item.date)}
+              {formatDate(item.created_at)}
             </Text>
           </View>
         </View>

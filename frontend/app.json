@@ -3,9 +3,9 @@
     "name": "Remember You",
     "slug": "frontend",
     "version": "1.0.0",
-    "icon": "./src/assets/images/LogoMain.png",
+    "icon": "./src/assets/images/LogoMainFinal.png",
     "splash": {
-      "image": "./src/assets/images/LogoMain.png",
+      "image": "./src/assets/images/LogoMainFinal.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/LogoMain.png",
+        "foregroundImage": "./src/assets/images/LogoMainFinal.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [

@@ -106,7 +106,7 @@ export default function useZonaSegura() {
 
               // 🔋 Ajustar intervalo dinámicamente según estado de zona
               const isOutOfZone = latest.is_out_of_zone;
-              const nextInterval = isOutOfZone ? 5000 : 30000; // 5s fuera, 30s dentro
+              const nextInterval = isOutOfZone ? 5000 : 15000; // 5s fuera, 15s dentro
 
               console.log(`[Polling] Paciente ${isOutOfZone ? 'FUERA' : 'DENTRO'} - Próximo poll en ${nextInterval / 1000}s`);
 
@@ -121,7 +121,7 @@ export default function useZonaSegura() {
       };
 
       fetchLocation(); // Primer fetch inmediato
-      interval = setInterval(fetchLocation, 30000); // Empezar conservador (30s)
+      interval = setInterval(fetchLocation, 15000); // Empezar con 15s
     }
     return () => {
       if (interval) clearInterval(interval);

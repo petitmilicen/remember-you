@@ -3,6 +3,7 @@ import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 import HomeScreen from "./src/screens/PacienteScreens/HomeScreen";
@@ -38,41 +39,43 @@ const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SettingsProvider>
-        <NavigationContainer>
-          <StatusBar style="auto" />
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="LoginPaciente" component={LoginPacienteScreen} />
-            <Stack.Screen name="LoginCuidador" component={LoginCuidadorScreen} />
-            <Stack.Screen name="RegisterPaciente" component={RegisterPacienteScreen} />
-            <Stack.Screen name="RegisterCuidador" component={RegisterCuidadorScreen} />
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Actividades" component={ActividadesScreen} />
-            <Stack.Screen name="Memorice" component={MemoriceScreen} />
-            <Stack.Screen name="CaminoCorrecto" component={CaminoCorrectoScreen} />
-            <Stack.Screen name="Puzzle" component={PuzzleScreen} options={{ title: 'Rompecabezas' }} />
-            <Stack.Screen name="Sudoku" component={SudokuScreen} options={{ title: 'Sudoku' }} />
-            <Stack.Screen name="Bitacora" component={BitacoraScreen} />
-            <Stack.Screen name="Tarjetas" component={TarjetasScreen} />
-            <Stack.Screen name="Logout" component={LogoutScreen} />
-            <Stack.Screen name="AddTarjetas" component={AddTarjetasScreen} />
-            <Stack.Screen name="Recuerdos" component={RecuerdosScreen} />
-            <Stack.Screen name="AddRecuerdos" component={AddRecuerdosScreen} />
-            <Stack.Screen name="DetalleRecuerdos" component={DetalleRecuerdosScreen} />
-            <Stack.Screen name="Ajustes" component={AjustesScreen} />
-            <Stack.Screen name="PerfilPaciente" component={PerfilPacienteScreen} />
-            <Stack.Screen name="HomeCuidador" component={HomeScreenCuidador} />
-            <Stack.Screen name="LectorQR" component={LectorQRScreen} />
-            <Stack.Screen name="ZonaSegura" component={ZonaSeguraScreen} />
-            <Stack.Screen name="BitacoraCuidador" component={BitacoiraScreenCuidador} />
-            <Stack.Screen name="CitasMedicas" component={CitasMedicasScreen} />
-            <Stack.Screen name="RedApoyo" component={RedApoyoScreen} />
-            <Stack.Screen name="Perfil" component={PerfilCuidadorScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SettingsProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <SettingsProvider>
+          <NavigationContainer>
+            <StatusBar style="auto" />
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Welcome" component={WelcomeScreen} />
+              <Stack.Screen name="LoginPaciente" component={LoginPacienteScreen} />
+              <Stack.Screen name="LoginCuidador" component={LoginCuidadorScreen} />
+              <Stack.Screen name="RegisterPaciente" component={RegisterPacienteScreen} />
+              <Stack.Screen name="RegisterCuidador" component={RegisterCuidadorScreen} />
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Actividades" component={ActividadesScreen} />
+              <Stack.Screen name="Memorice" component={MemoriceScreen} />
+              <Stack.Screen name="CaminoCorrecto" component={CaminoCorrectoScreen} />
+              <Stack.Screen name="Puzzle" component={PuzzleScreen} options={{ title: 'Rompecabezas' }} />
+              <Stack.Screen name="Sudoku" component={SudokuScreen} options={{ title: 'Sudoku' }} />
+              <Stack.Screen name="Bitacora" component={BitacoraScreen} />
+              <Stack.Screen name="Tarjetas" component={TarjetasScreen} />
+              <Stack.Screen name="Logout" component={LogoutScreen} />
+              <Stack.Screen name="AddTarjetas" component={AddTarjetasScreen} />
+              <Stack.Screen name="Recuerdos" component={RecuerdosScreen} />
+              <Stack.Screen name="AddRecuerdos" component={AddRecuerdosScreen} />
+              <Stack.Screen name="DetalleRecuerdos" component={DetalleRecuerdosScreen} />
+              <Stack.Screen name="Ajustes" component={AjustesScreen} />
+              <Stack.Screen name="PerfilPaciente" component={PerfilPacienteScreen} />
+              <Stack.Screen name="HomeCuidador" component={HomeScreenCuidador} />
+              <Stack.Screen name="LectorQR" component={LectorQRScreen} />
+              <Stack.Screen name="ZonaSegura" component={ZonaSeguraScreen} />
+              <Stack.Screen name="BitacoraCuidador" component={BitacoiraScreenCuidador} />
+              <Stack.Screen name="CitasMedicas" component={CitasMedicasScreen} />
+              <Stack.Screen name="RedApoyo" component={RedApoyoScreen} />
+              <Stack.Screen name="Perfil" component={PerfilCuidadorScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SettingsProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

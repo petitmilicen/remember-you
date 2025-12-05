@@ -64,7 +64,7 @@ export default function useRegisterCuidador(navigation) {
       await login(correo.trim(), password);
 
       Alert.alert("Registro exitoso", "Tu cuenta ha sido creada correctamente.");
-      navigation.navigate("Home");
+      navigation.navigate("HomeCuidador");
 
     } catch (error) {
       console.log("Error al registrar:", error.response?.data || error);

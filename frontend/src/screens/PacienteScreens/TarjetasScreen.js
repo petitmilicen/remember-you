@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: 30,
+    bottom: 50,
     right: 30,
     borderRadius: 30,
     shadowColor: "#84fab0",

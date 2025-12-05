@@ -1,16 +1,17 @@
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, Platform, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useRedApoyo from "../../hooks/useRedApoyo";
 import SolicitudCard from "../../components/cuidador/SolicitudCard";
 import CuidadorCard from "../../components/cuidador/CuidadorCard";
 import ModalNuevaSolicitud from "../../components/cuidador/ModalNuevaSolicitud";
 import { styles } from "../../styles/RedApoyoStyles";
 
-const TOP_PAD = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 const ACCENT = "#FF7043";
 
 export default function RedApoyoScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const {
     solicitudes,
     modalVisible,
@@ -40,7 +41,8 @@ export default function RedApoyoScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: TOP_PAD + 10 }]}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#212121" />
         </TouchableOpacity>
